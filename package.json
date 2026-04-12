@@ -1,0 +1,42 @@
+{
+  "name": "zerp",
+  "version": "0.1.0",
+  "description": "Zero-config HTML presentation framework for slide decks stored in a slides/ folder.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "bin": {
+    "zerp": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "check": "tsc -p tsconfig.json --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "presentation",
+    "slides",
+    "html",
+    "cli",
+    "typescript"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "typescript": "^5.9.3"
+  }
+}
