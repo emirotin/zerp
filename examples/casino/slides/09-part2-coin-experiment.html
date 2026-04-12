@@ -1,8 +1,8 @@
 <!-- Slide 1: Interactive coin flip simulator -->
 <div class="slide">
-  <div class="block-label">Часть 2 · Закон больших чисел</div>
-  <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
-  <h2>Эксперимент: подбрасываем монету</h2>
+  <div class="block-label">Part 2 · Law of Large Numbers</div>
+  <div class="interactive-badge">🎯 INTERACTIVE</div>
+  <h2>Experiment: flipping a coin</h2>
   <div
     style="
       display: flex;
@@ -14,11 +14,11 @@
     "
   >
     <div style="text-align: center; min-width: 200px">
-      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Всего бросков</p>
+      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Total flips</p>
       <div id="coin-total" class="big-number" style="font-size: 2.4em">0</div>
     </div>
     <div style="text-align: center; min-width: 200px">
-      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Орлов</p>
+      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Heads</p>
       <div
         id="coin-heads"
         style="
@@ -32,7 +32,7 @@
       </div>
     </div>
     <div style="text-align: center; min-width: 200px">
-      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Доля орлов</p>
+      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Share of heads</p>
       <div
         id="coin-pct"
         style="
@@ -84,7 +84,7 @@
     ></div>
   </div>
   <p style="text-align: center; color: #484f58; font-size: 0.85em; margin-bottom: 6px">
-    Зелёная линия = 50%
+    Green line = 50%
   </p>
   <div
     id="coin-last"
@@ -98,7 +98,7 @@
     "
   ></div>
   <p id="coin-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
-    ↓ бросить × 1 &nbsp;&nbsp;|&nbsp;&nbsp; нажмите несколько раз, чтобы увидеть паттерн
+    ↓ flip × 1 &nbsp;&nbsp;|&nbsp;&nbsp; press several times to see the pattern
   </p>
   <p
     id="coin-conclusion"
@@ -111,7 +111,7 @@
       visibility: hidden;
     "
   >
-    Чем больше бросков — тем ближе к 50%. Это закон больших чисел!
+    The more flips you make, the closer you get to 50%. That is the law of large numbers.
   </p>
 
   <script>
@@ -144,7 +144,7 @@
         var lastHtml = "";
         for (var i = 0; i < lastResults.length; i++) {
           var c = lastResults[i] ? "#f0883e" : "#58a6ff";
-          var t = lastResults[i] ? "О" : "Р";
+          var t = lastResults[i] ? "H" : "T";
           lastHtml +=
             '<span style="display: inline-flex; width: 30px; height: 30px; border-radius: 50%; background: ' +
             c +
@@ -155,7 +155,7 @@
         slide.querySelector("#coin-last").innerHTML = lastHtml;
 
         var nextBatch = stepIndex < batchSizes.length ? batchSizes[stepIndex] : 1000;
-        slide.querySelector("#coin-hint").innerHTML = "↓ бросить × " + nextBatch;
+        slide.querySelector("#coin-hint").innerHTML = "↓ flip × " + nextBatch;
         slide.querySelector("#coin-conclusion").style.visibility =
           total >= 100 ? "visible" : "hidden";
       }
@@ -183,29 +183,30 @@
 
 <!-- Slide 2: Law of Large Numbers key insight -->
 <div class="slide">
-  <div class="block-label">Часть 2 · Закон больших чисел</div>
-  <h2>Закон больших чисел</h2>
+  <div class="block-label">Part 2 · Law of Large Numbers</div>
+  <h2>Law of large numbers</h2>
   <div class="two-col" style="margin-top: 20px">
     <div>
       <p style="font-size: 1.3em; margin-bottom: 16px">
-        <span class="accent-orange" style="font-weight: 700">Мало попыток</span> — результат скачет.
+        <span class="accent-orange" style="font-weight: 700">Few trials</span> means the result
+        jumps around.
       </p>
       <p style="font-size: 1.3em; margin-bottom: 16px">
-        <span class="accent-green" style="font-weight: 700">Много попыток</span> — результат
-        стремится к теории.
+        <span class="accent-green" style="font-weight: 700">Many trials</span> means the result
+        approaches the theory.
       </p>
       <p style="font-size: 1.3em">
-        Чем больше попыток, тем
-        <span class="accent" style="font-weight: 700">точнее предсказание</span>.
+        The more trials you have, the
+        <span class="accent" style="font-weight: 700">more accurate the prediction</span>.
       </p>
     </div>
     <div>
       <div class="key-thought" style="border-color: #f85149">
-        <p style="color: #f85149; font-size: 1.2em">Это главное оружие казино.</p>
+        <p style="color: #f85149; font-size: 1.2em">This is the casino's main weapon.</p>
         <p style="color: #c9d1d9; font-size: 1em; margin-top: 8px; font-weight: 400">
-          Казино не выигрывает каждую партию. Оно играет
-          <span class="accent" style="font-weight: 700">тысячи партий каждый день</span>. Закон
-          больших чисел превращает крошечное преимущество в гарантированную прибыль.
+          The casino does not win every single round. It plays
+          <span class="accent" style="font-weight: 700">thousands of rounds every day</span>. The
+          law of large numbers turns a tiny edge into guaranteed profit.
         </p>
       </div>
     </div>

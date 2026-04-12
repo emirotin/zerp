@@ -1,10 +1,10 @@
 <!-- Interactive card counting practice -->
 <div class="slide">
-  <div class="block-label">Часть 4 · Интерактив</div>
-  <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
-  <h2>Потренируемся считать!</h2>
+  <div class="block-label">Part 4 · Interactive</div>
+  <div class="interactive-badge">🎯 INTERACTIVE</div>
+  <h2>Let's practice counting</h2>
   <p style="font-size: 1.58em; color: #8b949e; text-align: center; margin-bottom: 10px">
-    Ведите бегущий счёт Hi-Lo. Начинаем с нуля.
+    Keep the Hi-Lo running count. Start from zero.
   </p>
 
   <div
@@ -18,7 +18,7 @@
     "
   >
     <div style="text-align: center; min-width: 150px">
-      <p style="color: #8b949e; font-size: 1.35em">Бегущий счёт</p>
+      <p style="color: #8b949e; font-size: 1.35em">Running count</p>
       <div
         id="hilo-count"
         style="
@@ -33,7 +33,7 @@
       </div>
     </div>
     <div style="text-align: center; min-width: 150px">
-      <p style="color: #8b949e; font-size: 1.35em">Карт выдано</p>
+      <p style="color: #8b949e; font-size: 1.35em">Cards dealt</p>
       <div
         id="hilo-dealt"
         style="
@@ -67,12 +67,12 @@
   <div id="hilo-verdict" style="text-align: center; visibility: hidden; margin-top: 8px">
     <div class="key-thought" style="border-color: #3fb950">
       <p style="color: #3fb950; font-size: 1.8em">
-        Счёт +5! В колоде много крупных карт — выгодный момент для ставки!
+        Count is +5. The deck has lots of big cards left, so this is a favorable betting moment.
       </p>
     </div>
   </div>
   <p id="hilo-hint" style="text-align: center; color: #484f58; font-size: 1.28em; margin-top: 6px">
-    ↓ сдать следующую карту
+    ↓ deal the next card
   </p>
 
   <script>
@@ -95,8 +95,7 @@
         { card: "J", suit: "♦", val: -1 },
         { card: "2", suit: "♥", val: +1 },
       ];
-      var step = 0; // 0 = no cards, 1..15 = cards dealt
-      var runningCount = 0;
+      var step = 0;
 
       function cardColor(suit) {
         return suit === "♥" || suit === "♦" ? "#f85149" : "#e6edf3";
@@ -161,7 +160,7 @@
             valColor(last.val) +
             '; font-weight: 700; font-size: 1.8em">' +
             valText(last.val) +
-            '</span> <span style="font-size: 1.8em">→ счёт = </span><span style="color: ' +
+            '</span> <span style="font-size: 1.8em">→ count = </span><span style="color: ' +
             countColor +
             '; font-weight: 900; font-size: 1.8em">' +
             countSign +

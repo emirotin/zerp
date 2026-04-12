@@ -1,10 +1,10 @@
 <!-- Interactive step-through expected value calculation -->
 <div class="slide">
-  <div class="block-label">Часть 3 · Матожидание</div>
-  <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
-  <h2>Математическое ожидание</h2>
+  <div class="block-label">Part 3 · Expected Value</div>
+  <div class="interactive-badge">🎯 INTERACTIVE</div>
+  <h2>Expected value</h2>
   <p style="font-size: 1.15em; color: #8b949e; text-align: center; margin-bottom: 12px">
-    Ставка 100 ₽ на красное. Что <em>в среднем</em> происходит?
+    A ₽100 bet on red. What happens <em>on average</em>?
   </p>
 
   <div
@@ -25,20 +25,19 @@
   <div id="ev-result" style="text-align: center; margin-top: 16px; visibility: hidden">
     <div class="key-thought" style="border-color: #f85149">
       <p style="color: #f85149; font-size: 1.3em">
-        В среднем вы теряете
-        <span style="font-family: &quot;Roboto Mono&quot;, monospace">2,70 ₽</span> на каждой ставке
-        в 100 ₽
+        On average, you lose
+        <span style="font-family: &quot;Roboto Mono&quot;, monospace">₽2.70</span> on every ₽100 bet
       </p>
       <p style="color: #8b949e; font-size: 1em; margin-top: 8px; font-weight: 400">
         House edge =
         <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: #f0883e"
-          >1/37 ≈ 2,7%</span
+          >1/37 ≈ 2.7%</span
         >
       </p>
     </div>
   </div>
   <p id="ev-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 10px">
-    ↓ следующий шаг
+    ↓ next step
   </p>
 
   <script>
@@ -47,8 +46,8 @@
       var step = 0;
       var maxStep = 4;
       var lines = [
-        { html: '<span style="color: #3fb950">P(красное)</span> = 18/37', step: 0 },
-        { html: '<span style="color: #f85149">P(не красное)</span> = 19/37', step: 1 },
+        { html: '<span style="color: #3fb950">P(red)</span> = 18/37', step: 0 },
+        { html: '<span style="color: #f85149">P(not red)</span> = 19/37', step: 1 },
         { html: "", step: 2 },
         {
           html: 'E = <span style="color: #3fb950">(18/37)</span> × (+100) + <span style="color: #f85149">(19/37)</span> × (−100)',
@@ -56,7 +55,7 @@
         },
         { html: "E = (1800 − 1900) / 37", step: 3 },
         {
-          html: 'E = <span style="color: #f85149; font-weight: 900">−100/37 ≈ −2,70 ₽</span>',
+          html: 'E = <span style="color: #f85149; font-weight: 900">−100/37 ≈ −2.70 ₽</span>',
           step: 4,
         },
       ];

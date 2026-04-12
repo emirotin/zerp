@@ -1,28 +1,28 @@
 <!-- Interactive frequency table analysis -->
 <div class="slide">
-  <div class="block-label">Часть 4 · Интерактив</div>
-  <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
-  <h2>Найди кривое колесо!</h2>
+  <div class="block-label">Part 4 · Interactive</div>
+  <div class="interactive-badge">🎯 INTERACTIVE</div>
+  <h2>Find the biased wheel</h2>
   <p style="font-size: 1.05em; color: #8b949e; text-align: center; margin-bottom: 8px">
-    1000 вращений. Ожидаемая частота =
+    1,000 spins. Expected frequency =
     <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: #58a6ff">1000/37 ≈ 27</span
-    >. Какие числа подозрительные?
+    >. Which numbers look suspicious?
   </p>
   <div id="freq-table" style="margin: 8px 0"></div>
   <div
     id="freq-status"
     style="text-align: center; margin-top: 8px; font-size: 1.1em; color: #8b949e"
   >
-    Нажмите ↓ чтобы подсветить аномалии
+    Press ↓ to highlight anomalies
   </div>
   <p id="freq-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
-    ↓ подсветить аномалии
+    ↓ highlight anomalies
   </p>
 
   <script>
     (function () {
       var slide = document.currentScript.closest(".slide");
-      var step = 0; // 0 = raw, 1 = highlighted, 2 = explanation
+      var step = 0;
       var data = [
         [0, 25],
         [1, 29],
@@ -71,10 +71,9 @@
         var html =
           '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 24px; max-width: 750px; margin: 0 auto; font-family: Roboto Mono, monospace; font-size: 0.95em">';
 
-        // Headers
         for (var c = 0; c < cols; c++) {
           html +=
-            '<div style="display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid #30363d; color: #484f58; font-size: 0.85em"><span>Число</span><span>Частота</span></div>';
+            '<div style="display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid #30363d; color: #484f58; font-size: 0.85em"><span>Number</span><span>Frequency</span></div>';
         }
 
         for (var r = 0; r < perCol; r++) {
@@ -124,16 +123,16 @@
         var status = slide.querySelector("#freq-status");
         var hint = slide.querySelector("#freq-hint");
         if (step === 0) {
-          status.innerHTML = "Осмотрите таблицу — какие числа выделяются?";
-          hint.innerHTML = "↓ подсветить аномалии";
+          status.innerHTML = "Study the table. Which numbers stand out?";
+          hint.innerHTML = "↓ highlight anomalies";
           hint.style.visibility = "visible";
         } else if (step === 1) {
           status.innerHTML =
-            '<span style="color: #f85149; font-weight: 700">Высокие ⚠:</span> 8 (39), 16 (41), 27 (42), 32 (44) &nbsp; <span style="color: #58a6ff; font-weight: 700">Низкие ▼:</span> 19 (16), 24 (17)';
-          hint.innerHTML = "↓ объяснение";
+            '<span style="color: #f85149; font-weight: 700">High ⚠:</span> 8 (39), 16 (41), 27 (42), 32 (44) &nbsp; <span style="color: #58a6ff; font-weight: 700">Low ▼:</span> 19 (16), 24 (17)';
+          hint.innerHTML = "↓ explanation";
         } else {
           status.innerHTML =
-            '<span style="color: #3fb950">На реальном колесе числа 8, 16, 27, 32 расположены <strong>рядом</strong> — это перекос в одной зоне!</span>';
+            '<span style="color: #3fb950">On the real wheel, numbers 8, 16, 27, and 32 were <strong>next to each other</strong>. That means one zone of the wheel was biased.</span>';
           hint.style.visibility = "hidden";
         }
       }
