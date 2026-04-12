@@ -1,6 +1,6 @@
 # zerp consumer instructions for LLMs
 
-`zerp` is a zero-config HTML presentation framework. When you are authoring a deck that depends on this package, treat the deck source of truth as `slides/`.
+`@emirotin/zerp` is a zero-config HTML presentation framework. When you are authoring a deck that depends on this package, treat the deck source of truth as `slides/`.
 
 ## Deck contract
 

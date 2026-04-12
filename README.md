@@ -35,7 +35,7 @@ pnpm exec zerp serve .
 Or from a registry:
 
 ```bash
-pnpm add -D zerp
+pnpm add -D @emirotin/zerp
 pnpm exec zerp build .
 ```
 
@@ -78,7 +78,7 @@ pnpm format:check
 ## Library API
 
 ```ts
-import { buildPresentationHtml, writePresentation } from "zerp";
+import { buildPresentationHtml, writePresentation } from "@emirotin/zerp";
 ```
 
 ## Example

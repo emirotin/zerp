@@ -1,7 +1,12 @@
 {
-  "name": "zerp",
+  "name": "@emirotin/zerp",
   "version": "0.1.0",
   "description": "Zero-config HTML presentation framework for slide decks stored in a slides/ folder.",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/emirotin/zerp.git"
+  },
+  "homepage": "https://github.com/emirotin/zerp",
   "keywords": [
     "cli",
     "html",
@@ -20,6 +25,9 @@
     "CLAUDE.md"
   ],
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
