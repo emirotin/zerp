@@ -1,0 +1,124 @@
+# zerp consumer instructions for LLMs
+
+`zerp` is a zero-config HTML presentation framework. When you are authoring a deck that depends on this package, treat the deck source of truth as `slides/`.
+
+## Deck contract
+
+- Put authored slides in `slides/**/*.html`.
+- Files are ordered lexicographically. Use numeric prefixes like `00-`, `10-`, `20-`.
+- Put deck assets under `slides/` too, for example `slides/images/cover.jpg`.
+- Use relative asset paths inside slide HTML, for example `src="./images/cover.jpg"` or `src="images/cover.jpg"`.
+- Each file may contain one or more `<div class="slide">` blocks.
+- Do not hand-author built `index.html`; `zerp` generates it.
+
+## Authoring style
+
+- Prefer semantic HTML inside each `.slide`: headings, paragraphs, lists, tables, images.
+- Keep slide markup self-contained. Inline styles are allowed for deck-specific presentation details, but prefer the built-in classes first.
+- Assume the framework already injects fonts, navigation UI, progress bar, slide counter, CSS, and browser runtime.
+
+## Built-in CSS classes
+
+Use these before inventing new styling patterns:
+
+- `.slide` for each slide root.
+- `.accent`, `.accent-green`, `.accent-orange`, `.accent-purple`, `.accent-red` for emphasis colors.
+- `.big-number` for large numeric callouts.
+- `.two-col` for balanced two-column layouts.
+- `.img-row` for rows of images.
+- `.caption` for image captions and secondary labels.
+- `.block-label` for small section labels in the top-left area.
+- `.interactive-badge` for marking interactive slides.
+- `.timeline` and `.timeline .item` with child `.year` and `.label` for milestone layouts.
+- `.quote` for highlighted quotations or callouts.
+- `.key-thought` for boxed takeaways.
+- `.grid-demo`, `.grid-demo .cell`, `.grid-demo .cell.filled` for simple grid visualizations.
+
+## Interaction model
+
+`zerp` handles deck navigation. Do not recreate next/previous slide logic inside slide code.
+
+Available deck controls:
+
+- Right arrow, space, and PageDown move to the next slide.
+- Left arrow and PageUp move to the previous slide.
+- Down arrow dispatches a `slide-next` event to the current slide.
+- Up arrow dispatches a `slide-prev` event to the current slide.
+- Home jumps to the first slide.
+- End jumps to the last slide.
+
+## Interactive slide pattern
+
+For stepwise reveals or custom interactions, attach listeners to the current slide element and respond to `slide-next` and `slide-prev`.
+
+Pattern:
+
+```html
+<div class="slide">
+  <div class="interactive-badge">Interactive</div>
+  <h2>Example</h2>
+  <div id="demo-output"></div>
+
+  <script>
+    (function () {
+      var slide = document.currentScript.closest(".slide");
+      var step = 0;
+
+      function render() {
+        slide.querySelector("#demo-output").textContent = "Step " + step;
+      }
+
+      slide.addEventListener("slide-next", function () {
+        if (step < 3) {
+          step++;
+          render();
+        }
+      });
+
+      slide.addEventListener("slide-prev", function () {
+        if (step > 0) {
+          step--;
+          render();
+        }
+      });
+
+      render();
+    })();
+  </script>
+</div>
+```
+
+## Interactive slide rules
+
+- Scope DOM queries to `document.currentScript.closest(".slide")` so multiple slides can coexist safely.
+- Keep state inside the slide-local closure.
+- Make `slide-prev` reverse or reset interaction state when reasonable.
+- Do not attach global keyboard listeners from slide scripts unless there is a strong reason.
+- Avoid dependencies on build tools or frameworks inside slide HTML.
+
+## Good defaults
+
+- Use `.block-label` for section context on non-title slides.
+- Use `.interactive-badge` on slides that expect `slide-next` / `slide-prev` stepping.
+- Use `.key-thought` for one core takeaway rather than inventing a new box style.
+- Use `.two-col` instead of ad hoc layout wrappers when a balanced split is enough.
+
+## What to avoid
+
+- Do not embed a full HTML document inside slide files.
+- Do not duplicate the framework CSS or runtime.
+- Do not rely on a manually curated slide list; ordering comes from filenames.
+- Do not put assets outside `slides/` unless the deck explicitly needs that and the surrounding repo is set up for it.
+
+## Validation
+
+When working inside the `zerp` repo itself, validate with:
+
+```bash
+pnpm build
+pnpm check
+pnpm lint
+pnpm format:check
+```
+
+When working in a consumer deck repo, use that repo's normal `zerp build` or `zerp serve` workflow.
