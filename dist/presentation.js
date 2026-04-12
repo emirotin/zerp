@@ -13,7 +13,8 @@ function isExternalUrl(value) {
     return /^(?:[a-z]+:|#|\/)/i.test(value);
 }
 function rewriteRelativeUrls(html, relativeSlidePath) {
-    const slideDir = path.posix.dirname(relativeSlidePath.replaceAll(path.sep, "/"));
+    const slideRootRelativePath = path.posix.join("slides", relativeSlidePath.replaceAll(path.sep, "/"));
+    const slideDir = path.posix.dirname(slideRootRelativePath);
     const normalizedDir = slideDir === "." ? "" : slideDir;
     return html.replace(/\b(src|href|poster)\s*=\s*(["'])([^"']+)\2/gi, (_match, attr, quote, value) => {
         if (!URL_ATTRS.includes(attr.toLowerCase()) || isExternalUrl(value)) {

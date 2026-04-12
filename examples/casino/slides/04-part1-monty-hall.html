@@ -1,0 +1,138 @@
+<!-- Slide 1: Interactive question -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Задача Монти Холла</div>
+    <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
+    <h2>Задача Монти Холла</h2>
+    <p style="font-size: 1.25em; margin: 12px 0; text-align: center; color: #c9d1d9">
+        Три двери. За одной — машина. За двумя — козы.
+    </p>
+    <div id="monty-doors" style="display: flex; justify-content: center; gap: 24px; margin: 20px 0">
+        <div class="door door-selected" id="monty-d1">
+            <div class="door-label">Ваш выбор</div>
+            <span class="door-icon" style="font-size: 5em">🚪</span>
+            <p style="font-size: 1.35em; color: #58a6ff; margin-top: 6px">Дверь 1</p>
+        </div>
+        <div class="door" id="monty-d2">
+            <div class="door-label">&nbsp;</div>
+            <span class="door-icon" style="font-size: 5em">🚪</span>
+            <p style="font-size: 1.35em; color: #8b949e; margin-top: 6px">Дверь 2</p>
+        </div>
+        <div class="door" id="monty-d3">
+            <div class="door-label">&nbsp;</div>
+            <span class="door-icon" style="font-size: 5em">🚪</span>
+            <p style="font-size: 1.35em; color: #8b949e; margin-top: 6px">Дверь 3</p>
+        </div>
+    </div>
+    <div id="monty-question" style="visibility: hidden">
+        <div class="key-thought">
+            <p style="font-size: 1.3em">Хотите поменять свой выбор?</p>
+            <p style="font-size: 1em; color: #8b949e; margin-top: 6px; font-weight: 400">Кто бы поменял дверь? Поднимите руки!</p>
+        </div>
+    </div>
+    <p id="monty-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 10px">
+        ↓ ведущий открывает дверь
+    </p>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var step = 0;
+
+            function render() {
+                var d2 = slide.querySelector("#monty-d2");
+                var d3 = slide.querySelector("#monty-d3");
+                var question = slide.querySelector("#monty-question");
+                var hint = slide.querySelector("#monty-hint");
+
+                if (step >= 1) {
+                    d2.className = "door door-opened";
+                    d2.querySelector(".door-label").textContent = "Открыта";
+                    d2.querySelector(".door-label").style.color = "#f85149";
+                    d2.querySelector(".door-icon").textContent = "🐐";
+                    d2.querySelector("p").style.color = "#f85149";
+
+                    d3.querySelector(".door-label").textContent = "Поменять?";
+                    d3.querySelector(".door-label").style.color = "#f0883e";
+                    d3.querySelector("p").style.color = "#f0883e";
+
+                    question.style.visibility = "visible";
+                    hint.style.visibility = "hidden";
+                } else {
+                    d2.className = "door";
+                    d2.querySelector(".door-label").innerHTML = "&nbsp;";
+                    d2.querySelector(".door-label").style.color = "";
+                    d2.querySelector(".door-icon").textContent = "🚪";
+                    d2.querySelector("p").style.color = "#8b949e";
+
+                    d3.querySelector(".door-label").innerHTML = "&nbsp;";
+                    d3.querySelector(".door-label").style.color = "";
+                    d3.querySelector("p").style.color = "#8b949e";
+
+                    question.style.visibility = "hidden";
+                    hint.style.visibility = "visible";
+                }
+            }
+
+            slide.addEventListener("slide-next", function () {
+                if (step < 1) { step++; render(); }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (step > 0) { step--; render(); }
+            });
+
+            render();
+        })();
+    </script>
+</div>
+
+<!-- Slide 2: Answer -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Задача Монти Холла</div>
+    <h2>Менять — правильно!</h2>
+    <div style="display: flex; justify-content: center; gap: 60px; margin: 30px 0">
+        <div style="text-align: center">
+            <p style="font-size: 1.2em; color: #8b949e; margin-bottom: 8px">Не менять</p>
+            <div class="big-number" style="color: #f85149">1/3</div>
+            <p style="color: #f85149; font-weight: 700; margin-top: 4px">33%</p>
+        </div>
+        <div style="text-align: center">
+            <p style="font-size: 1.2em; color: #8b949e; margin-bottom: 8px">Поменять</p>
+            <div class="big-number" style="color: #3fb950">2/3</div>
+            <p style="color: #3fb950; font-weight: 700; margin-top: 4px">67%</p>
+        </div>
+    </div>
+    <div class="quote">
+        Ваша интуиция говорит «без разницы».<br>
+        Математика говорит «меняй».
+    </div>
+    <p style="text-align: center; margin-top: 16px; font-size: 1.2em; color: #8b949e">
+        Запомните это ощущение — именно об этом наше занятие.
+    </p>
+</div>
+
+<style>
+    .door {
+        background: #161b22;
+        border: 2px solid #30363d;
+        border-radius: 14px;
+        padding: 16px 24px;
+        text-align: center;
+        width: 150px;
+        position: relative;
+    }
+    .door-selected {
+        border-color: #58a6ff;
+    }
+    .door-opened {
+        border-color: #f85149;
+        background: #1c1214;
+    }
+    .door-label {
+        font-size: 0.75em;
+        font-weight: 700;
+        color: #58a6ff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+</style>

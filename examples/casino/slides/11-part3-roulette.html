@@ -1,0 +1,175 @@
+<!-- Slide 1: Roulette anatomy -->
+<div class="slide">
+    <div class="block-label">Часть 3 · Рулетка</div>
+    <h2>Анатомия рулетки</h2>
+    <div
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        "
+    >
+        <div
+            id="roulette-wheel"
+            style="position: relative; width: 280px; height: 280px"
+        ></div>
+        <div style="max-width: 580px; padding-left: 20px">
+            <ul style="font-size: 1.15em">
+                <li>
+                    <span class="accent" style="font-weight: 700">37</span>
+                    секторов: числа 1–36 + зеро (0)
+                </li>
+                <li>
+                    <span style="color: #f85149; font-weight: 700"
+                        >18 красных</span
+                    >
+                    + <span style="font-weight: 700">18 чёрных</span>
+                </li>
+                <li>
+                    <span style="color: #3fb950; font-weight: 700"
+                        >Зеро — зелёное</span
+                    >: не красное и не чёрное
+                </li>
+            </ul>
+            <div
+                style="
+                    background: #161b22;
+                    border: 2px solid #30363d;
+                    border-radius: 10px;
+                    padding: 14px 20px;
+                    margin-top: 16px;
+                "
+            >
+                <p style="font-size: 1.15em; color: #c9d1d9">
+                    Ставка
+                    <span class="accent" style="font-weight: 700">100 ₽</span>
+                    на красное:
+                </p>
+                <p style="font-size: 1.05em; color: #8b949e; margin-top: 6px">
+                    Красное → вам +100 ₽<br />
+                    Чёрное или зеро → вы теряете 100 ₽
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="key-thought" style="margin-top: 12px">
+        <p>
+            Вероятность выиграть =
+            <span
+                style="
+                    font-family: &quot;Roboto Mono&quot;, monospace;
+                    color: #f0883e;
+                "
+                >18/37 ≈ 48,6%</span
+            >
+            — не 50%!
+        </p>
+        <p
+            style="
+                font-size: 1em;
+                color: #8b949e;
+                margin-top: 4px;
+                font-weight: 400;
+            "
+        >
+            Разница — всего 1,4%. Из-за одного единственного зеро.
+        </p>
+    </div>
+
+    <script>
+        (function () {
+            var wheel = document.currentScript
+                .closest(".slide")
+                .querySelector("#roulette-wheel");
+            var numbers = [
+                0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8,
+                23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12,
+                35, 3, 26,
+            ];
+            var reds = [
+                1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34,
+                36,
+            ];
+            var isRed = {};
+            for (var i = 0; i < reds.length; i++) isRed[reds[i]] = true;
+
+            var svg = '<svg viewBox="0 0 280 280" width="280" height="280">';
+            svg +=
+                '<circle cx="140" cy="140" r="136" fill="#161b22" stroke="#30363d" stroke-width="2"/>';
+            var n = numbers.length;
+            var angleStep = 360 / n;
+            for (var i = 0; i < n; i++) {
+                var a1 = ((i * angleStep - 90) * Math.PI) / 180;
+                var a2 = (((i + 1) * angleStep - 90) * Math.PI) / 180;
+                var am = (((i + 0.5) * angleStep - 90) * Math.PI) / 180;
+                var r = 130,
+                    ri = 90;
+                var x1o = 140 + r * Math.cos(a1),
+                    y1o = 140 + r * Math.sin(a1);
+                var x2o = 140 + r * Math.cos(a2),
+                    y2o = 140 + r * Math.sin(a2);
+                var x1i = 140 + ri * Math.cos(a1),
+                    y1i = 140 + ri * Math.sin(a1);
+                var x2i = 140 + ri * Math.cos(a2),
+                    y2i = 140 + ri * Math.sin(a2);
+                var color =
+                    numbers[i] === 0
+                        ? "#238636"
+                        : isRed[numbers[i]]
+                          ? "#b91c1c"
+                          : "#1e1e1e";
+                svg +=
+                    '<path d="M' +
+                    x1i +
+                    "," +
+                    y1i +
+                    " L" +
+                    x1o +
+                    "," +
+                    y1o +
+                    " A" +
+                    r +
+                    "," +
+                    r +
+                    " 0 0,1 " +
+                    x2o +
+                    "," +
+                    y2o +
+                    " L" +
+                    x2i +
+                    "," +
+                    y2i +
+                    " A" +
+                    ri +
+                    "," +
+                    ri +
+                    " 0 0,0 " +
+                    x1i +
+                    "," +
+                    y1i +
+                    '" fill="' +
+                    color +
+                    '" stroke="#30363d" stroke-width="0.5"/>';
+                var tx = 140 + ((r + ri) / 2) * Math.cos(am);
+                var ty = 140 + ((r + ri) / 2) * Math.sin(am);
+                svg +=
+                    '<text x="' +
+                    tx +
+                    '" y="' +
+                    ty +
+                    '" fill="white" font-size="8" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Roboto Mono, monospace">' +
+                    numbers[i] +
+                    "</text>";
+            }
+            svg +=
+                '<circle cx="140" cy="140" r="85" fill="#0d1117" stroke="#30363d" stroke-width="1"/>';
+            svg +=
+                '<text x="140" y="140" fill="#484f58" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, sans-serif">РУЛЕТКА</text>';
+            svg += "</svg>";
+            wheel.innerHTML = svg;
+        })();
+    </script>
+</div>

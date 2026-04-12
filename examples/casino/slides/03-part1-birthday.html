@@ -1,0 +1,117 @@
+<!-- Slide 1: Question -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Парадокс дней рождения</div>
+    <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
+    <h2>Парадокс дней рождения</h2>
+    <p style="font-size: 1.4em; margin: 16px 0; text-align: center">
+        У кого-нибудь в этой комнате совпадает день рождения?
+    </p>
+    <p style="font-size: 1.2em; text-align: center; color: #8b949e">
+        Не год — просто число и месяц. Кто верит, что совпадение есть?
+    </p>
+    <div style="display: flex; justify-content: center; gap: 40px; margin: 30px 0">
+        <div style="text-align: center">
+            <div class="big-number">23</div>
+            <p style="color: #8b949e">человека</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #f0883e">50,7%</p>
+        </div>
+        <div style="text-align: center">
+            <div class="big-number" style="color: #3fb950">30</div>
+            <p style="color: #8b949e">человек</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #3fb950">70,6%</p>
+        </div>
+        <div style="text-align: center">
+            <div class="big-number" style="color: #bc8cff">50</div>
+            <p style="color: #8b949e">человек</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #bc8cff">97%</p>
+        </div>
+    </div>
+    <p style="font-size: 1.1em; text-align: center; color: #8b949e">
+        Давайте проверим! Кто родился в январе? Назовите число...
+    </p>
+</div>
+
+<!-- Slide 2: Explanation -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Парадокс дней рождения</div>
+    <h2>Почему так много?</h2>
+    <div class="two-col" style="margin-top: 16px">
+        <div>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                Мы сравниваем не «мой с каждым»,
+                а <span class="accent" style="font-weight: 700">каждого с каждым</span>.
+            </p>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                Число пар = <span style="font-family: 'Roboto Mono', monospace; color: #58a6ff">n(n−1)/2</span>
+            </p>
+            <ul>
+                <li>10 человек → <span class="accent">45</span> пар</li>
+                <li>23 человека → <span class="accent">253</span> пары</li>
+                <li>50 человек → <span class="accent">1225</span> пар</li>
+            </ul>
+        </div>
+        <div>
+            <div class="key-thought">
+                <p style="font-size: 1.2em">
+                    Людей — мало.<br>
+                    Пар — <span class="accent-orange">очень много</span>.<br>
+                    Каждая пара — шанс на совпадение.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Exact computation -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Парадокс дней рождения</div>
+    <h2>Точный расчёт</h2>
+    <p style="font-size: 1.2em; margin-bottom: 16px">
+        Проще посчитать вероятность, что все дни рождения
+        <span class="accent">разные</span>, и вычесть из единицы.
+    </p>
+    <div style="
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 24px 32px;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 1.15em;
+        line-height: 2;
+        margin-bottom: 20px;
+    ">
+        <div>P(все разные) =</div>
+        <div style="padding-left: 2em">
+            <span style="color: #58a6ff">365</span>/365
+            × <span style="color: #58a6ff">364</span>/365
+            × <span style="color: #58a6ff">363</span>/365
+            × …
+            × <span style="color: #58a6ff">(365 − n + 1)</span>/365
+        </div>
+        <div style="margin-top: 12px">
+            P(совпадение) = 1 − P(все разные)
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 16px">
+        <div style="text-align: center">
+            <p style="color: #8b949e; margin-bottom: 4px">n = 23</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #f0883e">
+                1 − 0,4927 = <span class="accent-orange">50,7%</span>
+            </p>
+        </div>
+        <div style="text-align: center">
+            <p style="color: #8b949e; margin-bottom: 4px">n = 50</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #bc8cff">
+                1 − 0,0296 = <span class="accent-purple">97,0%</span>
+            </p>
+        </div>
+    </div>
+    <div class="key-thought" style="margin-top: 20px">
+        <p>
+            Первый человек — <span style="color: #58a6ff">365</span> свободных дней.
+            Второй — <span style="color: #58a6ff">364</span>.
+            Каждый следующий «забирает» ещё один день —
+            пространство сужается <span class="accent-red">быстрее</span>, чем кажется.
+        </p>
+    </div>
+</div>

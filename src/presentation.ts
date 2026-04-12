@@ -30,7 +30,8 @@ function isExternalUrl(value: string): boolean {
 }
 
 function rewriteRelativeUrls(html: string, relativeSlidePath: string): string {
-  const slideDir = path.posix.dirname(relativeSlidePath.replaceAll(path.sep, "/"));
+  const slideRootRelativePath = path.posix.join("slides", relativeSlidePath.replaceAll(path.sep, "/"));
+  const slideDir = path.posix.dirname(slideRootRelativePath);
   const normalizedDir = slideDir === "." ? "" : slideDir;
 
   return html.replace(

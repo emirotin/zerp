@@ -1,0 +1,2387 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>casino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --zerp-bg: #0d1117;
+    --zerp-panel: #161b22;
+    --zerp-border: #30363d;
+    --zerp-text: #e6edf3;
+    --zerp-muted: #8b949e;
+    --zerp-faint: #484f58;
+    --zerp-accent: #58a6ff;
+    --zerp-green: #3fb950;
+    --zerp-orange: #f0883e;
+    --zerp-purple: #bc8cff;
+    --zerp-red: #f85149;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: var(--zerp-bg);
+    color: var(--zerp-text);
+    font-family: "Montserrat", sans-serif;
+}
+
+img,
+video {
+    max-width: 100%;
+}
+
+.slide {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding: 50px 70px;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+}
+
+.slide.active {
+    display: flex;
+}
+
+.slide h1 {
+    font-size: 3.2em;
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 20px;
+}
+
+.slide h2 {
+    font-size: 2.2em;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 14px;
+}
+
+.slide h3 {
+    font-size: 1.4em;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--zerp-muted);
+}
+
+.slide p,
+.slide li {
+    font-size: 1.25em;
+    line-height: 1.5;
+    color: #c9d1d9;
+}
+
+.slide ul {
+    list-style: none;
+    padding: 0;
+}
+
+.slide li {
+    padding: 5px 0;
+}
+
+.slide li::before {
+    content: "→ ";
+    color: var(--zerp-accent);
+}
+
+.accent {
+    color: var(--zerp-accent);
+}
+
+.accent-green {
+    color: var(--zerp-green);
+}
+
+.accent-orange {
+    color: var(--zerp-orange);
+}
+
+.accent-purple {
+    color: var(--zerp-purple);
+}
+
+.accent-red {
+    color: var(--zerp-red);
+}
+
+.big-number {
+    font-size: 3em;
+    font-weight: 900;
+    color: var(--zerp-accent);
+    font-family: "Roboto Mono", monospace;
+}
+
+.img-row {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+    margin: 24px 0;
+    flex-wrap: wrap;
+}
+
+.img-row img {
+    max-height: 300px;
+    border-radius: 10px;
+    object-fit: contain;
+    background: var(--zerp-panel);
+    padding: 6px;
+}
+
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.caption {
+    font-size: 0.8em;
+    color: var(--zerp-muted);
+    text-align: center;
+    margin-top: 4px;
+}
+
+.block-label {
+    position: absolute;
+    top: 24px;
+    left: 70px;
+    font-size: 0.8em;
+    font-weight: 700;
+    color: var(--zerp-faint);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.interactive-badge {
+    display: inline-block;
+    background: #238636;
+    color: white;
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.timeline {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 16px 0;
+}
+
+.timeline .item {
+    background: var(--zerp-panel);
+    border: 1px solid var(--zerp-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 130px;
+}
+
+.timeline .item .year {
+    font-family: "Roboto Mono", monospace;
+    font-size: 1.3em;
+    font-weight: 700;
+    color: var(--zerp-accent);
+}
+
+.timeline .item .label {
+    font-size: 0.85em;
+    color: #c9d1d9;
+    margin-top: 4px;
+}
+
+.nav {
+    position: fixed;
+    bottom: 24px;
+    right: 36px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+
+.nav button {
+    background: none;
+    border: none;
+    color: var(--zerp-faint);
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 0.85em;
+    font-family: "Roboto Mono", monospace;
+}
+
+.nav button:hover {
+    color: var(--zerp-muted);
+}
+
+.counter {
+    position: fixed;
+    bottom: 28px;
+    left: 36px;
+    font-size: 0.85em;
+    color: var(--zerp-faint);
+    font-family: "Roboto Mono", monospace;
+    z-index: 100;
+}
+
+.progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--zerp-accent);
+    z-index: 100;
+    transition: width 0.3s;
+}
+
+.quote {
+    border-left: 4px solid var(--zerp-accent);
+    padding: 14px 20px;
+    margin: 16px 0;
+    background: var(--zerp-panel);
+    border-radius: 0 10px 10px 0;
+    font-style: italic;
+    font-size: 1.1em;
+}
+
+.key-thought {
+    background: var(--zerp-panel);
+    border: 2px solid var(--zerp-accent);
+    border-radius: 14px;
+    padding: 28px 36px;
+    margin: 16px 0;
+    text-align: center;
+}
+
+.key-thought p {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: var(--zerp-text);
+}
+
+.grid-demo {
+    display: grid;
+    grid-template-columns: repeat(7, 48px);
+    gap: 3px;
+    justify-content: center;
+    margin: 16px 0;
+}
+
+.grid-demo .cell {
+    width: 48px;
+    height: 48px;
+    border: 2px solid var(--zerp-border);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75em;
+    color: var(--zerp-faint);
+}
+
+.grid-demo .cell.filled {
+    background: var(--zerp-red);
+    border-color: var(--zerp-red);
+    color: white;
+}
+
+    </style>
+  </head>
+  <body>
+<div class="slide">
+    <h1 style="font-size: 3.6em; text-align: center">Казино ненавидит этот трюк</h1>
+    <h3
+        style="
+            text-align: center;
+            font-size: 1.6em;
+            color: #58a6ff;
+            margin-top: 8px;
+        "
+    >
+        Математика против казино
+    </h3>
+    <p
+        style="
+            text-align: center;
+            margin-top: 30px;
+            font-size: 1.65em;
+            color: #8b949e;
+        "
+    >
+        Как люди обыгрывали казино чистой математикой — и почему казино нашло чем ответить
+    </p>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 1</div>
+    <h1>«Я чувствую, что сейчас повезёт»</h1>
+    <h3>Почему интуиция врёт</h3>
+</div>
+
+<!-- Slide 1: Voting question -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Ошибка игрока</div>
+    <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
+    <h2>Эксперимент с монетой</h2>
+    <p style="font-size: 1.5em; margin: 20px 0; text-align: center">
+        Монета подброшена 5 раз подряд — каждый раз
+        <span class="accent" style="font-weight: 900">ОРЁЛ</span>.
+    </p>
+    <div
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 24px 0;
+        "
+    >
+        <span class="coin-icon">О</span>
+        <span class="coin-icon">О</span>
+        <span class="coin-icon">О</span>
+        <span class="coin-icon">О</span>
+        <span class="coin-icon">О</span>
+        <span class="coin-icon coin-question">?</span>
+    </div>
+    <div class="key-thought">
+        <p style="font-size: 1.5em">Что выпадет на шестой бросок?</p>
+        <p
+            style="
+                font-size: 1.1em;
+                color: #8b949e;
+                margin-top: 8px;
+                font-weight: 400;
+            "
+        >
+            Кто считает, что скорее выпадет
+            <span class="accent-orange">решка</span>? Поднимите руки!
+        </p>
+    </div>
+</div>
+
+<!-- Slide 2: Answer -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Ошибка игрока</div>
+    <h2>Монета не помнит!</h2>
+    <div class="two-col" style="margin-top: 16px">
+        <div>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                Каждый бросок —
+                <span class="accent" style="font-weight: 700">независимый</span
+                >.
+            </p>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                Вероятность орла — всегда
+                <span
+                    class="big-number"
+                    style="
+                        font-size: 2em;
+                        vertical-align: middle;
+                        position: relative;
+                        top: -0.1em;
+                    "
+                    >50%</span
+                >
+            </p>
+            <p style="font-size: 1.3em">Не важно, что было до этого.</p>
+        </div>
+        <div>
+            <div class="quote" style="font-size: 1.15em">
+                «Уже пять раз было красное, сейчас точно будет чёрное!»
+            </div>
+            <p
+                style="
+                    margin-top: 16px;
+                    font-size: 1.2em;
+                    color: #f85149;
+                    font-weight: 700;
+                "
+            >
+                Именно так рассуждают в казино — и проигрывают.
+            </p>
+        </div>
+    </div>
+    <div class="key-thought" style="margin-top: 20px">
+        <p>
+            Это <span class="accent-red">ошибка игрока</span> (gambler's
+            fallacy)
+        </p>
+    </div>
+</div>
+
+<style>
+    .coin-icon {
+        display: inline-flex;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #f0883e;
+        color: #0d1117;
+        font-weight: 900;
+        font-size: 1.8em;
+        align-items: center;
+        justify-content: center;
+        font-family: "Roboto Mono", monospace;
+    }
+    .coin-question {
+        background: transparent;
+        border: 3px dashed #f0883e;
+        color: #f0883e;
+    }
+</style>
+
+<!-- Slide 1: Question -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Парадокс дней рождения</div>
+    <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
+    <h2>Парадокс дней рождения</h2>
+    <p style="font-size: 1.4em; margin: 16px 0; text-align: center">
+        У кого-нибудь в этой комнате совпадает день рождения?
+    </p>
+    <p style="font-size: 1.2em; text-align: center; color: #8b949e">
+        Не год — просто число и месяц. Кто верит, что совпадение есть?
+    </p>
+    <div style="display: flex; justify-content: center; gap: 40px; margin: 30px 0">
+        <div style="text-align: center">
+            <div class="big-number">23</div>
+            <p style="color: #8b949e">человека</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #f0883e">50,7%</p>
+        </div>
+        <div style="text-align: center">
+            <div class="big-number" style="color: #3fb950">30</div>
+            <p style="color: #8b949e">человек</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #3fb950">70,6%</p>
+        </div>
+        <div style="text-align: center">
+            <div class="big-number" style="color: #bc8cff">50</div>
+            <p style="color: #8b949e">человек</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #bc8cff">97%</p>
+        </div>
+    </div>
+    <p style="font-size: 1.1em; text-align: center; color: #8b949e">
+        Давайте проверим! Кто родился в январе? Назовите число...
+    </p>
+</div>
+
+<!-- Slide 2: Explanation -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Парадокс дней рождения</div>
+    <h2>Почему так много?</h2>
+    <div class="two-col" style="margin-top: 16px">
+        <div>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                Мы сравниваем не «мой с каждым»,
+                а <span class="accent" style="font-weight: 700">каждого с каждым</span>.
+            </p>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                Число пар = <span style="font-family: 'Roboto Mono', monospace; color: #58a6ff">n(n−1)/2</span>
+            </p>
+            <ul>
+                <li>10 человек → <span class="accent">45</span> пар</li>
+                <li>23 человека → <span class="accent">253</span> пары</li>
+                <li>50 человек → <span class="accent">1225</span> пар</li>
+            </ul>
+        </div>
+        <div>
+            <div class="key-thought">
+                <p style="font-size: 1.2em">
+                    Людей — мало.<br>
+                    Пар — <span class="accent-orange">очень много</span>.<br>
+                    Каждая пара — шанс на совпадение.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 3: Exact computation -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Парадокс дней рождения</div>
+    <h2>Точный расчёт</h2>
+    <p style="font-size: 1.2em; margin-bottom: 16px">
+        Проще посчитать вероятность, что все дни рождения
+        <span class="accent">разные</span>, и вычесть из единицы.
+    </p>
+    <div style="
+        background: #161b22;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 24px 32px;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 1.15em;
+        line-height: 2;
+        margin-bottom: 20px;
+    ">
+        <div>P(все разные) =</div>
+        <div style="padding-left: 2em">
+            <span style="color: #58a6ff">365</span>/365
+            × <span style="color: #58a6ff">364</span>/365
+            × <span style="color: #58a6ff">363</span>/365
+            × …
+            × <span style="color: #58a6ff">(365 − n + 1)</span>/365
+        </div>
+        <div style="margin-top: 12px">
+            P(совпадение) = 1 − P(все разные)
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 40px; margin-top: 16px">
+        <div style="text-align: center">
+            <p style="color: #8b949e; margin-bottom: 4px">n = 23</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #f0883e">
+                1 − 0,4927 = <span class="accent-orange">50,7%</span>
+            </p>
+        </div>
+        <div style="text-align: center">
+            <p style="color: #8b949e; margin-bottom: 4px">n = 50</p>
+            <p style="font-size: 1.3em; font-weight: 700; color: #bc8cff">
+                1 − 0,0296 = <span class="accent-purple">97,0%</span>
+            </p>
+        </div>
+    </div>
+    <div class="key-thought" style="margin-top: 20px">
+        <p>
+            Первый человек — <span style="color: #58a6ff">365</span> свободных дней.
+            Второй — <span style="color: #58a6ff">364</span>.
+            Каждый следующий «забирает» ещё один день —
+            пространство сужается <span class="accent-red">быстрее</span>, чем кажется.
+        </p>
+    </div>
+</div>
+
+<!-- Slide 1: Interactive question -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Задача Монти Холла</div>
+    <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
+    <h2>Задача Монти Холла</h2>
+    <p style="font-size: 1.25em; margin: 12px 0; text-align: center; color: #c9d1d9">
+        Три двери. За одной — машина. За двумя — козы.
+    </p>
+    <div id="monty-doors" style="display: flex; justify-content: center; gap: 24px; margin: 20px 0">
+        <div class="door door-selected" id="monty-d1">
+            <div class="door-label">Ваш выбор</div>
+            <span class="door-icon" style="font-size: 5em">🚪</span>
+            <p style="font-size: 1.35em; color: #58a6ff; margin-top: 6px">Дверь 1</p>
+        </div>
+        <div class="door" id="monty-d2">
+            <div class="door-label">&nbsp;</div>
+            <span class="door-icon" style="font-size: 5em">🚪</span>
+            <p style="font-size: 1.35em; color: #8b949e; margin-top: 6px">Дверь 2</p>
+        </div>
+        <div class="door" id="monty-d3">
+            <div class="door-label">&nbsp;</div>
+            <span class="door-icon" style="font-size: 5em">🚪</span>
+            <p style="font-size: 1.35em; color: #8b949e; margin-top: 6px">Дверь 3</p>
+        </div>
+    </div>
+    <div id="monty-question" style="visibility: hidden">
+        <div class="key-thought">
+            <p style="font-size: 1.3em">Хотите поменять свой выбор?</p>
+            <p style="font-size: 1em; color: #8b949e; margin-top: 6px; font-weight: 400">Кто бы поменял дверь? Поднимите руки!</p>
+        </div>
+    </div>
+    <p id="monty-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 10px">
+        ↓ ведущий открывает дверь
+    </p>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var step = 0;
+
+            function render() {
+                var d2 = slide.querySelector("#monty-d2");
+                var d3 = slide.querySelector("#monty-d3");
+                var question = slide.querySelector("#monty-question");
+                var hint = slide.querySelector("#monty-hint");
+
+                if (step >= 1) {
+                    d2.className = "door door-opened";
+                    d2.querySelector(".door-label").textContent = "Открыта";
+                    d2.querySelector(".door-label").style.color = "#f85149";
+                    d2.querySelector(".door-icon").textContent = "🐐";
+                    d2.querySelector("p").style.color = "#f85149";
+
+                    d3.querySelector(".door-label").textContent = "Поменять?";
+                    d3.querySelector(".door-label").style.color = "#f0883e";
+                    d3.querySelector("p").style.color = "#f0883e";
+
+                    question.style.visibility = "visible";
+                    hint.style.visibility = "hidden";
+                } else {
+                    d2.className = "door";
+                    d2.querySelector(".door-label").innerHTML = "&nbsp;";
+                    d2.querySelector(".door-label").style.color = "";
+                    d2.querySelector(".door-icon").textContent = "🚪";
+                    d2.querySelector("p").style.color = "#8b949e";
+
+                    d3.querySelector(".door-label").innerHTML = "&nbsp;";
+                    d3.querySelector(".door-label").style.color = "";
+                    d3.querySelector("p").style.color = "#8b949e";
+
+                    question.style.visibility = "hidden";
+                    hint.style.visibility = "visible";
+                }
+            }
+
+            slide.addEventListener("slide-next", function () {
+                if (step < 1) { step++; render(); }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (step > 0) { step--; render(); }
+            });
+
+            render();
+        })();
+    </script>
+</div>
+
+<!-- Slide 2: Answer -->
+<div class="slide">
+    <div class="block-label">Часть 1 · Задача Монти Холла</div>
+    <h2>Менять — правильно!</h2>
+    <div style="display: flex; justify-content: center; gap: 60px; margin: 30px 0">
+        <div style="text-align: center">
+            <p style="font-size: 1.2em; color: #8b949e; margin-bottom: 8px">Не менять</p>
+            <div class="big-number" style="color: #f85149">1/3</div>
+            <p style="color: #f85149; font-weight: 700; margin-top: 4px">33%</p>
+        </div>
+        <div style="text-align: center">
+            <p style="font-size: 1.2em; color: #8b949e; margin-bottom: 8px">Поменять</p>
+            <div class="big-number" style="color: #3fb950">2/3</div>
+            <p style="color: #3fb950; font-weight: 700; margin-top: 4px">67%</p>
+        </div>
+    </div>
+    <div class="quote">
+        Ваша интуиция говорит «без разницы».<br>
+        Математика говорит «меняй».
+    </div>
+    <p style="text-align: center; margin-top: 16px; font-size: 1.2em; color: #8b949e">
+        Запомните это ощущение — именно об этом наше занятие.
+    </p>
+</div>
+
+<style>
+    .door {
+        background: #161b22;
+        border: 2px solid #30363d;
+        border-radius: 14px;
+        padding: 16px 24px;
+        text-align: center;
+        width: 150px;
+        position: relative;
+    }
+    .door-selected {
+        border-color: #58a6ff;
+    }
+    .door-opened {
+        border-color: #f85149;
+        background: #1c1214;
+    }
+    .door-label {
+        font-size: 0.75em;
+        font-weight: 700;
+        color: #58a6ff;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+</style>
+
+<div class="slide">
+    <div class="block-label">Часть 1 → 2</div>
+    <h2 style="text-align: center; font-size: 2em">Три примера, где чутьё подводит</h2>
+    <div class="timeline" style="margin: 30px 0">
+        <div class="item">
+            <div class="year" style="font-size: 2.8em">🪙</div>
+            <div class="label" style="font-size: 1.5em">Ошибка игрока</div>
+        </div>
+        <div class="item">
+            <div class="year" style="font-size: 2.8em">🎂</div>
+            <div class="label" style="font-size: 1.5em">Парадокс дней рождения</div>
+        </div>
+        <div class="item">
+            <div class="year" style="font-size: 2.8em">🚪</div>
+            <div class="label" style="font-size: 1.5em">Задача Монти Холла</div>
+        </div>
+    </div>
+    <div class="key-thought" style="border-color: #3fb950">
+        <p style="color: #3fb950">
+            Нам нужен инструмент точнее, чем интуиция.<br>
+            Этот инструмент — <span style="color: #58a6ff">теория вероятностей</span>.
+        </p>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 2</div>
+    <h1>Строим инструменты</h1>
+    <h3>от «наверное» к числам</h3>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 2 · Вероятность</div>
+    <h2>Что такое вероятность?</h2>
+    <p style="font-size: 1.5em; margin: 16px 0; text-align: center">
+        Вероятность — это просто
+        <span class="accent" style="font-weight: 700">доля</span>.
+    </p>
+    <div
+        style="
+            background: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 14px;
+            padding: 24px 40px;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 600px;
+        "
+    >
+        <p
+            style="
+                font-size: 1.8em;
+                font-family: &quot;Roboto Mono&quot;, monospace;
+                color: #58a6ff;
+                font-weight: 700;
+            "
+        >
+            P = благоприятные / все
+        </p>
+    </div>
+    <div
+        style="
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 60px;
+            margin-top: 30px;
+        "
+    >
+        <div style="text-align: center">
+            <div
+                style="
+                    height: 100px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                "
+            >
+                <span style="font-size: 5em; line-height: 1">🎲</span>
+            </div>
+            <p style="font-size: 1.8em; color: #c9d1d9">Выбросить 6</p>
+            <p
+                style="
+                    font-size: 2.1em;
+                    font-weight: 700;
+                    color: #58a6ff;
+                    font-family: &quot;Roboto Mono&quot;, monospace;
+                    margin-top: 4px;
+                "
+            >
+                1/6
+            </p>
+        </div>
+        <div style="text-align: center">
+            <div
+                style="
+                    height: 100px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                "
+            >
+                <span style="font-size: 5em; line-height: 1">🪙</span>
+            </div>
+            <p style="font-size: 1.8em; color: #c9d1d9">Выбросить орла</p>
+            <p
+                style="
+                    font-size: 2.1em;
+                    font-weight: 700;
+                    color: #58a6ff;
+                    font-family: &quot;Roboto Mono&quot;, monospace;
+                    margin-top: 4px;
+                "
+            >
+                1/2
+            </p>
+        </div>
+        <div style="text-align: center">
+            <div
+                style="
+                    height: 100px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                "
+            >
+                <div
+                    style="
+                        display: inline-block;
+                        width: 64px;
+                        height: 88px;
+                        background: #fff;
+                        border-radius: 8px;
+                        color: #000;
+                        font-size: 1.4em;
+                        font-weight: 700;
+                        line-height: 1;
+                        position: relative;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                    "
+                >
+                    <span style="position: absolute; top: 4px; left: 4px"
+                        >A</span
+                    >
+                    <span
+                        style="
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            font-size: 1.6em;
+                        "
+                        >♠</span
+                    >
+                    <span
+                        style="
+                            position: absolute;
+                            bottom: 4px;
+                            right: 4px;
+                            transform: rotate(180deg);
+                        "
+                        >A</span
+                    >
+                </div>
+            </div>
+            <p style="font-size: 1.8em; color: #c9d1d9">Вытянуть туза</p>
+            <p
+                style="
+                    font-size: 2.1em;
+                    font-weight: 700;
+                    color: #58a6ff;
+                    font-family: &quot;Roboto Mono&quot;, monospace;
+                    margin-top: 4px;
+                "
+            >
+                4/52
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Slide 1: Question -->
+<div class="slide">
+    <div class="block-label">Часть 2 · Два кубика</div>
+    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+    <h2>Два кубика: какова вероятность суммы 7?</h2>
+    <p style="font-size: 1.2em; text-align: center; color: #8b949e; margin: 10px 0">
+        Всего комбинаций: 6 × 6 = <span class="accent" style="font-weight: 700">36</span>. Сколько дают сумму 7?
+    </p>
+    <div id="dice-grid" style="margin: 16px 0"></div>
+    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 8px">
+        <div id="dice-status" style="
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #8b949e;
+            text-align: center;
+        ">Нажмите ↓ чтобы подсветить комбинации с суммой 7</div>
+    </div>
+    <div id="dice-result" style="text-align: center; margin-top: 12px; visibility: hidden">
+        <p style="font-size: 1.4em; font-weight: 700; color: #3fb950">
+            P(сумма = 7) = 6/36 = <span style="font-family: 'Roboto Mono', monospace">1/6 ≈ 16,7%</span>
+        </p>
+        <p style="font-size: 1.1em; color: #f0883e; margin-top: 6px">
+            Семёрка — самая частая сумма! А двойка (1+1) — всего 1/36 ≈ 2,8%
+        </p>
+    </div>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var grid = slide.querySelector("#dice-grid");
+            var step = 0; // 0 = plain grid, 1 = highlighted
+
+            function render() {
+                var html = '<div style="display: grid; grid-template-columns: 40px repeat(6, 48px); gap: 3px; justify-content: center; align-items: center">';
+                // Header row
+                html += '<div></div>';
+                for (var j = 1; j <= 6; j++) {
+                    html += '<div style="text-align: center; font-weight: 700; color: #58a6ff; font-size: 1.1em; font-family: Roboto Mono, monospace">🎲' + j + '</div>';
+                }
+                for (var i = 1; i <= 6; i++) {
+                    html += '<div style="text-align: center; font-weight: 700; color: #58a6ff; font-size: 1.1em; font-family: Roboto Mono, monospace">🎲' + i + '</div>';
+                    for (var j = 1; j <= 6; j++) {
+                        var sum = i + j;
+                        var isSeven = sum === 7;
+                        var bg = step >= 1 && isSeven ? '#238636' : '#161b22';
+                        var border = step >= 1 && isSeven ? '#3fb950' : '#30363d';
+                        var color = step >= 1 && isSeven ? '#fff' : '#8b949e';
+                        var weight = step >= 1 && isSeven ? '900' : '400';
+                        html += '<div style="width: 48px; height: 48px; background: ' + bg + '; border: 2px solid ' + border + '; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.05em; color: ' + color + '; font-weight: ' + weight + '; font-family: Roboto Mono, monospace">' + sum + '</div>';
+                    }
+                }
+                html += '</div>';
+                grid.innerHTML = html;
+
+                var status = slide.querySelector("#dice-status");
+                var result = slide.querySelector("#dice-result");
+                if (step >= 1) {
+                    status.innerHTML = '<span style="color: #3fb950">6 комбинаций дают сумму 7</span>: (1,6) (2,5) (3,4) (4,3) (5,2) (6,1)';
+                    result.style.visibility = "visible";
+                } else {
+                    status.innerHTML = 'Нажмите ↓ чтобы подсветить комбинации с суммой 7';
+                    result.style.visibility = "hidden";
+                }
+            }
+
+            slide.addEventListener("slide-next", function () {
+                if (step < 1) { step++; render(); }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (step > 0) { step--; render(); }
+            });
+
+            render();
+        })();
+    </script>
+</div>
+
+<!-- Slide 2: Full probability table -->
+<div class="slide">
+    <div class="block-label">Часть 2 · Два кубика</div>
+    <h2>Не все суммы одинаковы!</h2>
+    <div style="display: flex; justify-content: center; margin: 16px 0">
+        <table style="border-collapse: collapse; font-size: 1.05em; font-family: 'Roboto Mono', monospace">
+            <tr>
+                <th style="padding: 6px 14px; color: #8b949e; border-bottom: 2px solid #30363d">Сумма</th>
+                <th style="padding: 6px 14px; color: #8b949e; border-bottom: 2px solid #30363d">Комбинаций</th>
+                <th style="padding: 6px 14px; color: #8b949e; border-bottom: 2px solid #30363d">Вероятность</th>
+            </tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">2</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">1</td><td style="padding: 4px 14px; color: #484f58; text-align: center">2,8%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">3</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">2</td><td style="padding: 4px 14px; color: #484f58; text-align: center">5,6%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">4</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">3</td><td style="padding: 4px 14px; color: #8b949e; text-align: center">8,3%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">5</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">4</td><td style="padding: 4px 14px; color: #8b949e; text-align: center">11,1%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">6</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">5</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">13,9%</td></tr>
+            <tr style="background: #0e2a1a"><td style="padding: 6px 14px; color: #3fb950; text-align: center; font-weight: 900">7</td><td style="padding: 6px 14px; color: #3fb950; text-align: center; font-weight: 700">6</td><td style="padding: 6px 14px; color: #3fb950; text-align: center; font-weight: 700">16,7%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">8</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">5</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">13,9%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">9</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">4</td><td style="padding: 4px 14px; color: #8b949e; text-align: center">11,1%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">10</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">3</td><td style="padding: 4px 14px; color: #8b949e; text-align: center">8,3%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">11</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">2</td><td style="padding: 4px 14px; color: #484f58; text-align: center">5,6%</td></tr>
+            <tr><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">12</td><td style="padding: 4px 14px; color: #c9d1d9; text-align: center">1</td><td style="padding: 4px 14px; color: #484f58; text-align: center">2,8%</td></tr>
+        </table>
+    </div>
+    <div class="key-thought">
+        <p>Не все исходы одинаковы, даже если кажется, что должны быть.<br>
+        <span class="accent-red">Именно это непонимание приносит казино деньги.</span></p>
+    </div>
+</div>
+
+<!-- Slide 1: Interactive coin flip simulator -->
+<div class="slide">
+    <div class="block-label">Часть 2 · Закон больших чисел</div>
+    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+    <h2>Эксперимент: подбрасываем монету</h2>
+    <div style="display: flex; justify-content: center; gap: 40px; margin: 12px 0; align-items: flex-start; flex-wrap: wrap">
+        <div style="text-align: center; min-width: 200px">
+            <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Всего бросков</p>
+            <div id="coin-total" class="big-number" style="font-size: 2.4em">0</div>
+        </div>
+        <div style="text-align: center; min-width: 200px">
+            <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Орлов</p>
+            <div id="coin-heads" style="font-size: 2.4em; font-weight: 900; color: #f0883e; font-family: 'Roboto Mono', monospace">0</div>
+        </div>
+        <div style="text-align: center; min-width: 200px">
+            <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Доля орлов</p>
+            <div id="coin-pct" style="font-size: 2.4em; font-weight: 900; color: #3fb950; font-family: 'Roboto Mono', monospace">—</div>
+        </div>
+    </div>
+    <div id="coin-bar-wrap" style="
+        background: #161b22;
+        border: 2px solid #30363d;
+        border-radius: 10px;
+        height: 48px;
+        width: 100%;
+        max-width: 700px;
+        margin: 12px auto;
+        position: relative;
+        overflow: hidden;
+        align-self: center;
+    ">
+        <div id="coin-bar" style="
+            height: 100%;
+            background: #f0883e;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 8px;
+        "></div>
+        <div style="
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: #3fb950;
+            transform: translateX(-50%);
+        "></div>
+    </div>
+    <p style="text-align: center; color: #484f58; font-size: 0.85em; margin-bottom: 6px">
+        Зелёная линия = 50%
+    </p>
+    <div id="coin-last" style="display: flex; justify-content: center; gap: 4px; margin: 8px 0; min-height: 36px; flex-wrap: wrap"></div>
+    <p id="coin-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
+        ↓ бросить × 1 &nbsp;&nbsp;|&nbsp;&nbsp; нажмите несколько раз, чтобы увидеть паттерн
+    </p>
+    <p id="coin-conclusion" style="
+        text-align: center;
+        font-size: 1.15em;
+        color: #3fb950;
+        font-weight: 700;
+        margin-top: 6px;
+        visibility: hidden;
+    ">
+        Чем больше бросков — тем ближе к 50%. Это закон больших чисел!
+    </p>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var total = 0, heads = 0;
+            var lastResults = [];
+            var batchSizes = [1, 1, 1, 1, 1, 5, 10, 10, 20, 50, 100, 100, 200, 500];
+            var stepIndex = 0;
+
+            function flip(n) {
+                for (var i = 0; i < n; i++) {
+                    var isHead = Math.random() < 0.5;
+                    total++;
+                    if (isHead) heads++;
+                    if (lastResults.length >= 20) lastResults.shift();
+                    lastResults.push(isHead);
+                }
+            }
+
+            function render() {
+                slide.querySelector("#coin-total").textContent = total;
+                slide.querySelector("#coin-heads").textContent = heads;
+                var pct = total > 0 ? (heads / total * 100).toFixed(1) + "%" : "—";
+                slide.querySelector("#coin-pct").textContent = pct;
+                var barWidth = total > 0 ? (heads / total * 100) : 0;
+                slide.querySelector("#coin-bar").style.width = barWidth + "%";
+
+                var lastHtml = "";
+                for (var i = 0; i < lastResults.length; i++) {
+                    var c = lastResults[i] ? "#f0883e" : "#58a6ff";
+                    var t = lastResults[i] ? "О" : "Р";
+                    lastHtml += '<span style="display: inline-flex; width: 30px; height: 30px; border-radius: 50%; background: ' + c + '; color: #0d1117; font-weight: 900; font-size: 0.75em; align-items: center; justify-content: center; font-family: Roboto Mono, monospace">' + t + '</span>';
+                }
+                slide.querySelector("#coin-last").innerHTML = lastHtml;
+
+                var nextBatch = stepIndex < batchSizes.length ? batchSizes[stepIndex] : 1000;
+                slide.querySelector("#coin-hint").innerHTML = "↓ бросить × " + nextBatch;
+                slide.querySelector("#coin-conclusion").style.visibility = total >= 100 ? "visible" : "hidden";
+            }
+
+            slide.addEventListener("slide-next", function () {
+                var n = stepIndex < batchSizes.length ? batchSizes[stepIndex] : 1000;
+                stepIndex++;
+                flip(n);
+                render();
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (total > 0) {
+                    total = 0; heads = 0; lastResults = []; stepIndex = 0;
+                    render();
+                }
+            });
+
+            render();
+        })();
+    </script>
+</div>
+
+<!-- Slide 2: Law of Large Numbers key insight -->
+<div class="slide">
+    <div class="block-label">Часть 2 · Закон больших чисел</div>
+    <h2>Закон больших чисел</h2>
+    <div class="two-col" style="margin-top: 20px">
+        <div>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                <span class="accent-orange" style="font-weight: 700">Мало попыток</span> — результат скачет.
+            </p>
+            <p style="font-size: 1.3em; margin-bottom: 16px">
+                <span class="accent-green" style="font-weight: 700">Много попыток</span> — результат стремится к теории.
+            </p>
+            <p style="font-size: 1.3em">
+                Чем больше попыток, тем <span class="accent" style="font-weight: 700">точнее предсказание</span>.
+            </p>
+        </div>
+        <div>
+            <div class="key-thought" style="border-color: #f85149">
+                <p style="color: #f85149; font-size: 1.2em">
+                    Это главное оружие казино.
+                </p>
+                <p style="color: #c9d1d9; font-size: 1em; margin-top: 8px; font-weight: 400">
+                    Казино не выигрывает каждую партию. Оно играет <span class="accent" style="font-weight: 700">тысячи партий каждый день</span>. Закон больших чисел превращает крошечное преимущество в гарантированную прибыль.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 3</div>
+    <h1>«Преимущество заведения»</h1>
+    <h3>почему казино не рискует</h3>
+</div>
+
+<!-- Slide 1: Roulette anatomy -->
+<div class="slide">
+    <div class="block-label">Часть 3 · Рулетка</div>
+    <h2>Анатомия рулетки</h2>
+    <div
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+            align-items: center;
+        "
+    >
+        <div
+            id="roulette-wheel"
+            style="position: relative; width: 280px; height: 280px"
+        ></div>
+        <div style="max-width: 580px; padding-left: 20px">
+            <ul style="font-size: 1.15em">
+                <li>
+                    <span class="accent" style="font-weight: 700">37</span>
+                    секторов: числа 1–36 + зеро (0)
+                </li>
+                <li>
+                    <span style="color: #f85149; font-weight: 700"
+                        >18 красных</span
+                    >
+                    + <span style="font-weight: 700">18 чёрных</span>
+                </li>
+                <li>
+                    <span style="color: #3fb950; font-weight: 700"
+                        >Зеро — зелёное</span
+                    >: не красное и не чёрное
+                </li>
+            </ul>
+            <div
+                style="
+                    background: #161b22;
+                    border: 2px solid #30363d;
+                    border-radius: 10px;
+                    padding: 14px 20px;
+                    margin-top: 16px;
+                "
+            >
+                <p style="font-size: 1.15em; color: #c9d1d9">
+                    Ставка
+                    <span class="accent" style="font-weight: 700">100 ₽</span>
+                    на красное:
+                </p>
+                <p style="font-size: 1.05em; color: #8b949e; margin-top: 6px">
+                    Красное → вам +100 ₽<br />
+                    Чёрное или зеро → вы теряете 100 ₽
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="key-thought" style="margin-top: 12px">
+        <p>
+            Вероятность выиграть =
+            <span
+                style="
+                    font-family: &quot;Roboto Mono&quot;, monospace;
+                    color: #f0883e;
+                "
+                >18/37 ≈ 48,6%</span
+            >
+            — не 50%!
+        </p>
+        <p
+            style="
+                font-size: 1em;
+                color: #8b949e;
+                margin-top: 4px;
+                font-weight: 400;
+            "
+        >
+            Разница — всего 1,4%. Из-за одного единственного зеро.
+        </p>
+    </div>
+
+    <script>
+        (function () {
+            var wheel = document.currentScript
+                .closest(".slide")
+                .querySelector("#roulette-wheel");
+            var numbers = [
+                0, 32, 15, 19, 4, 21, 2, 25, 17, 34, 6, 27, 13, 36, 11, 30, 8,
+                23, 10, 5, 24, 16, 33, 1, 20, 14, 31, 9, 22, 18, 29, 7, 28, 12,
+                35, 3, 26,
+            ];
+            var reds = [
+                1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34,
+                36,
+            ];
+            var isRed = {};
+            for (var i = 0; i < reds.length; i++) isRed[reds[i]] = true;
+
+            var svg = '<svg viewBox="0 0 280 280" width="280" height="280">';
+            svg +=
+                '<circle cx="140" cy="140" r="136" fill="#161b22" stroke="#30363d" stroke-width="2"/>';
+            var n = numbers.length;
+            var angleStep = 360 / n;
+            for (var i = 0; i < n; i++) {
+                var a1 = ((i * angleStep - 90) * Math.PI) / 180;
+                var a2 = (((i + 1) * angleStep - 90) * Math.PI) / 180;
+                var am = (((i + 0.5) * angleStep - 90) * Math.PI) / 180;
+                var r = 130,
+                    ri = 90;
+                var x1o = 140 + r * Math.cos(a1),
+                    y1o = 140 + r * Math.sin(a1);
+                var x2o = 140 + r * Math.cos(a2),
+                    y2o = 140 + r * Math.sin(a2);
+                var x1i = 140 + ri * Math.cos(a1),
+                    y1i = 140 + ri * Math.sin(a1);
+                var x2i = 140 + ri * Math.cos(a2),
+                    y2i = 140 + ri * Math.sin(a2);
+                var color =
+                    numbers[i] === 0
+                        ? "#238636"
+                        : isRed[numbers[i]]
+                          ? "#b91c1c"
+                          : "#1e1e1e";
+                svg +=
+                    '<path d="M' +
+                    x1i +
+                    "," +
+                    y1i +
+                    " L" +
+                    x1o +
+                    "," +
+                    y1o +
+                    " A" +
+                    r +
+                    "," +
+                    r +
+                    " 0 0,1 " +
+                    x2o +
+                    "," +
+                    y2o +
+                    " L" +
+                    x2i +
+                    "," +
+                    y2i +
+                    " A" +
+                    ri +
+                    "," +
+                    ri +
+                    " 0 0,0 " +
+                    x1i +
+                    "," +
+                    y1i +
+                    '" fill="' +
+                    color +
+                    '" stroke="#30363d" stroke-width="0.5"/>';
+                var tx = 140 + ((r + ri) / 2) * Math.cos(am);
+                var ty = 140 + ((r + ri) / 2) * Math.sin(am);
+                svg +=
+                    '<text x="' +
+                    tx +
+                    '" y="' +
+                    ty +
+                    '" fill="white" font-size="8" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Roboto Mono, monospace">' +
+                    numbers[i] +
+                    "</text>";
+            }
+            svg +=
+                '<circle cx="140" cy="140" r="85" fill="#0d1117" stroke="#30363d" stroke-width="1"/>';
+            svg +=
+                '<text x="140" y="140" fill="#484f58" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, sans-serif">РУЛЕТКА</text>';
+            svg += "</svg>";
+            wheel.innerHTML = svg;
+        })();
+    </script>
+</div>
+
+<!-- Interactive step-through expected value calculation -->
+<div class="slide">
+    <div class="block-label">Часть 3 · Матожидание</div>
+    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+    <h2>Математическое ожидание</h2>
+    <p style="font-size: 1.15em; color: #8b949e; text-align: center; margin-bottom: 12px">
+        Ставка 100 ₽ на красное. Что <em>в среднем</em> происходит?
+    </p>
+
+    <div id="ev-steps" style="
+        background: #161b22;
+        border: 2px solid #30363d;
+        border-radius: 14px;
+        padding: 24px 36px;
+        max-width: 650px;
+        margin: 0 auto;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 1.15em;
+        line-height: 2.2;
+    "></div>
+
+    <div id="ev-result" style="text-align: center; margin-top: 16px; visibility: hidden">
+        <div class="key-thought" style="border-color: #f85149">
+            <p style="color: #f85149; font-size: 1.3em">
+                В среднем вы теряете <span style="font-family: 'Roboto Mono', monospace">2,70 ₽</span> на каждой ставке в 100 ₽
+            </p>
+            <p style="color: #8b949e; font-size: 1em; margin-top: 8px; font-weight: 400">
+                House edge = <span style="font-family: 'Roboto Mono', monospace; color: #f0883e">1/37 ≈ 2,7%</span>
+            </p>
+        </div>
+    </div>
+    <p id="ev-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 10px">
+        ↓ следующий шаг
+    </p>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var step = 0;
+            var maxStep = 4;
+            var lines = [
+                { html: '<span style="color: #3fb950">P(красное)</span> = 18/37', step: 0 },
+                { html: '<span style="color: #f85149">P(не красное)</span> = 19/37', step: 1 },
+                { html: '', step: 2 },
+                { html: 'E = <span style="color: #3fb950">(18/37)</span> × (+100) + <span style="color: #f85149">(19/37)</span> × (−100)', step: 2 },
+                { html: 'E = (1800 − 1900) / 37', step: 3 },
+                { html: 'E = <span style="color: #f85149; font-weight: 900">−100/37 ≈ −2,70 ₽</span>', step: 4 },
+            ];
+
+            function render() {
+                var html = '';
+                for (var i = 0; i < lines.length; i++) {
+                    if (step >= lines[i].step) {
+                        html += '<div' + (lines[i].html === '' ? ' style="height: 8px"' : '') + '>' + lines[i].html + '</div>';
+                    }
+                }
+                slide.querySelector("#ev-steps").innerHTML = html;
+                slide.querySelector("#ev-result").style.visibility = step >= maxStep ? "visible" : "hidden";
+                slide.querySelector("#ev-hint").style.visibility = step >= maxStep ? "hidden" : "visible";
+            }
+
+            slide.addEventListener("slide-next", function () {
+                if (step < maxStep) { step++; render(); }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (step > 0) { step--; render(); }
+            });
+
+            render();
+        })();
+    </script>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 3 · Масштаб</div>
+    <h2>Масштаб: 1000 игроков</h2>
+    <div
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        "
+    >
+        <div
+            style="
+                text-align: center;
+                background: #161b22;
+                border: 2px solid #30363d;
+                border-radius: 14px;
+                padding: 20px 28px;
+                min-width: 180px;
+            "
+        >
+            <p style="color: #8b949e; font-size: 0.9em">Игроков</p>
+            <div class="big-number" style="font-size: 2.2em">1 000</div>
+        </div>
+        <div
+            style="
+                text-align: center;
+                display: flex;
+                align-items: center;
+                font-size: 2em;
+                color: #484f58;
+            "
+        >
+            ×
+        </div>
+        <div
+            style="
+                text-align: center;
+                background: #161b22;
+                border: 2px solid #30363d;
+                border-radius: 14px;
+                padding: 20px 28px;
+                min-width: 180px;
+            "
+        >
+            <p style="color: #8b949e; font-size: 0.9em">Ставка</p>
+            <div class="big-number" style="font-size: 2.2em">100 ₽</div>
+        </div>
+        <div
+            style="
+                text-align: center;
+                display: flex;
+                align-items: center;
+                font-size: 2em;
+                color: #484f58;
+            "
+        >
+            ×
+        </div>
+        <div
+            style="
+                text-align: center;
+                background: #161b22;
+                border: 2px solid #30363d;
+                border-radius: 14px;
+                padding: 20px 28px;
+                min-width: 180px;
+            "
+        >
+            <p style="color: #8b949e; font-size: 0.9em">House edge</p>
+            <div class="big-number" style="font-size: 2.2em; color: #f85149">
+                2,7%
+            </div>
+        </div>
+    </div>
+    <div
+        style="
+            text-align: center;
+            font-size: 2em;
+            color: #484f58;
+            margin: 8px 0;
+        "
+    >
+        ↓
+    </div>
+    <div class="key-thought" style="border-color: #3fb950">
+        <p style="color: #3fb950; font-size: 1.6em">
+            Прибыль казино ≈
+            <span style="font-family: &quot;Roboto Mono&quot;, monospace"
+                >2 700 ₽</span
+            >
+        </p>
+        <p
+            style="
+                color: #8b949e;
+                font-size: 1em;
+                margin-top: 8px;
+                font-weight: 400;
+            "
+        >
+            Гарантированно. Каждый день. Без риска.
+        </p>
+    </div>
+    <p
+        style="
+            text-align: center;
+            margin-top: 14px;
+            font-size: 1.15em;
+            color: #c9d1d9;
+        "
+    >
+        И это только
+        <span class="accent-orange" style="font-weight: 700">один стол</span>. В
+        казино — десятки столов, тысячи ставок в час.
+    </p>
+</div>
+
+<!-- Bridge slide -->
+<div class="slide">
+    <div class="block-label">Часть 3 → 4</div>
+    <h2 style="text-align: center">Два столпа казино</h2>
+    <div
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+        "
+    >
+        <div
+            style="
+                text-align: center;
+                background: #161b22;
+                border: 2px solid #f85149;
+                border-radius: 14px;
+                padding: 24px 32px;
+                min-width: 400px;
+            "
+        >
+            <p style="font-size: 1.6em; font-weight: 900; color: #f85149">
+                House edge
+            </p>
+            <p style="color: #8b949e; font-size: 1.1em; margin-top: 6px">
+                крошечное преимущество<br />в каждой ставке
+            </p>
+        </div>
+        <div
+            style="
+                display: flex;
+                align-items: center;
+                font-size: 2em;
+                color: #484f58;
+            "
+        >
+            +
+        </div>
+        <div
+            style="
+                text-align: center;
+                background: #161b22;
+                border: 2px solid #58a6ff;
+                border-radius: 14px;
+                padding: 24px 32px;
+                min-width: 250px;
+            "
+        >
+            <p style="font-size: 1.6em; font-weight: 900; color: #58a6ff">
+                Закон больших чисел
+            </p>
+            <p style="color: #8b949e; font-size: 1.1em; margin-top: 6px">
+                тысячи повторений<br />= неизбежный результат
+            </p>
+        </div>
+    </div>
+    <div
+        class="quote"
+        style="text-align: center; font-style: normal; font-size: 1.3em"
+    >
+        Звучит непобедимо. Но в истории находились люди, которые
+        <span class="accent-green" style="font-weight: 700"
+            >перевернули математику в свою пользу</span
+        >.
+    </div>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 4</div>
+    <h1>Три человека, которые сломали систему</h1>
+    <h3>инженер, профессор и команда студентов</h3>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 4 · История 1</div>
+    <h2>Джозеф Джаггер: инженер и кривое колесо</h2>
+    <div class="timeline" style="margin: 20px 0">
+        <div class="item">
+            <div class="year">1873</div>
+            <div class="label">Монте-Карло</div>
+        </div>
+    </div>
+    <div class="two-col" style="margin-top: 12px">
+        <div>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Английский инженер нанял <span class="accent" style="font-weight: 700">6 помощников</span>.
+            </p>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Задание: <span class="accent-orange" style="font-weight: 700">неделю</span> записывать каждое выпавшее число.
+            </p>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Результат: тетради с <span class="accent" style="font-weight: 700">тысячами чисел</span>.
+            </p>
+            <p style="font-size: 1.15em">
+                Обнаружил: на одном колесе определённые числа выпадают <span class="accent-red" style="font-weight: 700">заметно чаще</span>. Механический дефект!
+            </p>
+        </div>
+        <div>
+            <div class="key-thought" style="border-color: #3fb950">
+                <p style="color: #3fb950; font-size: 1.3em">Выигрыш: миллионы</p>
+                <p style="color: #8b949e; font-size: 0.95em; margin-top: 6px; font-weight: 400">
+                    в пересчёте на современные деньги
+                </p>
+            </div>
+            <p style="margin-top: 12px; font-size: 1.1em; color: #8b949e">
+                Казино в панике: переставило колёса, потом полностью заменило.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive frequency table analysis -->
+<div class="slide">
+    <div class="block-label">Часть 4 · Интерактив</div>
+    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+    <h2>Найди кривое колесо!</h2>
+    <p style="font-size: 1.05em; color: #8b949e; text-align: center; margin-bottom: 8px">
+        1000 вращений. Ожидаемая частота = <span style="font-family: 'Roboto Mono', monospace; color: #58a6ff">1000/37 ≈ 27</span>. Какие числа подозрительные?
+    </p>
+    <div id="freq-table" style="margin: 8px 0"></div>
+    <div id="freq-status" style="text-align: center; margin-top: 8px; font-size: 1.1em; color: #8b949e">
+        Нажмите ↓ чтобы подсветить аномалии
+    </div>
+    <p id="freq-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
+        ↓ подсветить аномалии
+    </p>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var step = 0; // 0 = raw, 1 = highlighted, 2 = explanation
+            var data = [
+                [0,25],[1,29],[2,23],[3,26],[4,31],[5,28],[6,24],[7,27],[8,39],[9,30],
+                [10,22],[11,26],[12,28],[13,28],[14,26],[15,30],[16,41],[17,22],[18,25],
+                [19,16],[20,29],[21,27],[22,24],[23,32],[24,17],[25,27],[26,24],[27,42],
+                [28,31],[29,26],[30,28],[31,24],[32,44],[33,26],[34,23],[35,29],[36,25]
+            ];
+            var highThresh = 37;
+            var lowThresh = 19;
+
+            function render() {
+                var cols = 3;
+                var perCol = Math.ceil(data.length / cols);
+                var html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 24px; max-width: 750px; margin: 0 auto; font-family: Roboto Mono, monospace; font-size: 0.95em">';
+
+                // Headers
+                for (var c = 0; c < cols; c++) {
+                    html += '<div style="display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid #30363d; color: #484f58; font-size: 0.85em"><span>Число</span><span>Частота</span></div>';
+                }
+
+                for (var r = 0; r < perCol; r++) {
+                    for (var c = 0; c < cols; c++) {
+                        var idx = r + c * perCol;
+                        if (idx >= data.length) {
+                            html += '<div></div>';
+                            continue;
+                        }
+                        var num = data[idx][0];
+                        var freq = data[idx][1];
+                        var isHigh = freq >= highThresh;
+                        var isLow = freq <= lowThresh;
+                        var bg = 'transparent';
+                        var color = '#c9d1d9';
+                        var weight = '400';
+                        if (step >= 1) {
+                            if (isHigh) { bg = '#1a2e1a'; color = '#f85149'; weight = '900'; }
+                            else if (isLow) { bg = '#1a1a2e'; color = '#58a6ff'; weight = '700'; }
+                        }
+                        html += '<div style="display: flex; justify-content: space-between; padding: 2px 8px; background: ' + bg + '; border-radius: 4px; color: ' + color + '; font-weight: ' + weight + '"><span>' + num + '</span><span>' + freq + (step >= 1 && isHigh ? ' ⚠' : '') + (step >= 1 && isLow ? ' ▼' : '') + '</span></div>';
+                    }
+                }
+                html += '</div>';
+                slide.querySelector("#freq-table").innerHTML = html;
+
+                var status = slide.querySelector("#freq-status");
+                var hint = slide.querySelector("#freq-hint");
+                if (step === 0) {
+                    status.innerHTML = 'Осмотрите таблицу — какие числа выделяются?';
+                    hint.innerHTML = '↓ подсветить аномалии';
+                    hint.style.visibility = 'visible';
+                } else if (step === 1) {
+                    status.innerHTML = '<span style="color: #f85149; font-weight: 700">Высокие ⚠:</span> 8 (39), 16 (41), 27 (42), 32 (44) &nbsp; <span style="color: #58a6ff; font-weight: 700">Низкие ▼:</span> 19 (16), 24 (17)';
+                    hint.innerHTML = '↓ объяснение';
+                } else {
+                    status.innerHTML = '<span style="color: #3fb950">На реальном колесе числа 8, 16, 27, 32 расположены <strong>рядом</strong> — это перекос в одной зоне!</span>';
+                    hint.style.visibility = 'hidden';
+                }
+            }
+
+            slide.addEventListener("slide-next", function () {
+                if (step < 2) { step++; render(); }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (step > 0) { step--; render(); }
+            });
+
+            render();
+        })();
+    </script>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 4 · История 2</div>
+    <div style="position: absolute; top: 40px; right: 60px; text-align: center">
+        <img src="slides/images/beat-the-dealer.jpg" alt="Beat the Dealer book cover" style="width: 120px; border-radius: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); display: block">
+        <p style="font-size: 0.8em; color: #8b949e; margin-top: 6px">«Beat the Dealer», 1962</p>
+    </div>
+    <h2>Эдвард Торп: профессор и подсчёт карт</h2>
+    <div class="two-col" style="margin-top: 16px">
+        <div>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Профессор математики написал книгу, как <span class="accent-green" style="font-weight: 700">обыграть казино в блэкджек</span>.
+            </p>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Ключевое отличие от рулетки:
+            </p>
+            <div class="quote" style="font-size: 1em">
+                Рулетка — каждое вращение <span class="accent-red">независимо</span>.<br>
+                Блэкджек — карты сдаются из колоды и не возвращаются. Колода <span class="accent-green">«помнит»</span>.
+            </div>
+        </div>
+        <div>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Если из колоды вышло много <span class="accent-orange">мелких</span> карт (2–6), в колоде осталось больше <span class="accent" style="font-weight: 700">крупных</span> (10, J, Q, K, A).
+            </p>
+            <p style="font-size: 1.15em">
+                Крупные карты <span class="accent-green" style="font-weight: 700">выгодны игроку</span> — повышают шанс набрать 21 и шанс, что дилер «перебрал».
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Hi-Lo system -->
+<div class="slide">
+    <div class="block-label">Часть 4 · Система Hi-Lo</div>
+    <h2>Система Hi-Lo</h2>
+    <p style="font-size: 1.15em; text-align: center; color: #8b949e; margin-bottom: 16px">
+        Простая система отслеживания карт
+    </p>
+    <div style="display: flex; justify-content: center; margin: 16px 0">
+        <table style="border-collapse: collapse; font-size: 1.15em">
+            <tr>
+                <th style="padding: 10px 20px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: left">Карта</th>
+                <th style="padding: 10px 20px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: center">Счёт</th>
+                <th style="padding: 10px 20px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: left">Логика</th>
+            </tr>
+            <tr style="background: #0e2a1a">
+                <td style="padding: 8px 20px; color: #3fb950; font-weight: 700; font-size: 1.3em">2, 3, 4, 5, 6</td>
+                <td style="padding: 8px 20px; color: #3fb950; font-weight: 900; font-family: 'Roboto Mono', monospace; text-align: center; font-size: 1.5em">+1</td>
+                <td style="padding: 8px 20px; color: #8b949e">мелкая ушла → выгодно</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 20px; color: #c9d1d9; font-weight: 700; font-size: 1.3em">7, 8, 9</td>
+                <td style="padding: 8px 20px; color: #484f58; font-weight: 900; font-family: 'Roboto Mono', monospace; text-align: center; font-size: 1.5em">0</td>
+                <td style="padding: 8px 20px; color: #8b949e">нейтральная</td>
+            </tr>
+            <tr style="background: #2a1a1a">
+                <td style="padding: 8px 20px; color: #f85149; font-weight: 700; font-size: 1.3em">10, J, Q, K, A</td>
+                <td style="padding: 8px 20px; color: #f85149; font-weight: 900; font-family: 'Roboto Mono', monospace; text-align: center; font-size: 1.5em">−1</td>
+                <td style="padding: 8px 20px; color: #8b949e">крупная ушла → невыгодно</td>
+            </tr>
+        </table>
+    </div>
+    <div class="key-thought" style="margin-top: 16px">
+        <p style="font-size: 1.15em">
+            Счёт <span class="accent-green" style="font-weight: 700">высокий (+5 и выше)</span> → в колоде много крупных → ставь больше!<br>
+            Счёт <span class="accent-red" style="font-weight: 700">низкий или отрицательный</span> → преимущество у казино → ставь минимум.
+        </p>
+    </div>
+</div>
+
+<!-- Interactive card counting practice -->
+<div class="slide">
+    <div class="block-label">Часть 4 · Интерактив</div>
+    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+    <h2>Потренируемся считать!</h2>
+    <p style="font-size: 1.58em; color: #8b949e; text-align: center; margin-bottom: 10px">
+        Ведите бегущий счёт Hi-Lo. Начинаем с нуля.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 24px; margin: 10px 0; align-items: flex-start; flex-wrap: wrap">
+        <div style="text-align: center; min-width: 150px">
+            <p style="color: #8b949e; font-size: 1.35em">Бегущий счёт</p>
+            <div id="hilo-count" style="font-size: 4.5em; font-weight: 900; color: #58a6ff; font-family: 'Roboto Mono', monospace; line-height: 1.1">0</div>
+        </div>
+        <div style="text-align: center; min-width: 150px">
+            <p style="color: #8b949e; font-size: 1.35em">Карт выдано</p>
+            <div id="hilo-dealt" style="font-size: 3em; font-weight: 700; color: #8b949e; font-family: 'Roboto Mono', monospace; line-height: 1.1; padding-top: 0.3em">0 / 15</div>
+        </div>
+    </div>
+
+    <div id="hilo-cards" style="display: flex; justify-content: center; gap: 6px; margin: 12px 0; flex-wrap: wrap; min-height: 90px"></div>
+
+    <div id="hilo-current" style="text-align: center; min-height: 40px; margin: 8px 0"></div>
+
+    <div id="hilo-verdict" style="text-align: center; visibility: hidden; margin-top: 8px">
+        <div class="key-thought" style="border-color: #3fb950">
+            <p style="color: #3fb950; font-size: 1.8em">
+                Счёт +5! В колоде много крупных карт — выгодный момент для ставки!
+            </p>
+        </div>
+    </div>
+    <p id="hilo-hint" style="text-align: center; color: #484f58; font-size: 1.28em; margin-top: 6px">
+        ↓ сдать следующую карту
+    </p>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var sequence = [
+                { card: "5", suit: "♠", val: +1 },
+                { card: "K", suit: "♥", val: -1 },
+                { card: "3", suit: "♦", val: +1 },
+                { card: "7", suit: "♣", val: 0 },
+                { card: "2", suit: "♠", val: +1 },
+                { card: "6", suit: "♥", val: +1 },
+                { card: "A", suit: "♠", val: -1 },
+                { card: "4", suit: "♦", val: +1 },
+                { card: "10", suit: "♣", val: -1 },
+                { card: "9", suit: "♥", val: 0 },
+                { card: "3", suit: "♣", val: +1 },
+                { card: "5", suit: "♦", val: +1 },
+                { card: "6", suit: "♠", val: +1 },
+                { card: "J", suit: "♦", val: -1 },
+                { card: "2", suit: "♥", val: +1 }
+            ];
+            var step = 0; // 0 = no cards, 1..15 = cards dealt
+            var runningCount = 0;
+
+            function cardColor(suit) {
+                return suit === "♥" || suit === "♦" ? "#f85149" : "#e6edf3";
+            }
+
+            function valColor(v) {
+                return v > 0 ? "#3fb950" : v < 0 ? "#f85149" : "#484f58";
+            }
+
+            function valText(v) {
+                return v > 0 ? "+1" : v < 0 ? "−1" : "0";
+            }
+
+            function render() {
+                var count = 0;
+                var cardsHtml = "";
+                for (var i = 0; i < step; i++) {
+                    count += sequence[i].val;
+                    var c = sequence[i];
+                    var isCurrent = i === step - 1;
+                    var border = isCurrent ? "#f0883e" : "#30363d";
+                    var bg = isCurrent ? "#1e1a14" : "#161b22";
+                    cardsHtml += '<div style="background: ' + bg + '; border: 2px solid ' + border + '; border-radius: 8px; padding: 6px 14px; min-width: 70px; text-align: center">';
+                    cardsHtml += '<div style="font-size: 1.82em; font-weight: 700; color: ' + cardColor(c.suit) + '; font-family: Roboto Mono, monospace">' + c.card + c.suit + '</div>';
+                    cardsHtml += '<div style="font-size: 1.32em; font-weight: 700; color: ' + valColor(c.val) + '">' + valText(c.val) + '</div>';
+                    cardsHtml += '</div>';
+                }
+                slide.querySelector("#hilo-cards").innerHTML = cardsHtml;
+
+                var countColor = count > 0 ? "#3fb950" : count < 0 ? "#f85149" : "#58a6ff";
+                var countSign = count > 0 ? "+" : "";
+                slide.querySelector("#hilo-count").textContent = countSign + count;
+                slide.querySelector("#hilo-count").style.color = countColor;
+                slide.querySelector("#hilo-dealt").textContent = step + " / " + sequence.length;
+
+                var currentEl = slide.querySelector("#hilo-current");
+                if (step > 0 && step <= sequence.length) {
+                    var last = sequence[step - 1];
+                    currentEl.innerHTML = '<span style="font-size: 1.8em; color: ' + cardColor(last.suit) + '; font-weight: 700">' + last.card + last.suit + '</span> → <span style="color: ' + valColor(last.val) + '; font-weight: 700; font-size: 1.8em">' + valText(last.val) + '</span> <span style="font-size: 1.8em">→ счёт = </span><span style="color: ' + countColor + '; font-weight: 900; font-size: 1.8em">' + countSign + count + '</span>';
+                } else {
+                    currentEl.innerHTML = "";
+                }
+
+                slide.querySelector("#hilo-verdict").style.visibility = step >= sequence.length ? "visible" : "hidden";
+                slide.querySelector("#hilo-hint").style.visibility = step >= sequence.length ? "hidden" : "visible";
+            }
+
+            slide.addEventListener("slide-next", function () {
+                if (step < sequence.length) { step++; render(); }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (step > 0) { step--; render(); }
+            });
+
+            render();
+        })();
+    </script>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 4 · История 3</div>
+    <div style="position: absolute; top: 40px; right: 60px; text-align: center">
+        <img
+            src="slides/images/21-movie.jpg"
+            alt="21 (2008) movie poster"
+            style="
+                width: 120px;
+                border-radius: 4px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+                display: block;
+            "
+        />
+        <p style="font-size: 0.8em; color: #8b949e; margin-top: 6px">
+            Фильм «21», 2008
+        </p>
+    </div>
+    <h2>Команда MIT: студенты-миллионеры</h2>
+    <div class="timeline" style="margin: 16px 0">
+        <div class="item">
+            <div class="year">1990-е</div>
+            <div class="label">MIT Blackjack Team</div>
+        </div>
+    </div>
+    <p style="font-size: 1.15em; margin: 12px 0; color: #c9d1d9; text-align: center">
+        Проблема одиночки: маленькие ставки → вдруг крупные =
+        <span class="accent-red" style="font-weight: 700">подозрительно</span>.
+    </p>
+    <p style="font-size: 1.15em; color: #c9d1d9; text-align: center; margin-bottom: 10px">
+        Решение:
+        <span class="accent-green" style="font-weight: 700">командная игра</span>.
+    </p>
+    <div
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 14px 0;
+            flex-wrap: wrap;
+        "
+    >
+        <div
+            style="
+                background: #161b22;
+                border: 2px solid #58a6ff;
+                border-radius: 14px;
+                padding: 14px 22px;
+                text-align: center;
+                min-width: 200px;
+            "
+        >
+            <p style="font-size: 1.8em">👀</p>
+            <p
+                style="
+                    color: #58a6ff;
+                    font-weight: 700;
+                    font-size: 1.15em;
+                    margin-top: 4px;
+                "
+            >
+                Наблюдатели
+            </p>
+            <p style="color: #8b949e; font-size: 0.95em; margin-top: 4px">
+                Сидят за разными столами.<br />Минимальные ставки.<br />Ведут
+                счёт.
+            </p>
+        </div>
+        <div
+            style="
+                display: flex;
+                align-items: center;
+                font-size: 2em;
+                color: #f0883e;
+            "
+        >
+            →
+        </div>
+        <div
+            style="
+                background: #161b22;
+                border: 2px solid #f0883e;
+                border-radius: 14px;
+                padding: 14px 22px;
+                text-align: center;
+                min-width: 200px;
+            "
+        >
+            <p style="font-size: 1.8em">📡</p>
+            <p
+                style="
+                    color: #f0883e;
+                    font-weight: 700;
+                    font-size: 1.15em;
+                    margin-top: 4px;
+                "
+            >
+                Сигнал
+            </p>
+            <p style="color: #8b949e; font-size: 0.95em; margin-top: 4px">
+                Снимает очки.<br />Ставит фишки<br />определённым образом.
+            </p>
+        </div>
+        <div
+            style="
+                display: flex;
+                align-items: center;
+                font-size: 2em;
+                color: #3fb950;
+            "
+        >
+            →
+        </div>
+        <div
+            style="
+                background: #161b22;
+                border: 2px solid #3fb950;
+                border-radius: 14px;
+                padding: 14px 22px;
+                text-align: center;
+                min-width: 200px;
+            "
+        >
+            <p style="font-size: 1.8em">🎰</p>
+            <p
+                style="
+                    color: #3fb950;
+                    font-weight: 700;
+                    font-size: 1.15em;
+                    margin-top: 4px;
+                "
+            >
+                Большой игрок
+            </p>
+            <p style="color: #8b949e; font-size: 0.95em; margin-top: 4px">
+                Подсаживается.<br />Крупные ставки.<br />Выглядит как турист.
+            </p>
+        </div>
+    </div>
+    <p
+        style="
+            text-align: center;
+            font-size: 1.15em;
+            color: #c9d1d9;
+            margin-top: 8px;
+        "
+    >
+        За несколько лет —
+        <span class="accent-green" style="font-weight: 700"
+            >миллионы долларов</span
+        >. Книга «Bringing Down the House». Фильм «21».
+    </p>
+</div>
+
+<!-- Why team > solo -->
+<div class="slide">
+    <div class="block-label">Часть 4 · Вопрос</div>
+    <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
+    <h2>Почему команда эффективнее одиночки?</h2>
+    <p
+        style="
+            font-size: 1.3em;
+            text-align: center;
+            color: #8b949e;
+            margin: 20px 0;
+        "
+    >
+        Две причины — кто назовёт?
+    </p>
+    <div
+        id="team-answers"
+        style="
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            visibility: hidden;
+        "
+    >
+        <div
+            style="
+                background: #161b22;
+                border: 2px solid #58a6ff;
+                border-radius: 14px;
+                padding: 24px 28px;
+                max-width: 300px;
+                text-align: center;
+            "
+        >
+            <div class="big-number" style="font-size: 2em; margin-bottom: 8px">
+                ×5
+            </div>
+            <p style="font-size: 1.15em; color: #58a6ff; font-weight: 700">
+                Больше столов
+            </p>
+            <p style="color: #8b949e; font-size: 1em; margin-top: 6px">
+                5 наблюдателей = 5 столов = в 5 раз больше выгодных моментов
+            </p>
+        </div>
+        <div
+            style="
+                background: #161b22;
+                border: 2px solid #3fb950;
+                border-radius: 14px;
+                padding: 24px 28px;
+                max-width: 300px;
+                text-align: center;
+            "
+        >
+            <div style="font-size: 2em; margin-bottom: 8px">🎭</div>
+            <p style="font-size: 1.15em; color: #3fb950; font-weight: 700">
+                Маскировка
+            </p>
+            <p style="color: #8b949e; font-size: 1em; margin-top: 6px">
+                Нет паттерна «мало → мало → МНОГО» за одним столом
+            </p>
+        </div>
+    </div>
+    <p id="team-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 16px">
+        ↓ показать ответ
+    </p>
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var revealed = false;
+            var answers = slide.querySelector("#team-answers");
+            var hint = slide.querySelector("#team-hint");
+            slide.addEventListener("slide-next", function () {
+                if (!revealed) {
+                    revealed = true;
+                    answers.style.visibility = "visible";
+                    hint.style.visibility = "hidden";
+                }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (revealed) {
+                    revealed = false;
+                    answers.style.visibility = "hidden";
+                    hint.style.visibility = "visible";
+                }
+            });
+        })();
+    </script>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 5</div>
+    <h1>Контрудар казино</h1>
+    <h3>и выводы</h3>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 5 · Контрмеры</div>
+    <h2>Как казино ответило</h2>
+    <div style="margin: 16px 0; overflow-x: auto">
+        <table style="border-collapse: collapse; font-size: 1.25em; width: 100%; max-width: 900px; margin: 0 auto">
+            <tr>
+                <th style="padding: 10px 14px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: left; width: 22%">Трюк</th>
+                <th style="padding: 10px 14px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: left; width: 33%">Как работал</th>
+                <th style="padding: 10px 14px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: left; width: 45%">Контрмера казино</th>
+            </tr>
+            <tr style="border-bottom: 1px solid #21262d">
+                <td style="padding: 10px 14px; color: #f0883e; font-weight: 700; vertical-align: top">
+                    Джаггер<br><span style="color: #484f58; font-weight: 400; font-size: 0.9em">1873</span>
+                </td>
+                <td style="padding: 10px 14px; color: #c9d1d9; vertical-align: top">
+                    Анализ частот → обнаружение дефекта колеса
+                </td>
+                <td style="padding: 10px 14px; color: #c9d1d9; vertical-align: top">
+                    Идеальная балансировка колёс. Регулярные проверки. Ротация колёс между столами.
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #21262d">
+                <td style="padding: 10px 14px; color: #58a6ff; font-weight: 700; vertical-align: top">
+                    Торп<br><span style="color: #484f58; font-weight: 400; font-size: 0.9em">1962</span>
+                </td>
+                <td style="padding: 10px 14px; color: #c9d1d9; vertical-align: top">
+                    Подсчёт карт → момент преимущества
+                </td>
+                <td style="padding: 10px 14px; color: #c9d1d9; vertical-align: top">
+                    6–8 колод вместо 1. Ранняя перетасовка. Автоматические шаффл-машины.
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 14px; color: #bc8cff; font-weight: 700; vertical-align: top">
+                    MIT<br><span style="color: #484f58; font-weight: 400; font-size: 0.9em">1990-е</span>
+                </td>
+                <td style="padding: 10px 14px; color: #c9d1d9; vertical-align: top">
+                    Командная игра → маскировка подсчёта
+                </td>
+                <td style="padding: 10px 14px; color: #c9d1d9; vertical-align: top">
+                    Собственные математики. Распознавание лиц. Базы «нежелательных» игроков. Обмен данными между казино.
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="quote" style="margin-top: 16px; font-style: normal">
+        Ни один из этих трюков — <span class="accent-green" style="font-weight: 700">не жульничество</span>.
+        Никаких скрытых устройств, подкупа или мошенничества. Чистая математика.
+    </div>
+</div>
+
+<div class="slide">
+    <div class="block-label">Часть 5 · Итоги</div>
+    <h2>Что мы узнали</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 16px 0">
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px 18px">
+            <p style="color: #f0883e; font-weight: 700; font-size: 1.1em; margin-bottom: 4px">Интуиция врёт</p>
+            <p style="color: #8b949e; font-size: 0.95em">Ошибка игрока, парадокс дней рождения, Монти Холл</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px 18px">
+            <p style="color: #58a6ff; font-weight: 700; font-size: 1.1em; margin-bottom: 4px">Инструменты</p>
+            <p style="color: #8b949e; font-size: 0.95em">Вероятность, матожидание, закон больших чисел</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px 18px">
+            <p style="color: #f85149; font-weight: 700; font-size: 1.1em; margin-bottom: 4px">House edge</p>
+            <p style="color: #8b949e; font-size: 0.95em">Маленький % × тысячи ставок = прибыль</p>
+        </div>
+    </div>
+    <h3 style="color: #3fb950; text-align: center; margin-top: 20px; margin-bottom: 4px">Три героя</h3>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 12px 0">
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px 18px; text-align: center">
+            <p style="color: #f0883e; font-weight: 700; font-size: 1.1em; margin-bottom: 4px; font-family: 'Roboto Mono', monospace">Джаггер</p>
+            <p style="color: #8b949e; font-size: 0.95em">Собрал данные → нашёл аномалию</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px 18px; text-align: center">
+            <p style="color: #58a6ff; font-weight: 700; font-size: 1.1em; margin-bottom: 4px; font-family: 'Roboto Mono', monospace">Торп</p>
+            <p style="color: #8b949e; font-size: 0.95em">Прошлое → предсказал будущее</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 14px 18px; text-align: center">
+            <p style="color: #bc8cff; font-weight: 700; font-size: 1.1em; margin-bottom: 4px; font-family: 'Roboto Mono', monospace">MIT</p>
+            <p style="color: #8b949e; font-size: 0.95em">Закон больших чисел за игроков</p>
+        </div>
+    </div>
+    <div class="key-thought">
+        <p>Разница между игроком и казино — не в удаче.<br>
+        А в том, кто лучше знает <span class="accent">математику</span>.</p>
+    </div>
+</div>
+
+<div class="slide">
+    <div class="block-label">Заключение</div>
+    <h2 style="text-align: center">Вопрос для размышления</h2>
+    <div style="
+        text-align: center;
+        margin: 30px auto;
+        padding: 32px 40px;
+        background: #161b22;
+        border-radius: 14px;
+        border: 2px solid #f0883e;
+        max-width: 700px;
+    ">
+        <p style="font-size: 1.8em; font-weight: 700; color: #f0883e">
+            Где ещё в жизни работают эти принципы?
+        </p>
+        <p style="font-size: 1.15em; color: #8b949e; margin-top: 16px">
+            Закон больших чисел · преимущество «заведения» · поиск скрытых закономерностей
+        </p>
+    </div>
+    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 24px; flex-wrap: wrap">
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px 20px; text-align: center">
+            <p style="font-size: 1.5em">🏦</p>
+            <p style="color: #c9d1d9; font-size: 0.95em">Страховые<br>компании</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px 20px; text-align: center">
+            <p style="font-size: 1.5em">📈</p>
+            <p style="color: #c9d1d9; font-size: 0.95em">Фондовый<br>рынок</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px 20px; text-align: center">
+            <p style="font-size: 1.5em">🧪</p>
+            <p style="color: #c9d1d9; font-size: 0.95em">A/B<br>тестирование</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px 20px; text-align: center">
+            <p style="font-size: 1.5em">⚽</p>
+            <p style="color: #c9d1d9; font-size: 0.95em">Спортивная<br>аналитика</p>
+        </div>
+        <div style="background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 12px 20px; text-align: center">
+            <p style="font-size: 1.5em">💊</p>
+            <p style="color: #c9d1d9; font-size: 0.95em">Медицинская<br>статистика</p>
+        </div>
+    </div>
+</div>
+
+    <div class="progress" id="progress"></div>
+    <div class="counter" id="counter"></div>
+    <div class="nav"><button onclick="prev()">←</button><button onclick="next()">→</button></div>
+    <script>
+
+(() => {
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    let current = 0;
+    const total = slides.length;
+    const counter = document.getElementById("counter");
+    const progress = document.getElementById("progress");
+
+    function clamp(index) {
+        return Math.max(0, Math.min(index, total - 1));
+    }
+
+    function show(index) {
+        current = clamp(index);
+        for (const slide of slides) {
+            slide.classList.remove("active");
+        }
+        const active = slides[current];
+        if (!active) {
+            return;
+        }
+        active.classList.add("active");
+        if (counter) {
+            counter.textContent = String(current + 1) + " / " + String(total);
+        }
+        if (progress) {
+            progress.style.width = String(((current + 1) / Math.max(total, 1)) * 100) + "%";
+        }
+        history.replaceState(null, "", "#" + String(current + 1));
+    }
+
+    function next() {
+        show(current + 1);
+    }
+
+    function prev() {
+        show(current - 1);
+    }
+
+    function stepForward() {
+        slides[current]?.dispatchEvent(new Event("slide-next"));
+    }
+
+    function stepBackward() {
+        slides[current]?.dispatchEvent(new Event("slide-prev"));
+    }
+
+    window.next = next;
+    window.prev = prev;
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowRight" || event.key === " " || event.key === "PageDown") {
+            event.preventDefault();
+            next();
+        }
+        if (event.key === "ArrowLeft" || event.key === "PageUp") {
+            event.preventDefault();
+            prev();
+        }
+        if (event.key === "Home") {
+            event.preventDefault();
+            show(0);
+        }
+        if (event.key === "End") {
+            event.preventDefault();
+            show(total - 1);
+        }
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            stepForward();
+        }
+        if (event.key === "ArrowUp") {
+            event.preventDefault();
+            stepBackward();
+        }
+    });
+
+    let touchStartX = 0;
+    document.addEventListener("touchstart", (event) => {
+        touchStartX = event.touches[0]?.clientX ?? 0;
+    });
+    document.addEventListener("touchend", (event) => {
+        const delta = touchStartX - (event.changedTouches[0]?.clientX ?? 0);
+        if (Math.abs(delta) > 60) {
+            delta > 0 ? next() : prev();
+        }
+    });
+
+    show((Number.parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+
+    </script>
+  </body>
+</html>

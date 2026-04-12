@@ -23,6 +23,7 @@ function getContentType(filePath: string): string {
 
 export async function servePresentation(rootDir: string, port: number): Promise<void> {
   const resolvedRoot = path.resolve(rootDir);
+  const host = "127.0.0.1";
 
   const server = createServer(async (req, res) => {
     try {
@@ -54,8 +55,8 @@ export async function servePresentation(rootDir: string, port: number): Promise<
   });
 
   await new Promise<void>((resolve) => {
-    server.listen(port, resolve);
+    server.listen(port, host, resolve);
   });
 
-  process.stdout.write(`Serving ${resolvedRoot} at http://localhost:${port}\n`);
+  process.stdout.write(`Serving ${resolvedRoot} at http://${host}:${port}\n`);
 }

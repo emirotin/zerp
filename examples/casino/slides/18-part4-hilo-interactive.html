@@ -1,0 +1,115 @@
+<!-- Interactive card counting practice -->
+<div class="slide">
+    <div class="block-label">Часть 4 · Интерактив</div>
+    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+    <h2>Потренируемся считать!</h2>
+    <p style="font-size: 1.58em; color: #8b949e; text-align: center; margin-bottom: 10px">
+        Ведите бегущий счёт Hi-Lo. Начинаем с нуля.
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 24px; margin: 10px 0; align-items: flex-start; flex-wrap: wrap">
+        <div style="text-align: center; min-width: 150px">
+            <p style="color: #8b949e; font-size: 1.35em">Бегущий счёт</p>
+            <div id="hilo-count" style="font-size: 4.5em; font-weight: 900; color: #58a6ff; font-family: 'Roboto Mono', monospace; line-height: 1.1">0</div>
+        </div>
+        <div style="text-align: center; min-width: 150px">
+            <p style="color: #8b949e; font-size: 1.35em">Карт выдано</p>
+            <div id="hilo-dealt" style="font-size: 3em; font-weight: 700; color: #8b949e; font-family: 'Roboto Mono', monospace; line-height: 1.1; padding-top: 0.3em">0 / 15</div>
+        </div>
+    </div>
+
+    <div id="hilo-cards" style="display: flex; justify-content: center; gap: 6px; margin: 12px 0; flex-wrap: wrap; min-height: 90px"></div>
+
+    <div id="hilo-current" style="text-align: center; min-height: 40px; margin: 8px 0"></div>
+
+    <div id="hilo-verdict" style="text-align: center; visibility: hidden; margin-top: 8px">
+        <div class="key-thought" style="border-color: #3fb950">
+            <p style="color: #3fb950; font-size: 1.8em">
+                Счёт +5! В колоде много крупных карт — выгодный момент для ставки!
+            </p>
+        </div>
+    </div>
+    <p id="hilo-hint" style="text-align: center; color: #484f58; font-size: 1.28em; margin-top: 6px">
+        ↓ сдать следующую карту
+    </p>
+
+    <script>
+        (function () {
+            var slide = document.currentScript.closest(".slide");
+            var sequence = [
+                { card: "5", suit: "♠", val: +1 },
+                { card: "K", suit: "♥", val: -1 },
+                { card: "3", suit: "♦", val: +1 },
+                { card: "7", suit: "♣", val: 0 },
+                { card: "2", suit: "♠", val: +1 },
+                { card: "6", suit: "♥", val: +1 },
+                { card: "A", suit: "♠", val: -1 },
+                { card: "4", suit: "♦", val: +1 },
+                { card: "10", suit: "♣", val: -1 },
+                { card: "9", suit: "♥", val: 0 },
+                { card: "3", suit: "♣", val: +1 },
+                { card: "5", suit: "♦", val: +1 },
+                { card: "6", suit: "♠", val: +1 },
+                { card: "J", suit: "♦", val: -1 },
+                { card: "2", suit: "♥", val: +1 }
+            ];
+            var step = 0; // 0 = no cards, 1..15 = cards dealt
+            var runningCount = 0;
+
+            function cardColor(suit) {
+                return suit === "♥" || suit === "♦" ? "#f85149" : "#e6edf3";
+            }
+
+            function valColor(v) {
+                return v > 0 ? "#3fb950" : v < 0 ? "#f85149" : "#484f58";
+            }
+
+            function valText(v) {
+                return v > 0 ? "+1" : v < 0 ? "−1" : "0";
+            }
+
+            function render() {
+                var count = 0;
+                var cardsHtml = "";
+                for (var i = 0; i < step; i++) {
+                    count += sequence[i].val;
+                    var c = sequence[i];
+                    var isCurrent = i === step - 1;
+                    var border = isCurrent ? "#f0883e" : "#30363d";
+                    var bg = isCurrent ? "#1e1a14" : "#161b22";
+                    cardsHtml += '<div style="background: ' + bg + '; border: 2px solid ' + border + '; border-radius: 8px; padding: 6px 14px; min-width: 70px; text-align: center">';
+                    cardsHtml += '<div style="font-size: 1.82em; font-weight: 700; color: ' + cardColor(c.suit) + '; font-family: Roboto Mono, monospace">' + c.card + c.suit + '</div>';
+                    cardsHtml += '<div style="font-size: 1.32em; font-weight: 700; color: ' + valColor(c.val) + '">' + valText(c.val) + '</div>';
+                    cardsHtml += '</div>';
+                }
+                slide.querySelector("#hilo-cards").innerHTML = cardsHtml;
+
+                var countColor = count > 0 ? "#3fb950" : count < 0 ? "#f85149" : "#58a6ff";
+                var countSign = count > 0 ? "+" : "";
+                slide.querySelector("#hilo-count").textContent = countSign + count;
+                slide.querySelector("#hilo-count").style.color = countColor;
+                slide.querySelector("#hilo-dealt").textContent = step + " / " + sequence.length;
+
+                var currentEl = slide.querySelector("#hilo-current");
+                if (step > 0 && step <= sequence.length) {
+                    var last = sequence[step - 1];
+                    currentEl.innerHTML = '<span style="font-size: 1.8em; color: ' + cardColor(last.suit) + '; font-weight: 700">' + last.card + last.suit + '</span> → <span style="color: ' + valColor(last.val) + '; font-weight: 700; font-size: 1.8em">' + valText(last.val) + '</span> <span style="font-size: 1.8em">→ счёт = </span><span style="color: ' + countColor + '; font-weight: 900; font-size: 1.8em">' + countSign + count + '</span>';
+                } else {
+                    currentEl.innerHTML = "";
+                }
+
+                slide.querySelector("#hilo-verdict").style.visibility = step >= sequence.length ? "visible" : "hidden";
+                slide.querySelector("#hilo-hint").style.visibility = step >= sequence.length ? "hidden" : "visible";
+            }
+
+            slide.addEventListener("slide-next", function () {
+                if (step < sequence.length) { step++; render(); }
+            });
+            slide.addEventListener("slide-prev", function () {
+                if (step > 0) { step--; render(); }
+            });
+
+            render();
+        })();
+    </script>
+</div>

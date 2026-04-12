@@ -1,0 +1,69 @@
+<div class="slide">
+    <div class="block-label">Часть 4 · История 2</div>
+    <div style="position: absolute; top: 40px; right: 60px; text-align: center">
+        <img src="images/beat-the-dealer.jpg" alt="Beat the Dealer book cover" style="width: 120px; border-radius: 4px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); display: block">
+        <p style="font-size: 0.8em; color: #8b949e; margin-top: 6px">«Beat the Dealer», 1962</p>
+    </div>
+    <h2>Эдвард Торп: профессор и подсчёт карт</h2>
+    <div class="two-col" style="margin-top: 16px">
+        <div>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Профессор математики написал книгу, как <span class="accent-green" style="font-weight: 700">обыграть казино в блэкджек</span>.
+            </p>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Ключевое отличие от рулетки:
+            </p>
+            <div class="quote" style="font-size: 1em">
+                Рулетка — каждое вращение <span class="accent-red">независимо</span>.<br>
+                Блэкджек — карты сдаются из колоды и не возвращаются. Колода <span class="accent-green">«помнит»</span>.
+            </div>
+        </div>
+        <div>
+            <p style="font-size: 1.15em; margin-bottom: 12px">
+                Если из колоды вышло много <span class="accent-orange">мелких</span> карт (2–6), в колоде осталось больше <span class="accent" style="font-weight: 700">крупных</span> (10, J, Q, K, A).
+            </p>
+            <p style="font-size: 1.15em">
+                Крупные карты <span class="accent-green" style="font-weight: 700">выгодны игроку</span> — повышают шанс набрать 21 и шанс, что дилер «перебрал».
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Hi-Lo system -->
+<div class="slide">
+    <div class="block-label">Часть 4 · Система Hi-Lo</div>
+    <h2>Система Hi-Lo</h2>
+    <p style="font-size: 1.15em; text-align: center; color: #8b949e; margin-bottom: 16px">
+        Простая система отслеживания карт
+    </p>
+    <div style="display: flex; justify-content: center; margin: 16px 0">
+        <table style="border-collapse: collapse; font-size: 1.15em">
+            <tr>
+                <th style="padding: 10px 20px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: left">Карта</th>
+                <th style="padding: 10px 20px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: center">Счёт</th>
+                <th style="padding: 10px 20px; color: #8b949e; border-bottom: 2px solid #30363d; text-align: left">Логика</th>
+            </tr>
+            <tr style="background: #0e2a1a">
+                <td style="padding: 8px 20px; color: #3fb950; font-weight: 700; font-size: 1.3em">2, 3, 4, 5, 6</td>
+                <td style="padding: 8px 20px; color: #3fb950; font-weight: 900; font-family: 'Roboto Mono', monospace; text-align: center; font-size: 1.5em">+1</td>
+                <td style="padding: 8px 20px; color: #8b949e">мелкая ушла → выгодно</td>
+            </tr>
+            <tr>
+                <td style="padding: 8px 20px; color: #c9d1d9; font-weight: 700; font-size: 1.3em">7, 8, 9</td>
+                <td style="padding: 8px 20px; color: #484f58; font-weight: 900; font-family: 'Roboto Mono', monospace; text-align: center; font-size: 1.5em">0</td>
+                <td style="padding: 8px 20px; color: #8b949e">нейтральная</td>
+            </tr>
+            <tr style="background: #2a1a1a">
+                <td style="padding: 8px 20px; color: #f85149; font-weight: 700; font-size: 1.3em">10, J, Q, K, A</td>
+                <td style="padding: 8px 20px; color: #f85149; font-weight: 900; font-family: 'Roboto Mono', monospace; text-align: center; font-size: 1.5em">−1</td>
+                <td style="padding: 8px 20px; color: #8b949e">крупная ушла → невыгодно</td>
+            </tr>
+        </table>
+    </div>
+    <div class="key-thought" style="margin-top: 16px">
+        <p style="font-size: 1.15em">
+            Счёт <span class="accent-green" style="font-weight: 700">высокий (+5 и выше)</span> → в колоде много крупных → ставь больше!<br>
+            Счёт <span class="accent-red" style="font-weight: 700">низкий или отрицательный</span> → преимущество у казино → ставь минимум.
+        </p>
+    </div>
+</div>

@@ -21,22 +21,22 @@ Install from a local checkout:
 
 ```bash
 pnpm add -D file:../zerp
-pnpm zerp serve .
+pnpm exec zerp serve .
 ```
 
 Or from a registry:
 
 ```bash
 pnpm add -D zerp
-pnpm zerp build .
+pnpm exec zerp build .
 ```
 
 Commands:
 
 ```bash
-pnpm zerp serve .        # serve a deck from ./slides on http://localhost:8000
-pnpm zerp serve . 3000   # custom port
-pnpm zerp build .        # write ./index.html
+pnpm exec zerp serve .        # serve a deck from ./slides on http://localhost:8000
+pnpm exec zerp serve . 3000   # custom port
+pnpm exec zerp build .        # write ./index.html
 ```
 
 ## Authoring
@@ -51,3 +51,7 @@ pnpm zerp build .        # write ./index.html
 ```ts
 import { buildPresentationHtml, writePresentation } from "zerp";
 ```
+
+## Example
+
+This repository includes a migrated example deck at `examples/casino/`. Its authored source is only `examples/casino/slides/`.
