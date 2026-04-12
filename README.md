@@ -15,6 +15,14 @@ my-deck/
 
 `zerp` finds `slides/**/*.html`, sorts them by filename, rewrites relative asset URLs so slide-local assets keep working, injects default styles/runtime, and serves or builds a single-page deck.
 
+## Maintainer Policy
+
+I use `zerp` myself and find it useful, which is why I am making it public as free open-source software.
+
+That does not mean I am available for general collaboration. Issues and pull requests are intentionally disabled. I do not have the capacity to debug other people's problems for free, and I do not want to spend time triaging low-signal or AI-generated contributions.
+
+If you want to use the project as-is, please do. If you need a fix, a feature, or help integrating it into your workflow, contact me directly for paid support.
+
 ## Usage
 
 Install from a local checkout:
