@@ -34,9 +34,10 @@ pnpm exec zerp build .
 Commands:
 
 ```bash
-pnpm exec zerp serve .        # serve a deck from ./slides on http://localhost:8000
-pnpm exec zerp serve . 3000   # custom port
-pnpm exec zerp build .        # write ./index.html
+pnpm exec zerp serve          # serve the current deck on http://localhost:8000
+pnpm exec zerp serve 3000     # current deck, custom port
+pnpm exec zerp serve . 3000   # explicit deck dir
+pnpm exec zerp build          # write ./index.html for the current deck
 ```
 
 ## Authoring
