@@ -1,89 +1,157 @@
 <!-- Interactive frequency table analysis -->
 <div class="slide">
-    <div class="block-label">Часть 4 · Интерактив</div>
-    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
-    <h2>Найди кривое колесо!</h2>
-    <p style="font-size: 1.05em; color: #8b949e; text-align: center; margin-bottom: 8px">
-        1000 вращений. Ожидаемая частота = <span style="font-family: 'Roboto Mono', monospace; color: #58a6ff">1000/37 ≈ 27</span>. Какие числа подозрительные?
-    </p>
-    <div id="freq-table" style="margin: 8px 0"></div>
-    <div id="freq-status" style="text-align: center; margin-top: 8px; font-size: 1.1em; color: #8b949e">
-        Нажмите ↓ чтобы подсветить аномалии
-    </div>
-    <p id="freq-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
-        ↓ подсветить аномалии
-    </p>
+  <div class="block-label">Часть 4 · Интерактив</div>
+  <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+  <h2>Найди кривое колесо!</h2>
+  <p style="font-size: 1.05em; color: #8b949e; text-align: center; margin-bottom: 8px">
+    1000 вращений. Ожидаемая частота =
+    <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: #58a6ff">1000/37 ≈ 27</span
+    >. Какие числа подозрительные?
+  </p>
+  <div id="freq-table" style="margin: 8px 0"></div>
+  <div
+    id="freq-status"
+    style="text-align: center; margin-top: 8px; font-size: 1.1em; color: #8b949e"
+  >
+    Нажмите ↓ чтобы подсветить аномалии
+  </div>
+  <p id="freq-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
+    ↓ подсветить аномалии
+  </p>
 
-    <script>
-        (function () {
-            var slide = document.currentScript.closest(".slide");
-            var step = 0; // 0 = raw, 1 = highlighted, 2 = explanation
-            var data = [
-                [0,25],[1,29],[2,23],[3,26],[4,31],[5,28],[6,24],[7,27],[8,39],[9,30],
-                [10,22],[11,26],[12,28],[13,28],[14,26],[15,30],[16,41],[17,22],[18,25],
-                [19,16],[20,29],[21,27],[22,24],[23,32],[24,17],[25,27],[26,24],[27,42],
-                [28,31],[29,26],[30,28],[31,24],[32,44],[33,26],[34,23],[35,29],[36,25]
-            ];
-            var highThresh = 37;
-            var lowThresh = 19;
+  <script>
+    (function () {
+      var slide = document.currentScript.closest(".slide");
+      var step = 0; // 0 = raw, 1 = highlighted, 2 = explanation
+      var data = [
+        [0, 25],
+        [1, 29],
+        [2, 23],
+        [3, 26],
+        [4, 31],
+        [5, 28],
+        [6, 24],
+        [7, 27],
+        [8, 39],
+        [9, 30],
+        [10, 22],
+        [11, 26],
+        [12, 28],
+        [13, 28],
+        [14, 26],
+        [15, 30],
+        [16, 41],
+        [17, 22],
+        [18, 25],
+        [19, 16],
+        [20, 29],
+        [21, 27],
+        [22, 24],
+        [23, 32],
+        [24, 17],
+        [25, 27],
+        [26, 24],
+        [27, 42],
+        [28, 31],
+        [29, 26],
+        [30, 28],
+        [31, 24],
+        [32, 44],
+        [33, 26],
+        [34, 23],
+        [35, 29],
+        [36, 25],
+      ];
+      var highThresh = 37;
+      var lowThresh = 19;
 
-            function render() {
-                var cols = 3;
-                var perCol = Math.ceil(data.length / cols);
-                var html = '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 24px; max-width: 750px; margin: 0 auto; font-family: Roboto Mono, monospace; font-size: 0.95em">';
+      function render() {
+        var cols = 3;
+        var perCol = Math.ceil(data.length / cols);
+        var html =
+          '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px 24px; max-width: 750px; margin: 0 auto; font-family: Roboto Mono, monospace; font-size: 0.95em">';
 
-                // Headers
-                for (var c = 0; c < cols; c++) {
-                    html += '<div style="display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid #30363d; color: #484f58; font-size: 0.85em"><span>Число</span><span>Частота</span></div>';
-                }
+        // Headers
+        for (var c = 0; c < cols; c++) {
+          html +=
+            '<div style="display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid #30363d; color: #484f58; font-size: 0.85em"><span>Число</span><span>Частота</span></div>';
+        }
 
-                for (var r = 0; r < perCol; r++) {
-                    for (var c = 0; c < cols; c++) {
-                        var idx = r + c * perCol;
-                        if (idx >= data.length) {
-                            html += '<div></div>';
-                            continue;
-                        }
-                        var num = data[idx][0];
-                        var freq = data[idx][1];
-                        var isHigh = freq >= highThresh;
-                        var isLow = freq <= lowThresh;
-                        var bg = 'transparent';
-                        var color = '#c9d1d9';
-                        var weight = '400';
-                        if (step >= 1) {
-                            if (isHigh) { bg = '#1a2e1a'; color = '#f85149'; weight = '900'; }
-                            else if (isLow) { bg = '#1a1a2e'; color = '#58a6ff'; weight = '700'; }
-                        }
-                        html += '<div style="display: flex; justify-content: space-between; padding: 2px 8px; background: ' + bg + '; border-radius: 4px; color: ' + color + '; font-weight: ' + weight + '"><span>' + num + '</span><span>' + freq + (step >= 1 && isHigh ? ' ⚠' : '') + (step >= 1 && isLow ? ' ▼' : '') + '</span></div>';
-                    }
-                }
-                html += '</div>';
-                slide.querySelector("#freq-table").innerHTML = html;
-
-                var status = slide.querySelector("#freq-status");
-                var hint = slide.querySelector("#freq-hint");
-                if (step === 0) {
-                    status.innerHTML = 'Осмотрите таблицу — какие числа выделяются?';
-                    hint.innerHTML = '↓ подсветить аномалии';
-                    hint.style.visibility = 'visible';
-                } else if (step === 1) {
-                    status.innerHTML = '<span style="color: #f85149; font-weight: 700">Высокие ⚠:</span> 8 (39), 16 (41), 27 (42), 32 (44) &nbsp; <span style="color: #58a6ff; font-weight: 700">Низкие ▼:</span> 19 (16), 24 (17)';
-                    hint.innerHTML = '↓ объяснение';
-                } else {
-                    status.innerHTML = '<span style="color: #3fb950">На реальном колесе числа 8, 16, 27, 32 расположены <strong>рядом</strong> — это перекос в одной зоне!</span>';
-                    hint.style.visibility = 'hidden';
-                }
+        for (var r = 0; r < perCol; r++) {
+          for (var c = 0; c < cols; c++) {
+            var idx = r + c * perCol;
+            if (idx >= data.length) {
+              html += "<div></div>";
+              continue;
             }
+            var num = data[idx][0];
+            var freq = data[idx][1];
+            var isHigh = freq >= highThresh;
+            var isLow = freq <= lowThresh;
+            var bg = "transparent";
+            var color = "#c9d1d9";
+            var weight = "400";
+            if (step >= 1) {
+              if (isHigh) {
+                bg = "#1a2e1a";
+                color = "#f85149";
+                weight = "900";
+              } else if (isLow) {
+                bg = "#1a1a2e";
+                color = "#58a6ff";
+                weight = "700";
+              }
+            }
+            html +=
+              '<div style="display: flex; justify-content: space-between; padding: 2px 8px; background: ' +
+              bg +
+              "; border-radius: 4px; color: " +
+              color +
+              "; font-weight: " +
+              weight +
+              '"><span>' +
+              num +
+              "</span><span>" +
+              freq +
+              (step >= 1 && isHigh ? " ⚠" : "") +
+              (step >= 1 && isLow ? " ▼" : "") +
+              "</span></div>";
+          }
+        }
+        html += "</div>";
+        slide.querySelector("#freq-table").innerHTML = html;
 
-            slide.addEventListener("slide-next", function () {
-                if (step < 2) { step++; render(); }
-            });
-            slide.addEventListener("slide-prev", function () {
-                if (step > 0) { step--; render(); }
-            });
+        var status = slide.querySelector("#freq-status");
+        var hint = slide.querySelector("#freq-hint");
+        if (step === 0) {
+          status.innerHTML = "Осмотрите таблицу — какие числа выделяются?";
+          hint.innerHTML = "↓ подсветить аномалии";
+          hint.style.visibility = "visible";
+        } else if (step === 1) {
+          status.innerHTML =
+            '<span style="color: #f85149; font-weight: 700">Высокие ⚠:</span> 8 (39), 16 (41), 27 (42), 32 (44) &nbsp; <span style="color: #58a6ff; font-weight: 700">Низкие ▼:</span> 19 (16), 24 (17)';
+          hint.innerHTML = "↓ объяснение";
+        } else {
+          status.innerHTML =
+            '<span style="color: #3fb950">На реальном колесе числа 8, 16, 27, 32 расположены <strong>рядом</strong> — это перекос в одной зоне!</span>';
+          hint.style.visibility = "hidden";
+        }
+      }
 
-            render();
-        })();
-    </script>
+      slide.addEventListener("slide-next", function () {
+        if (step < 2) {
+          step++;
+          render();
+        }
+      });
+      slide.addEventListener("slide-prev", function () {
+        if (step > 0) {
+          step--;
+          render();
+        }
+      });
+
+      render();
+    })();
+  </script>
 </div>

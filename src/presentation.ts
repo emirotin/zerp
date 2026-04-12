@@ -1,14 +1,14 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { defaultRuntime, defaultStyles } from "./default-template.js";
-
 export interface BuildOptions {
   rootDir: string;
   title?: string;
   lang?: string;
   outFile?: string;
 }
+
+const assetCache = new Map<string, Promise<string>>();
 
 interface SlideFile {
   absolutePath: string;
@@ -30,7 +30,10 @@ function isExternalUrl(value: string): boolean {
 }
 
 function rewriteRelativeUrls(html: string, relativeSlidePath: string): string {
-  const slideRootRelativePath = path.posix.join("slides", relativeSlidePath.replaceAll(path.sep, "/"));
+  const slideRootRelativePath = path.posix.join(
+    "slides",
+    relativeSlidePath.replaceAll(path.sep, "/"),
+  );
   const slideDir = path.posix.dirname(slideRootRelativePath);
   const normalizedDir = slideDir === "." ? "" : slideDir;
 
@@ -46,6 +49,17 @@ function rewriteRelativeUrls(html: string, relativeSlidePath: string): string {
       return `${attr}=${quote}${rewritten}${quote}`;
     },
   );
+}
+
+function readAsset(assetPath: string): Promise<string> {
+  const cached = assetCache.get(assetPath);
+  if (cached) {
+    return cached;
+  }
+
+  const contentPromise = readFile(new URL(assetPath, import.meta.url), "utf8");
+  assetCache.set(assetPath, contentPromise);
+  return contentPromise;
 }
 
 async function collectSlideFiles(slidesDir: string, prefix = ""): Promise<SlideFile[]> {
@@ -80,6 +94,10 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
   const title = options.title ?? path.basename(path.resolve(options.rootDir));
   const lang = options.lang ?? "en";
   const slideFiles = await listSlides(options.rootDir);
+  const [defaultStyles, defaultRuntime] = await Promise.all([
+    readAsset("./assets/default-styles.css"),
+    readAsset("./assets/default-runtime.js"),
+  ]);
 
   if (slideFiles.length === 0) {
     throw new Error(`No slide HTML files found in ${path.join(options.rootDir, "slides")}`);

@@ -1,0 +1,28 @@
+{
+  "languages": {
+    "JavaScript": {
+      "formatter": {
+        "external": {
+          "command": ".zed/format.sh",
+          "arguments": ["{buffer_path}"]
+        }
+      }
+    },
+    "TypeScript": {
+      "formatter": {
+        "external": {
+          "command": ".zed/format.sh",
+          "arguments": ["{buffer_path}"]
+        }
+      }
+    },
+    "TSX": {
+      "formatter": {
+        "external": {
+          "command": ".zed/format.sh",
+          "arguments": ["{buffer_path}"]
+        }
+      }
+    }
+  }
+}

@@ -1,110 +1,80 @@
 <!-- Slide 1: Voting question -->
 <div class="slide">
-    <div class="block-label">Часть 1 · Ошибка игрока</div>
-    <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
-    <h2>Эксперимент с монетой</h2>
-    <p style="font-size: 1.5em; margin: 20px 0; text-align: center">
-        Монета подброшена 5 раз подряд — каждый раз
-        <span class="accent" style="font-weight: 900">ОРЁЛ</span>.
+  <div class="block-label">Часть 1 · Ошибка игрока</div>
+  <div class="interactive-badge">🎯 ГОЛОСОВАНИЕ</div>
+  <h2>Эксперимент с монетой</h2>
+  <p style="font-size: 1.5em; margin: 20px 0; text-align: center">
+    Монета подброшена 5 раз подряд — каждый раз
+    <span class="accent" style="font-weight: 900">ОРЁЛ</span>.
+  </p>
+  <div style="display: flex; justify-content: center; gap: 16px; margin: 24px 0">
+    <span class="coin-icon">О</span>
+    <span class="coin-icon">О</span>
+    <span class="coin-icon">О</span>
+    <span class="coin-icon">О</span>
+    <span class="coin-icon">О</span>
+    <span class="coin-icon coin-question">?</span>
+  </div>
+  <div class="key-thought">
+    <p style="font-size: 1.5em">Что выпадет на шестой бросок?</p>
+    <p style="font-size: 1.1em; color: #8b949e; margin-top: 8px; font-weight: 400">
+      Кто считает, что скорее выпадет
+      <span class="accent-orange">решка</span>? Поднимите руки!
     </p>
-    <div
-        style="
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin: 24px 0;
-        "
-    >
-        <span class="coin-icon">О</span>
-        <span class="coin-icon">О</span>
-        <span class="coin-icon">О</span>
-        <span class="coin-icon">О</span>
-        <span class="coin-icon">О</span>
-        <span class="coin-icon coin-question">?</span>
-    </div>
-    <div class="key-thought">
-        <p style="font-size: 1.5em">Что выпадет на шестой бросок?</p>
-        <p
-            style="
-                font-size: 1.1em;
-                color: #8b949e;
-                margin-top: 8px;
-                font-weight: 400;
-            "
-        >
-            Кто считает, что скорее выпадет
-            <span class="accent-orange">решка</span>? Поднимите руки!
-        </p>
-    </div>
+  </div>
 </div>
 
 <!-- Slide 2: Answer -->
 <div class="slide">
-    <div class="block-label">Часть 1 · Ошибка игрока</div>
-    <h2>Монета не помнит!</h2>
-    <div class="two-col" style="margin-top: 16px">
-        <div>
-            <p style="font-size: 1.3em; margin-bottom: 16px">
-                Каждый бросок —
-                <span class="accent" style="font-weight: 700">независимый</span
-                >.
-            </p>
-            <p style="font-size: 1.3em; margin-bottom: 16px">
-                Вероятность орла — всегда
-                <span
-                    class="big-number"
-                    style="
-                        font-size: 2em;
-                        vertical-align: middle;
-                        position: relative;
-                        top: -0.1em;
-                    "
-                    >50%</span
-                >
-            </p>
-            <p style="font-size: 1.3em">Не важно, что было до этого.</p>
-        </div>
-        <div>
-            <div class="quote" style="font-size: 1.15em">
-                «Уже пять раз было красное, сейчас точно будет чёрное!»
-            </div>
-            <p
-                style="
-                    margin-top: 16px;
-                    font-size: 1.2em;
-                    color: #f85149;
-                    font-weight: 700;
-                "
-            >
-                Именно так рассуждают в казино — и проигрывают.
-            </p>
-        </div>
+  <div class="block-label">Часть 1 · Ошибка игрока</div>
+  <h2>Монета не помнит!</h2>
+  <div class="two-col" style="margin-top: 16px">
+    <div>
+      <p style="font-size: 1.3em; margin-bottom: 16px">
+        Каждый бросок —
+        <span class="accent" style="font-weight: 700">независимый</span>.
+      </p>
+      <p style="font-size: 1.3em; margin-bottom: 16px">
+        Вероятность орла — всегда
+        <span
+          class="big-number"
+          style="font-size: 2em; vertical-align: middle; position: relative; top: -0.1em"
+          >50%</span
+        >
+      </p>
+      <p style="font-size: 1.3em">Не важно, что было до этого.</p>
     </div>
-    <div class="key-thought" style="margin-top: 20px">
-        <p>
-            Это <span class="accent-red">ошибка игрока</span> (gambler's
-            fallacy)
-        </p>
+    <div>
+      <div class="quote" style="font-size: 1.15em">
+        «Уже пять раз было красное, сейчас точно будет чёрное!»
+      </div>
+      <p style="margin-top: 16px; font-size: 1.2em; color: #f85149; font-weight: 700">
+        Именно так рассуждают в казино — и проигрывают.
+      </p>
     </div>
+  </div>
+  <div class="key-thought" style="margin-top: 20px">
+    <p>Это <span class="accent-red">ошибка игрока</span> (gambler's fallacy)</p>
+  </div>
 </div>
 
 <style>
-    .coin-icon {
-        display: inline-flex;
-        width: 64px;
-        height: 64px;
-        border-radius: 50%;
-        background: #f0883e;
-        color: #0d1117;
-        font-weight: 900;
-        font-size: 1.8em;
-        align-items: center;
-        justify-content: center;
-        font-family: "Roboto Mono", monospace;
-    }
-    .coin-question {
-        background: transparent;
-        border: 3px dashed #f0883e;
-        color: #f0883e;
-    }
+  .coin-icon {
+    display: inline-flex;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f0883e;
+    color: #0d1117;
+    font-weight: 900;
+    font-size: 1.8em;
+    align-items: center;
+    justify-content: center;
+    font-family: "Roboto Mono", monospace;
+  }
+  .coin-question {
+    background: transparent;
+    border: 3px dashed #f0883e;
+    color: #f0883e;
+  }
 </style>

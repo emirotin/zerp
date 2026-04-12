@@ -2,15 +2,14 @@
   "name": "zerp",
   "version": "0.1.0",
   "description": "Zero-config HTML presentation framework for slide decks stored in a slides/ folder.",
-  "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
+  "keywords": [
+    "cli",
+    "html",
+    "presentation",
+    "slides",
+    "typescript"
+  ],
+  "license": "MIT",
   "bin": {
     "zerp": "./dist/cli.js"
   },
@@ -20,23 +19,45 @@
     "AGENTS.md",
     "CLAUDE.md"
   ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "check": "tsc -p tsconfig.json --noEmit"
+    "build": "node ./scripts/build.mjs",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "prepare": "husky",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts .zed",
+    "lint:fix": "oxlint --fix --deny-warnings --node-plugin --import-plugin src scripts .zed"
   },
-  "engines": {
-    "node": ">=20"
-  },
-  "keywords": [
-    "presentation",
-    "slides",
-    "html",
-    "cli",
-    "typescript"
-  ],
-  "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.6.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
     "typescript": "^5.9.3"
-  }
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts}": [
+      "oxfmt --write",
+      "oxlint --fix --deny-warnings --node-plugin --import-plugin"
+    ]
+  },
+  "engines": {
+    "node": "24.14.1",
+    "pnpm": "10.33.0"
+  },
+  "volta": {
+    "node": "24.14.1",
+    "pnpm": "10.33.0"
+  },
+  "packageManager": "pnpm@10.33.0"
 }

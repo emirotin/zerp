@@ -1,151 +1,213 @@
 <!-- Slide 1: Interactive coin flip simulator -->
 <div class="slide">
-    <div class="block-label">Часть 2 · Закон больших чисел</div>
-    <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
-    <h2>Эксперимент: подбрасываем монету</h2>
-    <div style="display: flex; justify-content: center; gap: 40px; margin: 12px 0; align-items: flex-start; flex-wrap: wrap">
-        <div style="text-align: center; min-width: 200px">
-            <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Всего бросков</p>
-            <div id="coin-total" class="big-number" style="font-size: 2.4em">0</div>
-        </div>
-        <div style="text-align: center; min-width: 200px">
-            <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Орлов</p>
-            <div id="coin-heads" style="font-size: 2.4em; font-weight: 900; color: #f0883e; font-family: 'Roboto Mono', monospace">0</div>
-        </div>
-        <div style="text-align: center; min-width: 200px">
-            <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Доля орлов</p>
-            <div id="coin-pct" style="font-size: 2.4em; font-weight: 900; color: #3fb950; font-family: 'Roboto Mono', monospace">—</div>
-        </div>
+  <div class="block-label">Часть 2 · Закон больших чисел</div>
+  <div class="interactive-badge">🎯 ИНТЕРАКТИВ</div>
+  <h2>Эксперимент: подбрасываем монету</h2>
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 12px 0;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    "
+  >
+    <div style="text-align: center; min-width: 200px">
+      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Всего бросков</p>
+      <div id="coin-total" class="big-number" style="font-size: 2.4em">0</div>
     </div>
-    <div id="coin-bar-wrap" style="
-        background: #161b22;
-        border: 2px solid #30363d;
-        border-radius: 10px;
-        height: 48px;
-        width: 100%;
-        max-width: 700px;
-        margin: 12px auto;
-        position: relative;
-        overflow: hidden;
-        align-self: center;
-    ">
-        <div id="coin-bar" style="
-            height: 100%;
-            background: #f0883e;
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 8px;
-        "></div>
-        <div style="
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: #3fb950;
-            transform: translateX(-50%);
-        "></div>
+    <div style="text-align: center; min-width: 200px">
+      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Орлов</p>
+      <div
+        id="coin-heads"
+        style="
+          font-size: 2.4em;
+          font-weight: 900;
+          color: #f0883e;
+          font-family: &quot;Roboto Mono&quot;, monospace;
+        "
+      >
+        0
+      </div>
     </div>
-    <p style="text-align: center; color: #484f58; font-size: 0.85em; margin-bottom: 6px">
-        Зелёная линия = 50%
-    </p>
-    <div id="coin-last" style="display: flex; justify-content: center; gap: 4px; margin: 8px 0; min-height: 36px; flex-wrap: wrap"></div>
-    <p id="coin-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
-        ↓ бросить × 1 &nbsp;&nbsp;|&nbsp;&nbsp; нажмите несколько раз, чтобы увидеть паттерн
-    </p>
-    <p id="coin-conclusion" style="
-        text-align: center;
-        font-size: 1.15em;
-        color: #3fb950;
-        font-weight: 700;
-        margin-top: 6px;
-        visibility: hidden;
-    ">
-        Чем больше бросков — тем ближе к 50%. Это закон больших чисел!
-    </p>
+    <div style="text-align: center; min-width: 200px">
+      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Доля орлов</p>
+      <div
+        id="coin-pct"
+        style="
+          font-size: 2.4em;
+          font-weight: 900;
+          color: #3fb950;
+          font-family: &quot;Roboto Mono&quot;, monospace;
+        "
+      >
+        —
+      </div>
+    </div>
+  </div>
+  <div
+    id="coin-bar-wrap"
+    style="
+      background: #161b22;
+      border: 2px solid #30363d;
+      border-radius: 10px;
+      height: 48px;
+      width: 100%;
+      max-width: 700px;
+      margin: 12px auto;
+      position: relative;
+      overflow: hidden;
+      align-self: center;
+    "
+  >
+    <div
+      id="coin-bar"
+      style="
+        height: 100%;
+        background: #f0883e;
+        width: 0%;
+        transition: width 0.3s;
+        border-radius: 8px;
+      "
+    ></div>
+    <div
+      style="
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: #3fb950;
+        transform: translateX(-50%);
+      "
+    ></div>
+  </div>
+  <p style="text-align: center; color: #484f58; font-size: 0.85em; margin-bottom: 6px">
+    Зелёная линия = 50%
+  </p>
+  <div
+    id="coin-last"
+    style="
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin: 8px 0;
+      min-height: 36px;
+      flex-wrap: wrap;
+    "
+  ></div>
+  <p id="coin-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
+    ↓ бросить × 1 &nbsp;&nbsp;|&nbsp;&nbsp; нажмите несколько раз, чтобы увидеть паттерн
+  </p>
+  <p
+    id="coin-conclusion"
+    style="
+      text-align: center;
+      font-size: 1.15em;
+      color: #3fb950;
+      font-weight: 700;
+      margin-top: 6px;
+      visibility: hidden;
+    "
+  >
+    Чем больше бросков — тем ближе к 50%. Это закон больших чисел!
+  </p>
 
-    <script>
-        (function () {
-            var slide = document.currentScript.closest(".slide");
-            var total = 0, heads = 0;
-            var lastResults = [];
-            var batchSizes = [1, 1, 1, 1, 1, 5, 10, 10, 20, 50, 100, 100, 200, 500];
-            var stepIndex = 0;
+  <script>
+    (function () {
+      var slide = document.currentScript.closest(".slide");
+      var total = 0,
+        heads = 0;
+      var lastResults = [];
+      var batchSizes = [1, 1, 1, 1, 1, 5, 10, 10, 20, 50, 100, 100, 200, 500];
+      var stepIndex = 0;
 
-            function flip(n) {
-                for (var i = 0; i < n; i++) {
-                    var isHead = Math.random() < 0.5;
-                    total++;
-                    if (isHead) heads++;
-                    if (lastResults.length >= 20) lastResults.shift();
-                    lastResults.push(isHead);
-                }
-            }
+      function flip(n) {
+        for (var i = 0; i < n; i++) {
+          var isHead = Math.random() < 0.5;
+          total++;
+          if (isHead) heads++;
+          if (lastResults.length >= 20) lastResults.shift();
+          lastResults.push(isHead);
+        }
+      }
 
-            function render() {
-                slide.querySelector("#coin-total").textContent = total;
-                slide.querySelector("#coin-heads").textContent = heads;
-                var pct = total > 0 ? (heads / total * 100).toFixed(1) + "%" : "—";
-                slide.querySelector("#coin-pct").textContent = pct;
-                var barWidth = total > 0 ? (heads / total * 100) : 0;
-                slide.querySelector("#coin-bar").style.width = barWidth + "%";
+      function render() {
+        slide.querySelector("#coin-total").textContent = total;
+        slide.querySelector("#coin-heads").textContent = heads;
+        var pct = total > 0 ? ((heads / total) * 100).toFixed(1) + "%" : "—";
+        slide.querySelector("#coin-pct").textContent = pct;
+        var barWidth = total > 0 ? (heads / total) * 100 : 0;
+        slide.querySelector("#coin-bar").style.width = barWidth + "%";
 
-                var lastHtml = "";
-                for (var i = 0; i < lastResults.length; i++) {
-                    var c = lastResults[i] ? "#f0883e" : "#58a6ff";
-                    var t = lastResults[i] ? "О" : "Р";
-                    lastHtml += '<span style="display: inline-flex; width: 30px; height: 30px; border-radius: 50%; background: ' + c + '; color: #0d1117; font-weight: 900; font-size: 0.75em; align-items: center; justify-content: center; font-family: Roboto Mono, monospace">' + t + '</span>';
-                }
-                slide.querySelector("#coin-last").innerHTML = lastHtml;
+        var lastHtml = "";
+        for (var i = 0; i < lastResults.length; i++) {
+          var c = lastResults[i] ? "#f0883e" : "#58a6ff";
+          var t = lastResults[i] ? "О" : "Р";
+          lastHtml +=
+            '<span style="display: inline-flex; width: 30px; height: 30px; border-radius: 50%; background: ' +
+            c +
+            '; color: #0d1117; font-weight: 900; font-size: 0.75em; align-items: center; justify-content: center; font-family: Roboto Mono, monospace">' +
+            t +
+            "</span>";
+        }
+        slide.querySelector("#coin-last").innerHTML = lastHtml;
 
-                var nextBatch = stepIndex < batchSizes.length ? batchSizes[stepIndex] : 1000;
-                slide.querySelector("#coin-hint").innerHTML = "↓ бросить × " + nextBatch;
-                slide.querySelector("#coin-conclusion").style.visibility = total >= 100 ? "visible" : "hidden";
-            }
+        var nextBatch = stepIndex < batchSizes.length ? batchSizes[stepIndex] : 1000;
+        slide.querySelector("#coin-hint").innerHTML = "↓ бросить × " + nextBatch;
+        slide.querySelector("#coin-conclusion").style.visibility =
+          total >= 100 ? "visible" : "hidden";
+      }
 
-            slide.addEventListener("slide-next", function () {
-                var n = stepIndex < batchSizes.length ? batchSizes[stepIndex] : 1000;
-                stepIndex++;
-                flip(n);
-                render();
-            });
-            slide.addEventListener("slide-prev", function () {
-                if (total > 0) {
-                    total = 0; heads = 0; lastResults = []; stepIndex = 0;
-                    render();
-                }
-            });
+      slide.addEventListener("slide-next", function () {
+        var n = stepIndex < batchSizes.length ? batchSizes[stepIndex] : 1000;
+        stepIndex++;
+        flip(n);
+        render();
+      });
+      slide.addEventListener("slide-prev", function () {
+        if (total > 0) {
+          total = 0;
+          heads = 0;
+          lastResults = [];
+          stepIndex = 0;
+          render();
+        }
+      });
 
-            render();
-        })();
-    </script>
+      render();
+    })();
+  </script>
 </div>
 
 <!-- Slide 2: Law of Large Numbers key insight -->
 <div class="slide">
-    <div class="block-label">Часть 2 · Закон больших чисел</div>
-    <h2>Закон больших чисел</h2>
-    <div class="two-col" style="margin-top: 20px">
-        <div>
-            <p style="font-size: 1.3em; margin-bottom: 16px">
-                <span class="accent-orange" style="font-weight: 700">Мало попыток</span> — результат скачет.
-            </p>
-            <p style="font-size: 1.3em; margin-bottom: 16px">
-                <span class="accent-green" style="font-weight: 700">Много попыток</span> — результат стремится к теории.
-            </p>
-            <p style="font-size: 1.3em">
-                Чем больше попыток, тем <span class="accent" style="font-weight: 700">точнее предсказание</span>.
-            </p>
-        </div>
-        <div>
-            <div class="key-thought" style="border-color: #f85149">
-                <p style="color: #f85149; font-size: 1.2em">
-                    Это главное оружие казино.
-                </p>
-                <p style="color: #c9d1d9; font-size: 1em; margin-top: 8px; font-weight: 400">
-                    Казино не выигрывает каждую партию. Оно играет <span class="accent" style="font-weight: 700">тысячи партий каждый день</span>. Закон больших чисел превращает крошечное преимущество в гарантированную прибыль.
-                </p>
-            </div>
-        </div>
+  <div class="block-label">Часть 2 · Закон больших чисел</div>
+  <h2>Закон больших чисел</h2>
+  <div class="two-col" style="margin-top: 20px">
+    <div>
+      <p style="font-size: 1.3em; margin-bottom: 16px">
+        <span class="accent-orange" style="font-weight: 700">Мало попыток</span> — результат скачет.
+      </p>
+      <p style="font-size: 1.3em; margin-bottom: 16px">
+        <span class="accent-green" style="font-weight: 700">Много попыток</span> — результат
+        стремится к теории.
+      </p>
+      <p style="font-size: 1.3em">
+        Чем больше попыток, тем
+        <span class="accent" style="font-weight: 700">точнее предсказание</span>.
+      </p>
     </div>
+    <div>
+      <div class="key-thought" style="border-color: #f85149">
+        <p style="color: #f85149; font-size: 1.2em">Это главное оружие казино.</p>
+        <p style="color: #c9d1d9; font-size: 1em; margin-top: 8px; font-weight: 400">
+          Казино не выигрывает каждую партию. Оно играет
+          <span class="accent" style="font-weight: 700">тысячи партий каждый день</span>. Закон
+          больших чисел превращает крошечное преимущество в гарантированную прибыль.
+        </p>
+      </div>
+    </div>
+  </div>
 </div>

@@ -40,12 +40,32 @@ pnpm exec zerp serve . 3000   # explicit deck dir
 pnpm exec zerp build          # write ./index.html for the current deck
 ```
 
+## Tooling
+
+This repo pins Node and pnpm via Volta metadata in `package.json`:
+
+```bash
+volta pin node@24.14.1 pnpm@10.33.0
+```
+
+Quality commands:
+
+```bash
+pnpm lint
+pnpm lint:fix
+pnpm format
+pnpm format:check
+```
+
+`husky` runs `lint-staged`, rebuilds `dist/`, and stages the rebuilt package output before each commit.
+
 ## Authoring
 
 - Put all authored content in `slides/`.
 - Use filename prefixes for ordering, for example `00-`, `10-`, `20-`.
 - Store deck assets under `slides/` too. Relative links like `src="./images/foo.jpg"` are rewritten automatically.
 - Each `.html` file can contain one or more `<div class="slide">` blocks.
+- The framework default CSS and browser runtime are stored as separate source assets and inlined into generated HTML during `serve` and `build`.
 
 ## Library API
 

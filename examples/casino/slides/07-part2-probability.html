@@ -1,149 +1,120 @@
 <div class="slide">
-    <div class="block-label">Часть 2 · Вероятность</div>
-    <h2>Что такое вероятность?</h2>
-    <p style="font-size: 1.5em; margin: 16px 0; text-align: center">
-        Вероятность — это просто
-        <span class="accent" style="font-weight: 700">доля</span>.
+  <div class="block-label">Часть 2 · Вероятность</div>
+  <h2>Что такое вероятность?</h2>
+  <p style="font-size: 1.5em; margin: 16px 0; text-align: center">
+    Вероятность — это просто
+    <span class="accent" style="font-weight: 700">доля</span>.
+  </p>
+  <div
+    style="
+      background: #161b22;
+      border: 2px solid #30363d;
+      border-radius: 14px;
+      padding: 24px 40px;
+      text-align: center;
+      margin: 20px auto;
+      max-width: 600px;
+    "
+  >
+    <p
+      style="
+        font-size: 1.8em;
+        font-family: &quot;Roboto Mono&quot;, monospace;
+        color: #58a6ff;
+        font-weight: 700;
+      "
+    >
+      P = благоприятные / все
     </p>
-    <div
+  </div>
+  <div
+    style="
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 60px;
+      margin-top: 30px;
+    "
+  >
+    <div style="text-align: center">
+      <div style="height: 100px; display: flex; align-items: center; justify-content: center">
+        <span style="font-size: 5em; line-height: 1">🎲</span>
+      </div>
+      <p style="font-size: 1.8em; color: #c9d1d9">Выбросить 6</p>
+      <p
         style="
-            background: #161b22;
-            border: 2px solid #30363d;
-            border-radius: 14px;
-            padding: 24px 40px;
-            text-align: center;
-            margin: 20px auto;
-            max-width: 600px;
+          font-size: 2.1em;
+          font-weight: 700;
+          color: #58a6ff;
+          font-family: &quot;Roboto Mono&quot;, monospace;
+          margin-top: 4px;
         "
-    >
-        <p
-            style="
-                font-size: 1.8em;
-                font-family: &quot;Roboto Mono&quot;, monospace;
-                color: #58a6ff;
-                font-weight: 700;
-            "
+      >
+        1/6
+      </p>
+    </div>
+    <div style="text-align: center">
+      <div style="height: 100px; display: flex; align-items: center; justify-content: center">
+        <span style="font-size: 5em; line-height: 1">🪙</span>
+      </div>
+      <p style="font-size: 1.8em; color: #c9d1d9">Выбросить орла</p>
+      <p
+        style="
+          font-size: 2.1em;
+          font-weight: 700;
+          color: #58a6ff;
+          font-family: &quot;Roboto Mono&quot;, monospace;
+          margin-top: 4px;
+        "
+      >
+        1/2
+      </p>
+    </div>
+    <div style="text-align: center">
+      <div style="height: 100px; display: flex; align-items: center; justify-content: center">
+        <div
+          style="
+            display: inline-block;
+            width: 64px;
+            height: 88px;
+            background: #fff;
+            border-radius: 8px;
+            color: #000;
+            font-size: 1.4em;
+            font-weight: 700;
+            line-height: 1;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+          "
         >
-            P = благоприятные / все
-        </p>
-    </div>
-    <div
+          <span style="position: absolute; top: 4px; left: 4px">A</span>
+          <span
+            style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              font-size: 1.6em;
+            "
+            >♠</span
+          >
+          <span style="position: absolute; bottom: 4px; right: 4px; transform: rotate(180deg)"
+            >A</span
+          >
+        </div>
+      </div>
+      <p style="font-size: 1.8em; color: #c9d1d9">Вытянуть туза</p>
+      <p
         style="
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            gap: 60px;
-            margin-top: 30px;
+          font-size: 2.1em;
+          font-weight: 700;
+          color: #58a6ff;
+          font-family: &quot;Roboto Mono&quot;, monospace;
+          margin-top: 4px;
         "
-    >
-        <div style="text-align: center">
-            <div
-                style="
-                    height: 100px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                "
-            >
-                <span style="font-size: 5em; line-height: 1">🎲</span>
-            </div>
-            <p style="font-size: 1.8em; color: #c9d1d9">Выбросить 6</p>
-            <p
-                style="
-                    font-size: 2.1em;
-                    font-weight: 700;
-                    color: #58a6ff;
-                    font-family: &quot;Roboto Mono&quot;, monospace;
-                    margin-top: 4px;
-                "
-            >
-                1/6
-            </p>
-        </div>
-        <div style="text-align: center">
-            <div
-                style="
-                    height: 100px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                "
-            >
-                <span style="font-size: 5em; line-height: 1">🪙</span>
-            </div>
-            <p style="font-size: 1.8em; color: #c9d1d9">Выбросить орла</p>
-            <p
-                style="
-                    font-size: 2.1em;
-                    font-weight: 700;
-                    color: #58a6ff;
-                    font-family: &quot;Roboto Mono&quot;, monospace;
-                    margin-top: 4px;
-                "
-            >
-                1/2
-            </p>
-        </div>
-        <div style="text-align: center">
-            <div
-                style="
-                    height: 100px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                "
-            >
-                <div
-                    style="
-                        display: inline-block;
-                        width: 64px;
-                        height: 88px;
-                        background: #fff;
-                        border-radius: 8px;
-                        color: #000;
-                        font-size: 1.4em;
-                        font-weight: 700;
-                        line-height: 1;
-                        position: relative;
-                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-                    "
-                >
-                    <span style="position: absolute; top: 4px; left: 4px"
-                        >A</span
-                    >
-                    <span
-                        style="
-                            position: absolute;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            font-size: 1.6em;
-                        "
-                        >♠</span
-                    >
-                    <span
-                        style="
-                            position: absolute;
-                            bottom: 4px;
-                            right: 4px;
-                            transform: rotate(180deg);
-                        "
-                        >A</span
-                    >
-                </div>
-            </div>
-            <p style="font-size: 1.8em; color: #c9d1d9">Вытянуть туза</p>
-            <p
-                style="
-                    font-size: 2.1em;
-                    font-weight: 700;
-                    color: #58a6ff;
-                    font-family: &quot;Roboto Mono&quot;, monospace;
-                    margin-top: 4px;
-                "
-            >
-                4/52
-            </p>
-        </div>
+      >
+        4/52
+      </p>
     </div>
+  </div>
 </div>
