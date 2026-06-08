@@ -43,6 +43,7 @@
   },
   "scripts": {
     "build": "node ./scripts/build.mjs",
+    "demo": "node ./scripts/demo.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
     "prepublishOnly": "pnpm build",
