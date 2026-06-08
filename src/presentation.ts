@@ -1,6 +1,10 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { renderMarkdownSlides } from "./markdown.js";
+
+const SLIDE_EXTENSIONS = new Set([".html", ".md"]);
+
 export interface BuildOptions {
   rootDir: string;
   title?: string;
@@ -75,7 +79,7 @@ async function collectSlideFiles(slidesDir: string, prefix = ""): Promise<SlideF
         if (entry.isDirectory()) {
           return collectSlideFiles(absolutePath, relativePath);
         }
-        if (entry.isFile() && entry.name.endsWith(".html")) {
+        if (entry.isFile() && SLIDE_EXTENSIONS.has(path.extname(entry.name))) {
           return [{ absolutePath, relativePath }];
         }
         return [];
@@ -100,15 +104,18 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
   ]);
 
   if (slideFiles.length === 0) {
-    throw new Error(`No slide HTML files found in ${path.join(options.rootDir, "slides")}`);
+    throw new Error(`No slide files found in ${path.join(options.rootDir, "slides")}`);
   }
 
-  const slideHtmlParts = await Promise.all(
-    slideFiles.map(async ({ absolutePath, relativePath }) => {
-      const html = await readFile(absolutePath, "utf8");
-      return rewriteRelativeUrls(html, relativePath);
-    }),
-  );
+  const slideHtmlParts = (
+    await Promise.all(
+      slideFiles.map(async ({ absolutePath, relativePath }) => {
+        const content = await readFile(absolutePath, "utf8");
+        const parts = absolutePath.endsWith(".md") ? renderMarkdownSlides(content) : [content];
+        return parts.map((html) => rewriteRelativeUrls(html, relativePath));
+      }),
+    )
+  ).flat();
 
   return [
     "<!doctype html>",

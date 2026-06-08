@@ -1,20 +1,21 @@
 {
   "name": "@emirotin/zerp",
-  "version": "0.1.1",
-  "description": "Zero-config HTML presentation framework for slide decks stored in a slides/ folder.",
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/emirotin/zerp.git"
-  },
-  "homepage": "https://github.com/emirotin/zerp",
+  "version": "0.1.2",
+  "description": "Zero-config presentation framework for slide decks authored in HTML and/or Markdown.",
   "keywords": [
     "cli",
     "html",
+    "markdown",
     "presentation",
     "slides",
     "typescript"
   ],
+  "homepage": "https://github.com/emirotin/zerp",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/emirotin/zerp.git"
+  },
   "bin": {
     "zerp": "./dist/cli.js"
   },
@@ -29,9 +30,6 @@
     "llms.txt"
   ],
   "type": "module",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -40,14 +38,21 @@
       "import": "./dist/index.js"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
+    "prepublishOnly": "pnpm build",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts .zed",
     "lint:fix": "oxlint --fix --deny-warnings --node-plugin --import-plugin src scripts .zed"
+  },
+  "dependencies": {
+    "marked": "^18.0.5"
   },
   "devDependencies": {
     "@types/node": "^24.6.0",

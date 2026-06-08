@@ -1,21 +1,78 @@
 # zerp consumer instructions for LLMs
 
-`@emirotin/zerp` is a zero-config HTML presentation framework. When you are authoring a deck that depends on this package, treat the deck source of truth as `slides/`.
+`@emirotin/zerp` is a zero-config presentation framework. Slides can be authored in HTML, Markdown, or a mix of both. When you are authoring a deck that depends on this package, treat the deck source of truth as `slides/`.
 
 ## Deck contract
 
-- Put authored slides in `slides/**/*.html`.
+- Put authored slides in `slides/**/*.html` and/or `slides/**/*.md`.
 - Files are ordered lexicographically. Use numeric prefixes like `00-`, `10-`, `20-`.
 - Put deck assets under `slides/` too, for example `slides/images/cover.jpg`.
-- Use relative asset paths inside slide HTML, for example `src="./images/cover.jpg"` or `src="images/cover.jpg"`.
-- Each file may contain one or more `<div class="slide">` blocks.
+- Use relative asset paths inside slide HTML or Markdown, for example `src="./images/cover.jpg"` or `![cover](images/cover.jpg)`.
+- Each `.html` file may contain one or more `<div class="slide">` blocks.
+- Each `.md` file is automatically wrapped in `<div class="slide">` at build time — no manual wrapper needed. Use `---` on its own line to separate multiple slides within a single `.md` file.
 - Do not hand-author built `index.html`; `zerp` generates it.
 
 ## Authoring style
 
-- Prefer semantic HTML inside each `.slide`: headings, paragraphs, lists, tables, images.
+- For simple slides (headings, text, lists, images), prefer Markdown. For complex layouts, interactive demos, or heavy inline styling, use HTML.
 - Keep slide markup self-contained. Inline styles are allowed for deck-specific presentation details, but prefer the built-in classes first.
 - Assume the framework already injects fonts, navigation UI, progress bar, slide counter, CSS, and browser runtime.
+
+## Markdown slides
+
+Markdown files are converted to HTML via `marked` and auto-wrapped in `<div class="slide">`. Use `---` on its own line to separate multiple slides in one file. The separator is code-fence-aware, so `---` inside fenced code blocks is not treated as a separator.
+
+Raw HTML passes through unchanged inside Markdown files, so you can freely mix Markdown content with HTML blocks such as `<div>`, `<style>`, and `<script>`.
+
+Example Markdown slide file with multiple slides and an interactive embed:
+
+```markdown
+<div class="block-label">Part 1</div>
+
+# Section Title
+
+### Subtitle text
+
+---
+
+## Content Slide
+
+- First point
+- Second point
+
+<div class="key-thought">
+  <p>The key takeaway goes here.</p>
+</div>
+
+---
+
+<div class="interactive-badge">Interactive</div>
+
+## Interactive Slide
+
+<div id="demo-output"></div>
+
+<script>
+(function () {
+  var slide = document.currentScript.closest(".slide");
+  var step = 0;
+
+  function render() {
+    slide.querySelector("#demo-output").textContent = "Step " + step;
+  }
+
+  slide.addEventListener("slide-next", function () {
+    if (step < 3) { step++; render(); }
+  });
+
+  slide.addEventListener("slide-prev", function () {
+    if (step > 0) { step--; render(); }
+  });
+
+  render();
+})();
+</script>
+```
 
 ## Built-in CSS classes
 
@@ -47,9 +104,9 @@ Available deck controls:
 - Home jumps to the first slide.
 - End jumps to the last slide.
 
-## Interactive slide pattern
+## Interactive slide pattern (HTML)
 
-For stepwise reveals or custom interactions, attach listeners to the current slide element and respond to `slide-next` and `slide-prev`.
+For stepwise reveals or custom interactions, attach listeners to the current slide element and respond to `slide-next` and `slide-prev`. This pattern works in both `.html` slides and raw HTML blocks inside `.md` slides.
 
 Pattern:
 
@@ -109,6 +166,7 @@ Pattern:
 - Do not duplicate the framework CSS or runtime.
 - Do not rely on a manually curated slide list; ordering comes from filenames.
 - Do not put assets outside `slides/` unless the deck explicitly needs that and the surrounding repo is set up for it.
+- Do not add `<div class="slide">` wrappers in Markdown files; zerp adds them automatically.
 
 ## Validation
 

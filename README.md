@@ -1,6 +1,6 @@
 # zerp
 
-`zerp` is a zero-config HTML presentation framework.
+`zerp` is a zero-config presentation framework. Slides can be authored in HTML, Markdown, or a mix of both.
 
 Each presentation can be authored as just a `slides/` folder:
 
@@ -8,12 +8,13 @@ Each presentation can be authored as just a `slides/` folder:
 my-deck/
   slides/
     00-title.html
-    10-intro.html
+    10-intro.md
+    20-content.md
     images/
       cover.jpg
 ```
 
-`zerp` finds `slides/**/*.html`, sorts them by filename, rewrites relative asset URLs so slide-local assets keep working, injects default styles/runtime, and serves or builds a single-page deck.
+`zerp` finds `slides/**/*.html` and `slides/**/*.md`, sorts them by filename, rewrites relative asset URLs so slide-local assets keep working, injects default styles/runtime, and serves or builds a single-page deck.
 
 ## Maintainer Policy
 
@@ -65,7 +66,7 @@ pnpm format
 pnpm format:check
 ```
 
-`husky` runs `lint-staged`, rebuilds `dist/`, and stages the rebuilt package output before each commit.
+`husky` runs `lint-staged` and a build check before each commit. `dist/` is not checked into git; it is built on demand and included in the npm package via `prepublishOnly`.
 
 ## Authoring
 
@@ -73,6 +74,8 @@ pnpm format:check
 - Use filename prefixes for ordering, for example `00-`, `10-`, `20-`.
 - Store deck assets under `slides/` too. Relative links like `src="./images/foo.jpg"` are rewritten automatically.
 - Each `.html` file can contain one or more `<div class="slide">` blocks.
+- `.md` files are also supported. Each Markdown file is automatically wrapped in `<div class="slide">` at build time — no manual wrapper needed. Use `---` on its own line to separate multiple slides within a single `.md` file.
+- Raw HTML inside Markdown files passes through unchanged, so you can embed interactive `<script>` blocks, custom `<div>` layouts, or `<style>` elements alongside Markdown content.
 - The framework default CSS and browser runtime are stored as separate source assets and inlined into generated HTML during `serve` and `build`.
 
 ## Library API
