@@ -5,11 +5,14 @@ import { renderMarkdownSlides } from "./markdown.js";
 
 const SLIDE_EXTENSIONS = new Set([".html", ".md"]);
 
+export type ThemeName = "dark" | "light" | "system";
+
 export interface BuildOptions {
   rootDir: string;
   title?: string;
   lang?: string;
   outFile?: string;
+  theme?: ThemeName;
 }
 
 const assetCache = new Map<string, Promise<string>>();
@@ -55,6 +58,20 @@ function rewriteRelativeUrls(html: string, relativeSlidePath: string): string {
   );
 }
 
+function injectSlideSrc(html: string, relativeSlidePath: string): string {
+  const srcPath = path.posix.join("slides", relativeSlidePath.replaceAll(path.sep, "/"));
+  return html.replace(/<div\b([^>]*)>/gi, (match, attrs: string) => {
+    const classMatch = attrs.match(/\bclass\s*=\s*(["'])([^"']*)\1/i);
+    if (!classMatch || !/(?:^|\s)slide(?:\s|$)/.test(classMatch[2] ?? "")) {
+      return match;
+    }
+    if (/\bdata-zerp-src\s*=/i.test(attrs)) {
+      return match;
+    }
+    return `<div${attrs} data-zerp-src="${escapeHtml(srcPath)}">`;
+  });
+}
+
 function readAsset(assetPath: string): Promise<string> {
   const cached = assetCache.get(assetPath);
   if (cached) {
@@ -97,6 +114,7 @@ export async function listSlides(rootDir: string): Promise<SlideFile[]> {
 export async function buildPresentationHtml(options: BuildOptions): Promise<string> {
   const title = options.title ?? path.basename(path.resolve(options.rootDir));
   const lang = options.lang ?? "en";
+  const theme = options.theme ?? "system";
   const slideFiles = await listSlides(options.rootDir);
   const [defaultStyles, defaultRuntime] = await Promise.all([
     readAsset("./assets/default-styles.css"),
@@ -112,19 +130,21 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
       slideFiles.map(async ({ absolutePath, relativePath }) => {
         const content = await readFile(absolutePath, "utf8");
         const parts = absolutePath.endsWith(".md") ? renderMarkdownSlides(content) : [content];
-        return parts.map((html) => rewriteRelativeUrls(html, relativePath));
+        return parts.map((html) =>
+          injectSlideSrc(rewriteRelativeUrls(html, relativePath), relativePath),
+        );
       }),
     )
   ).flat();
 
   return [
     "<!doctype html>",
-    `<html lang="${escapeHtml(lang)}">`,
+    `<html lang="${escapeHtml(lang)}" data-zerp-theme="${theme}" data-zerp-default-theme="${theme}">`,
     "  <head>",
     '    <meta charset="UTF-8" />',
     '    <meta name="viewport" content="width=device-width, initial-scale=1.0" />',
     `    <title>${escapeHtml(title)}</title>`,
-    '    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />',
+    '    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />',
     "    <style>",
     defaultStyles,
     "    </style>",
@@ -133,6 +153,7 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     slideHtmlParts.join("\n"),
     '    <div class="progress" id="progress"></div>',
     '    <div class="counter" id="counter"></div>',
+    '    <div class="theme-switch" id="theme-switch"><button class="theme-trigger" aria-label="Theme">◐</button><div class="theme-options" hidden><button data-theme-choice="light">Light</button><button data-theme-choice="system">Auto</button><button data-theme-choice="dark">Dark</button></div></div>',
     '    <div class="nav"><button onclick="prev()">←</button><button onclick="next()">→</button></div>',
     "    <script>",
     defaultRuntime,

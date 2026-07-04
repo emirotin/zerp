@@ -1,15 +1,29 @@
 #!/usr/bin/env node
 import path from "node:path";
+import { parseArgs } from "node:util";
 
+import type { ThemeName } from "./presentation.js";
 import { writePresentation } from "./presentation.js";
 import { servePresentation } from "./server.js";
+
+const THEME_NAMES = new Set(["dark", "light", "system"]);
+
+function parseTheme(raw: string | undefined): ThemeName {
+  if (raw === undefined) {
+    return "system";
+  }
+  if (!THEME_NAMES.has(raw)) {
+    throw new Error(`Invalid theme: ${raw} (expected dark, light, or system)`);
+  }
+  return raw as ThemeName;
+}
 
 function printUsage(): void {
   process.stderr.write(
     [
       "Usage:",
-      "  zerp serve [deck-dir] [port]",
-      "  zerp build [deck-dir]",
+      "  zerp serve [deck-dir] [port] [--theme dark|light|system]",
+      "  zerp build [deck-dir] [--theme dark|light|system]",
       "",
       "A deck directory must contain slides/.",
       "",
@@ -18,7 +32,15 @@ function printUsage(): void {
 }
 
 async function main(): Promise<void> {
-  const [, , command, firstArg, secondArg] = process.argv;
+  const { values, positionals } = parseArgs({
+    args: process.argv.slice(2),
+    allowPositionals: true,
+    options: {
+      theme: { type: "string" },
+      strict: { type: "boolean", default: false },
+    },
+  });
+  const [command, firstArg, secondArg] = positionals;
 
   if (!command) {
     printUsage();
@@ -28,7 +50,7 @@ async function main(): Promise<void> {
 
   if (command === "build") {
     const rootDir = path.resolve(firstArg ?? ".");
-    const outFile = await writePresentation({ rootDir });
+    const outFile = await writePresentation({ rootDir, theme: parseTheme(values.theme) });
     process.stdout.write(`Wrote ${outFile}\n`);
     return;
   }
@@ -41,7 +63,7 @@ async function main(): Promise<void> {
     if (!Number.isInteger(port)) {
       throw new Error(`Invalid port: ${portArg}`);
     }
-    await servePresentation(rootDir, port);
+    await servePresentation(rootDir, port, { theme: parseTheme(values.theme) });
     return;
   }
 

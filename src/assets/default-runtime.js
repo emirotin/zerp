@@ -72,6 +72,10 @@
       event.preventDefault();
       stepBackward();
     }
+    if (event.key === "t" || event.key === "T") {
+      event.preventDefault();
+      cycleTheme();
+    }
   });
 
   let touchStartX = 0;
@@ -88,6 +92,68 @@
       }
     }
   });
+
+  const THEME_KEY = "zerp-theme";
+  const THEME_ORDER = ["light", "system", "dark"];
+  const themeSwitch = document.getElementById("theme-switch");
+  const themeOptions = themeSwitch ? themeSwitch.querySelector(".theme-options") : null;
+
+  function syncThemeSwitch(value) {
+    if (!themeSwitch) {
+      return;
+    }
+    for (const button of themeSwitch.querySelectorAll("[data-theme-choice]")) {
+      button.classList.toggle("selected", button.dataset.themeChoice === value);
+    }
+  }
+
+  function applyTheme(value) {
+    document.documentElement.dataset.zerpTheme = value;
+    try {
+      localStorage.setItem(THEME_KEY, value);
+    } catch {
+      /* storage unavailable */
+    }
+    syncThemeSwitch(value);
+  }
+
+  function cycleTheme() {
+    const current = document.documentElement.dataset.zerpTheme || "system";
+    const index = THEME_ORDER.indexOf(current);
+    applyTheme(THEME_ORDER[(index + 1) % THEME_ORDER.length]);
+  }
+
+  function initTheme() {
+    let stored = null;
+    try {
+      stored = localStorage.getItem(THEME_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+    const value = THEME_ORDER.includes(stored)
+      ? stored
+      : document.documentElement.dataset.zerpDefaultTheme || "system";
+    document.documentElement.dataset.zerpTheme = value;
+    syncThemeSwitch(value);
+  }
+
+  if (themeSwitch && themeOptions) {
+    const trigger = themeSwitch.querySelector(".theme-trigger");
+    if (trigger) {
+      trigger.addEventListener("click", () => {
+        themeOptions.hidden = !themeOptions.hidden;
+      });
+    }
+    themeOptions.addEventListener("click", (event) => {
+      const choice = event.target.closest("[data-theme-choice]");
+      if (choice) {
+        applyTheme(choice.dataset.themeChoice);
+        themeOptions.hidden = true;
+      }
+    });
+  }
+
+  initTheme();
 
   show((Number.parseInt(location.hash.slice(1), 10) || 1) - 1);
 })();

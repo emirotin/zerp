@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { buildPresentationHtml } from "./presentation.js";
+import type { ThemeName } from "./presentation.js";
 
 const CONTENT_TYPES = new Map<string, string>([
   [".css", "text/css; charset=utf-8"],
@@ -21,7 +22,15 @@ function getContentType(filePath: string): string {
   return CONTENT_TYPES.get(path.extname(filePath).toLowerCase()) ?? "application/octet-stream";
 }
 
-export async function servePresentation(rootDir: string, port: number): Promise<void> {
+export interface ServeOptions {
+  theme?: ThemeName;
+}
+
+export async function servePresentation(
+  rootDir: string,
+  port: number,
+  options: ServeOptions = {},
+): Promise<void> {
   const resolvedRoot = path.resolve(rootDir);
   const host = "127.0.0.1";
 
@@ -31,7 +40,10 @@ export async function servePresentation(rootDir: string, port: number): Promise<
       const pathname = decodeURIComponent(requestUrl.pathname);
 
       if (pathname === "/" || pathname === "/index.html") {
-        const html = await buildPresentationHtml({ rootDir: resolvedRoot });
+        const html = await buildPresentationHtml({
+          rootDir: resolvedRoot,
+          ...(options.theme !== undefined ? { theme: options.theme } : {}),
+        });
         res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
         res.end(html);
         return;
