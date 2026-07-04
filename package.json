@@ -1,6 +1,6 @@
 {
   "name": "@emirotin/zerp",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Zero-config presentation framework for slide decks authored in HTML and/or Markdown.",
   "keywords": [
     "cli",
@@ -27,7 +27,9 @@
     "LICENSE",
     "AGENTS.md",
     "CLAUDE.md",
-    "llms.txt"
+    "llms.txt",
+    "MIGRATION.md",
+    "CHANGELOG.md"
   ],
   "type": "module",
   "main": "./dist/index.js",

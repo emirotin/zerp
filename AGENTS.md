@@ -11,7 +11,8 @@
 - Preserve support for inline interactive slide scripts (works in both HTML and Markdown slides via raw HTML passthrough).
 - Markdown slides use `---` on its own line as the slide separator. Each chunk is auto-wrapped in `<div class="slide">`.
 - Keep the package ready for both local `file:` installs and registry publishing.
-- Default styles should stay useful out of the box, but generic enough for reuse.
+- Default styles are token-based: hand-authored rules live in `src/assets/base-styles.css` (no raw colors); theme tokens are generated from `@evilmartians/harmony` at build time.
+- Any styling change must keep `pnpm test` green — the kitchen-sink and casino fixtures must pass `zerp check` in both themes.
 - `dist/` is gitignored. Source edits belong under `src/` and `scripts/`; `dist/` is built on demand and included in the npm package via `prepublishOnly`.
 - The default browser runtime and CSS live in `src/assets/` and are inlined by `src/presentation.ts` during `serve` and `build`.
 - Markdown rendering lives in `src/markdown.ts` and uses `marked` (a production dependency).
@@ -23,8 +24,9 @@
 ```bash
 pnpm install
 pnpm build
-pnpm check
+pnpm test
 pnpm lint
 pnpm format:check
 pnpm exec zerp serve examples/casino
+pnpm exec zerp check examples/casino
 ```

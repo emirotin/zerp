@@ -9,10 +9,13 @@ This repository contains the `zerp` presentation framework.
 - `src/presentation.ts` assembles slide files into one HTML document.
 - `src/markdown.ts` splits Markdown files on `---` separators, renders them via `marked`, and wraps each chunk in `<div class="slide">`.
 - `src/server.ts` serves a deck and static assets from a target directory.
-- `src/assets/default-styles.css` contains the default presentation styles.
-- `src/assets/default-runtime.js` contains the browser navigation/runtime logic.
+- `src/assets/base-styles.css` contains the hand-authored presentation styles (token references only).
+- `scripts/generate-tokens.mjs` derives theme tokens and the token-contrast table from `@evilmartians/harmony`; the build concatenates tokens + base styles into `dist/assets/default-styles.css`.
+- `src/check/` implements `zerp check`: a static APCA contrast/font-size analyzer (linkedom + css-tree + apca-w3) that runs against both themes.
+- `src/assets/default-runtime.js` contains the browser navigation/runtime logic and theme switch.
 - `scripts/build.mjs` builds TypeScript output into `dist/`, copies assets, and formats generated files.
 - `dist/` is gitignored. It is built on demand and included in the npm package via `prepublishOnly`.
+- The runtime provides a light/dark/system theme switch persisted in localStorage; `zerp build|serve --theme` sets the deck default.
 
 ## Deck Contract
 
@@ -35,7 +38,7 @@ This repository contains the `zerp` presentation framework.
 ```bash
 pnpm install
 pnpm build
-pnpm check
+pnpm test
 pnpm lint
 pnpm format:check
 ```

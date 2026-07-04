@@ -4,3 +4,4 @@ node_modules/
 .husky/_/
 dist/
 examples/**/index.html
+test/**/index.html

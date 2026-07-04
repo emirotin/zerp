@@ -1,182 +1,133 @@
 # zerp consumer instructions for LLMs
 
-`@emirotin/zerp` is a zero-config presentation framework. Slides can be authored in HTML, Markdown, or a mix of both. When you are authoring a deck that depends on this package, treat the deck source of truth as `slides/`.
+`@emirotin/zerp` is a zero-config presentation framework. Slides are authored in HTML, Markdown, or a mix. The deck source of truth is `slides/`.
 
 ## Deck contract
 
-- Put authored slides in `slides/**/*.html` and/or `slides/**/*.md`.
-- Files are ordered lexicographically. Use numeric prefixes like `00-`, `10-`, `20-`.
-- Put deck assets under `slides/` too, for example `slides/images/cover.jpg`.
-- Use relative asset paths inside slide HTML or Markdown, for example `src="./images/cover.jpg"` or `![cover](images/cover.jpg)`.
-- Each `.html` file may contain one or more `<div class="slide">` blocks.
-- Each `.md` file is automatically wrapped in `<div class="slide">` at build time — no manual wrapper needed. Use `---` on its own line to separate multiple slides within a single `.md` file.
-- Do not hand-author built `index.html`; `zerp` generates it.
+- Put slides in `slides/**/*.html` and/or `slides/**/*.md`; files are ordered lexicographically (`00-`, `10-`, `20-` prefixes).
+- Assets live under `slides/` too; use relative paths (`./images/foo.jpg`) — they are rewritten at build time.
+- Each `.html` file contains one or more `<div class="slide">` blocks. Each `.md` file is auto-wrapped; separate multiple slides with `---` on its own line.
+- Never hand-edit the generated `index.html`.
 
-## Authoring style
+## Design system — colors
 
-- For simple slides (headings, text, lists, images), prefer Markdown. For complex layouts, interactive demos, or heavy inline styling, use HTML.
-- Keep slide markup self-contained. Inline styles are allowed for deck-specific presentation details, but prefer the built-in classes first.
-- Assume the framework already injects fonts, navigation UI, progress bar, slide counter, CSS, and browser runtime.
+Colors come from CSS custom properties (design tokens). The framework ships a dark and a light theme; tokens flip automatically. **Never hardcode hex/rgb colors. Never invent new colors. Pick tokens by meaning.**
 
-## Markdown slides
+Neutrals:
 
-Markdown files are converted to HTML via `marked` and auto-wrapped in `<div class="slide">`. Use `---` on its own line to separate multiple slides in one file. The separator is code-fence-aware, so `---` inside fenced code blocks is not treated as a separator.
+- `--zerp-bg` page background · `--zerp-surface` cards/panels · `--zerp-border` borders
+- `--zerp-text` body text · `--zerp-muted` secondary text (readable at ≥16px)
+- `--zerp-faint` decorative glyphs ONLY (arrows, dividers) — **never use for text**
 
-Raw HTML passes through unchanged inside Markdown files, so you can freely mix Markdown content with HTML blocks such as `<div>`, `<style>`, and `<script>`.
+Accent hues (each in 4 roles): `blue green orange purple red amber teal`
 
-Example Markdown slide file with multiple slides and an interactive embed:
+- `--zerp-<hue>` — colored text on the page/surface (use at body size or larger)
+- `--zerp-<hue>-solid` + `--zerp-on-solid` — filled backgrounds (badges, fills) and text on them
+- `--zerp-<hue>-tint` + `--zerp-<hue>-on-tint` — subtle washes (highlight cards/rows) and text on them
 
-```markdown
-<div class="block-label">Part 1</div>
+Semantic aliases: `--zerp-accent` (blue), `--zerp-ok` (green), `--zerp-warn` (amber), `--zerp-danger` (red). Prefer semantic names when the color carries meaning; hue names for categorical coding.
 
-# Section Title
+## Typography rules
 
-### Subtitle text
+- Body text is 1.25em (~20px). **Never set text below 1em; `.sm` (0.9×) is the only sanctioned shrink.** Prefer trimming content over shrinking text.
+- Do not combine `.sm` with `.muted` — small muted text fails contrast.
+- Colored text classes are bold by design (emphasis). Do not fight the weight.
+- Captions: use `.caption` or `<figcaption>` — already sized and colored safely.
 
----
+## Built-in classes
 
-## Content Slide
+Emphasis: `.accent .ok .warn .danger .blue .green .orange .purple .red .amber .teal` (bold colored text) · `.muted` · `.mono` · `.lg .xl .sm`
+Layout: `.cols-2 .cols-3 .cols-4` (equal grids) · `.row` (centered flex row) · `.stack` (column) · `.spread` (space-between) · `.center` · `.grow` · `.slide.top` (top-align a busy slide)
+Components:
 
-- First point
-- Second point
+- `.card` — surface box; add `.tint-<hue>` for a colored wash
+- `.stat` (`.value` + `.label` children) inside `.stat-row` — big numbers
+- `.compare` — two children side by side with a "vs" divider (`data-vs="→"` to customize)
+- `.flow` — process row, arrows auto-inserted between children
+- `.steps` — auto-numbered card grid (children: plain divs with `h3` + `p`)
+- `.timeline` with `.item` (`.year`, `.label`) — milestones
+- `.key-thought` — boxed takeaway (one per slide max)
+- `.pill` — inline badge; combine with `.ok/.warn/.danger/.accent` or `.tint-<hue>`
+- `.interactive-badge` — marks slides that react to ↓/↑
+- `.block-label` — small top-left section label
+- `.img-row` — row of images · `figure` + `figcaption` for single captioned images
+- `table` is styled by default (add `.mono` for numeric tables; `.tint-green`/`.tint-red` on `<tr>` to highlight rows)
+- `blockquote`, `ol` (numbered takeaways), `ul` (arrow bullets), `code`, `pre`, `kbd` are styled by default
 
-<div class="key-thought">
-  <p>The key takeaway goes here.</p>
-</div>
+## Slide recipes
 
----
+Title: `# Big title` + `### subtitle` (Markdown). Section divider: `.block-label` + `h1` + `h3`. Bullets: `##` + `-` list. Two-column: `<div class="cols-2">` with text and image/card. Big numbers: `.stat-row` of `.stat`s. Comparison: `.compare` of two `.card`s. Process: `.flow` of spans. Steps: `.steps` of divs. History: `.timeline`. Quote: Markdown `>`. Takeaways: Markdown ordered list. Data: Markdown table. Closing: `# Thanks` + contact in `.muted`.
 
-<div class="interactive-badge">Interactive</div>
+Prefer Markdown for text-first slides; HTML for layout-heavy or interactive slides.
 
-## Interactive Slide
+## Theming
 
-<div id="demo-output"></div>
+- Decks are theme-neutral: tokens adapt to dark/light automatically. The presenter picks the default via `zerp build --theme dark|light|system` (default: `system`); viewers can override with the ◐ switch or the `t` key (persisted in localStorage).
+- Because both themes ship, anything you author must work in both — that is why hardcoded colors are forbidden.
 
-<script>
-(function () {
-  var slide = document.currentScript.closest(".slide");
-  var step = 0;
+## Validation loop (required)
 
-  function render() {
-    slide.querySelector("#demo-output").textContent = "Step " + step;
-  }
+After authoring or editing slides, ALWAYS run:
 
-  slide.addEventListener("slide-next", function () {
-    if (step < 3) { step++; render(); }
-  });
-
-  slide.addEventListener("slide-prev", function () {
-    if (step > 0) { step--; render(); }
-  });
-
-  render();
-})();
-</script>
+```bash
+zerp check .
 ```
 
-## Built-in CSS classes
-
-Use these before inventing new styling patterns:
-
-- `.slide` for each slide root.
-- `.accent`, `.accent-green`, `.accent-orange`, `.accent-purple`, `.accent-red` for emphasis colors.
-- `.big-number` for large numeric callouts.
-- `.two-col` for balanced two-column layouts.
-- `.img-row` for rows of images.
-- `.caption` for image captions and secondary labels.
-- `.block-label` for small section labels in the top-left area.
-- `.interactive-badge` for marking interactive slides.
-- `.timeline` and `.timeline .item` with child `.year` and `.label` for milestone layouts.
-- `.quote` for highlighted quotations or callouts.
-- `.key-thought` for boxed takeaways.
-- `.grid-demo`, `.grid-demo .cell`, `.grid-demo .cell.filled` for simple grid visualizations.
+Fix every `✗` error and `⚠` warning (font too small, contrast too low — the report names the slide file, the text, and suggests passing tokens). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp build` prints the same summary.
 
 ## Interaction model
 
-`zerp` handles deck navigation. Do not recreate next/previous slide logic inside slide code.
+`zerp` handles navigation (arrows, space, PageUp/Down, Home/End). Down/Up arrows dispatch `slide-next` / `slide-prev` events to the current slide for stepwise reveals.
 
-Available deck controls:
-
-- Right arrow, space, and PageDown move to the next slide.
-- Left arrow and PageUp move to the previous slide.
-- Down arrow dispatches a `slide-next` event to the current slide.
-- Up arrow dispatches a `slide-prev` event to the current slide.
-- Home jumps to the first slide.
-- End jumps to the last slide.
-
-## Interactive slide pattern (HTML)
-
-For stepwise reveals or custom interactions, attach listeners to the current slide element and respond to `slide-next` and `slide-prev`. This pattern works in both `.html` slides and raw HTML blocks inside `.md` slides.
-
-Pattern:
+Interactive slide pattern (works in `.html` files and raw HTML inside `.md`):
 
 ```html
 <div class="slide">
   <div class="interactive-badge">Interactive</div>
   <h2>Example</h2>
   <div id="demo-output"></div>
-
   <script>
     (function () {
       var slide = document.currentScript.closest(".slide");
       var step = 0;
-
       function render() {
         slide.querySelector("#demo-output").textContent = "Step " + step;
       }
-
       slide.addEventListener("slide-next", function () {
         if (step < 3) {
           step++;
           render();
         }
       });
-
       slide.addEventListener("slide-prev", function () {
         if (step > 0) {
           step--;
           render();
         }
       });
-
       render();
     })();
   </script>
 </div>
 ```
 
-## Interactive slide rules
+Rules: scope queries to `document.currentScript.closest(".slide")`; keep state in the closure; make `slide-prev` reverse state; no global key listeners; no external dependencies. When a script sets colors, use tokens: `el.style.color = "var(--zerp-green)"`.
 
-- Scope DOM queries to `document.currentScript.closest(".slide")` so multiple slides can coexist safely.
-- Keep state inside the slide-local closure.
-- Make `slide-prev` reverse or reset interaction state when reasonable.
-- Do not attach global keyboard listeners from slide scripts unless there is a strong reason.
-- Avoid dependencies on build tools or frameworks inside slide HTML.
+## Custom CSS policy (last resort)
 
-## Good defaults
-
-- Use `.block-label` for section context on non-title slides.
-- Use `.interactive-badge` on slides that expect `slide-next` / `slide-prev` stepping.
-- Use `.key-thought` for one core takeaway rather than inventing a new box style.
-- Use `.two-col` instead of ad hoc layout wrappers when a balanced split is enough.
+1. Reach for built-in classes and styled elements first — they cover title, list, column, stat, comparison, flow, step, timeline, quote, table, and image slides.
+2. If a layout truly needs custom CSS, put a `<style>` inside the slide file, use ONLY `var(--zerp-*)` tokens, keep text at 1em+.
+3. Re-run `zerp check` — custom CSS is checked too. Selectors it cannot verify are listed as skipped; keep them simple (tag/class selectors).
 
 ## What to avoid
 
-- Do not embed a full HTML document inside slide files.
-- Do not duplicate the framework CSS or runtime.
-- Do not rely on a manually curated slide list; ordering comes from filenames.
-- Do not put assets outside `slides/` unless the deck explicitly needs that and the surrounding repo is set up for it.
-- Do not add `<div class="slide">` wrappers in Markdown files; zerp adds them automatically.
+- No full HTML documents inside slide files; no duplicated framework CSS or runtime.
+- No hardcoded colors anywhere (including inline styles and scripts).
+- No text below 1em; no `--zerp-faint` for text; no `.sm .muted` combos.
+- No `<div class="slide">` wrappers inside Markdown files (added automatically).
+- Do not recreate navigation; do not edit generated `index.html`.
 
-## Validation
+## Validation commands
 
-When working inside the `zerp` repo itself, validate with:
-
-```bash
-pnpm build
-pnpm check
-pnpm lint
-pnpm format:check
-```
-
-When working in a consumer deck repo, use that repo's normal `zerp build` or `zerp serve` workflow.
+Inside the zerp repo: `pnpm build && pnpm test && pnpm lint && pnpm format:check`.
+In a consumer deck: `zerp check .` then `zerp serve .` / `zerp build .`.

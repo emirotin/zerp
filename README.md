@@ -43,10 +43,10 @@ pnpm exec zerp build .
 Commands:
 
 ```bash
-pnpm exec zerp serve          # serve the current deck on http://localhost:8000
-pnpm exec zerp serve 3000     # current deck, custom port
-pnpm exec zerp serve . 3000   # explicit deck dir
-pnpm exec zerp build          # write ./index.html for the current deck
+pnpm exec zerp serve                      # serve the current deck on http://localhost:8000
+pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default theme
+pnpm exec zerp build --theme light        # write ./index.html (light default)
+pnpm exec zerp check                      # APCA contrast + font-size report (both themes)
 ```
 
 ## Tooling
@@ -77,6 +77,8 @@ pnpm format:check
 - `.md` files are also supported. Each Markdown file is automatically wrapped in `<div class="slide">` at build time — no manual wrapper needed. Use `---` on its own line to separate multiple slides within a single `.md` file.
 - Raw HTML inside Markdown files passes through unchanged, so you can embed interactive `<script>` blocks, custom `<div>` layouts, or `<style>` elements alongside Markdown content.
 - The framework default CSS and browser runtime are stored as separate source assets and inlined into generated HTML during `serve` and `build`.
+- Colors come from design tokens (`var(--zerp-*)`) generated from the Harmony palette; decks render in dark and light themes. Do not hardcode colors.
+- Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
 
 ## Library API
 

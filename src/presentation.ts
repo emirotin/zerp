@@ -137,6 +137,31 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     )
   ).flat();
 
+  const themeSwitchHtml = [
+    '    <div class="theme-switch" id="theme-switch">',
+    '      <button class="theme-trigger" aria-label="Theme">◐</button>',
+    '      <div class="theme-options" hidden>',
+    '        <button data-theme-choice="light">Light</button>',
+    '        <button data-theme-choice="system">Auto</button>',
+    '        <button data-theme-choice="dark">Dark</button>',
+    "      </div>",
+    "    </div>",
+  ].join("\n");
+
+  const navHtml = [
+    '    <div class="nav">',
+    '      <button onclick="prev()">←</button>',
+    '      <button onclick="next()">→</button>',
+    "    </div>",
+  ].join("\n");
+
+  const fontLink = [
+    "    <link",
+    '      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Roboto+Mono:wght@400;700&display=swap"',
+    '      rel="stylesheet"',
+    "    />",
+  ].join("\n");
+
   return [
     "<!doctype html>",
     `<html lang="${escapeHtml(lang)}" data-zerp-theme="${theme}" data-zerp-default-theme="${theme}">`,
@@ -144,7 +169,7 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     '    <meta charset="UTF-8" />',
     '    <meta name="viewport" content="width=device-width, initial-scale=1.0" />',
     `    <title>${escapeHtml(title)}</title>`,
-    '    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet" />',
+    fontLink,
     "    <style>",
     defaultStyles,
     "    </style>",
@@ -153,8 +178,8 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     slideHtmlParts.join("\n"),
     '    <div class="progress" id="progress"></div>',
     '    <div class="counter" id="counter"></div>',
-    '    <div class="theme-switch" id="theme-switch"><button class="theme-trigger" aria-label="Theme">◐</button><div class="theme-options" hidden><button data-theme-choice="light">Light</button><button data-theme-choice="system">Auto</button><button data-theme-choice="dark">Dark</button></div></div>',
-    '    <div class="nav"><button onclick="prev()">←</button><button onclick="next()">→</button></div>',
+    themeSwitchHtml,
+    navHtml,
     "    <script>",
     defaultRuntime,
     "    </script>",
