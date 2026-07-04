@@ -11,7 +11,7 @@
     style="max-width: 650px; margin: 0 auto; line-height: 2.2"
   ></div>
 
-  <div id="ev-result" class="center" style="margin-top: 16px; visibility: hidden">
+  <div id="ev-result" class="center" style="margin-top: 16px" hidden>
     <div class="key-thought" style="border-color: var(--zerp-red)">
       <p class="red">On average, you lose <span class="mono">$2.70</span> on every $100 bet</p>
       <p style="font-size: 1em; margin-top: 8px">
@@ -54,8 +54,8 @@
           }
         }
         slide.querySelector("#ev-steps").innerHTML = html;
-        slide.querySelector("#ev-result").style.visibility = step >= maxStep ? "visible" : "hidden";
-        slide.querySelector("#ev-hint").style.visibility = step >= maxStep ? "hidden" : "visible";
+        slide.querySelector("#ev-result").hidden = step < maxStep;
+        slide.querySelector("#ev-hint").hidden = step >= maxStep;
       }
 
       slide.addEventListener("slide-next", function () {

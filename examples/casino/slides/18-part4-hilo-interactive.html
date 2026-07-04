@@ -18,9 +18,9 @@
 
   <div id="hilo-cards" class="row" style="gap: 6px; margin: 12px 0; min-height: 90px"></div>
 
-  <div id="hilo-current" class="center" style="min-height: 40px; margin: 8px 0"></div>
+  <div id="hilo-current" class="center xl" style="min-height: 44px; margin: 8px 0"></div>
 
-  <div id="hilo-verdict" class="center" style="visibility: hidden; margin-top: 8px">
+  <div id="hilo-verdict" class="center" style="margin-top: 8px" hidden>
     <div class="key-thought" style="border-color: var(--zerp-green)">
       <p class="green">
         Count is +5. The deck has lots of big cards left, so this is a favorable betting moment.
@@ -106,18 +106,18 @@
         if (step > 0 && step <= sequence.length) {
           var last = sequence[step - 1];
           currentEl.innerHTML =
-            '<span style="font-size: 1.8em; color: ' +
+            '<span style="color: ' +
             cardColor(last.suit) +
             '; font-weight: 700">' +
             last.card +
             last.suit +
             '</span> → <span style="color: ' +
             valColor(last.val) +
-            '; font-weight: 700; font-size: 1.8em">' +
+            '; font-weight: 700">' +
             valText(last.val) +
-            '</span> <span style="font-size: 1.8em">→ count = </span><span style="color: ' +
+            '</span> → count = <span style="color: ' +
             countColor +
-            '; font-weight: 900; font-size: 1.8em">' +
+            '; font-weight: 900">' +
             countSign +
             count +
             "</span>";
@@ -125,10 +125,8 @@
           currentEl.innerHTML = "";
         }
 
-        slide.querySelector("#hilo-verdict").style.visibility =
-          step >= sequence.length ? "visible" : "hidden";
-        slide.querySelector("#hilo-hint").style.visibility =
-          step >= sequence.length ? "hidden" : "visible";
+        slide.querySelector("#hilo-verdict").hidden = step < sequence.length;
+        slide.querySelector("#hilo-hint").hidden = step >= sequence.length;
       }
 
       slide.addEventListener("slide-next", function () {

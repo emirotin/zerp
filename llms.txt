@@ -41,7 +41,7 @@ Layout: `.cols-2 .cols-3 .cols-4` (equal grids) · `.row` (centered flex row) ·
 Components:
 
 - `.card` — surface box; add `.tint-<hue>` for a colored wash
-- `.stat` (`.value` + `.label` children) inside `.stat-row` — big numbers
+- `.stat` (`.value` + `.label` children) inside `.stat-row` — big numbers; for stat×operator compositions (`a × b = c`) use `.row` instead so operators center vertically
 - `.compare` — two children side by side with a "vs" divider (`data-vs="→"` to customize)
 - `.flow` — process row, arrows auto-inserted between children (works for text spans and for `.card` children)
 - `.steps` — auto-numbered card grid (children: plain divs with `h3` + `p`)

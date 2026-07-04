@@ -51,7 +51,7 @@
   <div class="interactive-badge">🎯 VOTE</div>
   <h2>Why is a team more effective than a solo player?</h2>
   <p class="xl center">There are two reasons. Can anyone name them?</p>
-  <div id="team-answers" class="row" style="gap: 40px; margin-top: 30px; visibility: hidden">
+  <div id="team-answers" class="row" style="gap: 40px; margin-top: 30px" hidden>
     <div class="card center" style="border-color: var(--zerp-accent); max-width: 300px">
       <div class="accent xl" style="margin-bottom: 8px">×5</div>
       <p class="accent">More tables</p>
@@ -77,15 +77,15 @@
       slide.addEventListener("slide-next", function () {
         if (!revealed) {
           revealed = true;
-          answers.style.visibility = "visible";
-          hint.style.visibility = "hidden";
+          answers.hidden = false;
+          hint.hidden = true;
         }
       });
       slide.addEventListener("slide-prev", function () {
         if (revealed) {
           revealed = false;
-          answers.style.visibility = "hidden";
-          hint.style.visibility = "visible";
+          answers.hidden = true;
+          hint.hidden = false;
         }
       });
     })();
