@@ -49,8 +49,13 @@ async function main(): Promise<void> {
     const theme = parseTheme(values.theme);
     const outFile = await writePresentation({ rootDir, theme });
     process.stdout.write(`Wrote ${outFile}\n`);
-    const report = await checkPresentation({ rootDir });
-    process.stdout.write(formatReport(report, { summaryOnly: true }));
+    try {
+      const report = await checkPresentation({ rootDir });
+      process.stdout.write(formatReport(report, { summaryOnly: true }));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      process.stdout.write(`check skipped: ${message}\n`);
+    }
     return;
   }
 

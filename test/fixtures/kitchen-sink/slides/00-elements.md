@@ -22,3 +22,19 @@ Plain paragraph with **bold** and `inline code`.
 | Beta  | 58    |
 
 > A quotation rendered via the blockquote element.
+
+---
+
+## Links and code
+
+Plain paragraph with <a href="#">a link</a> inside.
+
+```js
+function plan() {
+  return "build, check, ship";
+}
+```
+
+<hr />
+
+Text after a horizontal rule.

@@ -16,7 +16,7 @@ Colors come from CSS custom properties (design tokens). The framework ships a da
 Neutrals:
 
 - `--zerp-bg` page background · `--zerp-surface` cards/panels · `--zerp-border` borders
-- `--zerp-text` body text · `--zerp-muted` secondary text (readable at ≥16px)
+- `--zerp-text` body text · `--zerp-muted` secondary text — use at body size (≥1.25em/20px), or at smaller sizes only with weight 700
 - `--zerp-faint` decorative glyphs ONLY (arrows, dividers) — **never use for text**
 
 Accent hues (each in 4 roles): `blue green orange purple red amber teal`

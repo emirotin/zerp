@@ -43,6 +43,7 @@ img {
 a {
   color: var(--zerp-accent);
   text-decoration: none;
+  font-weight: 700;
 }
 
 a:hover {
@@ -228,7 +229,7 @@ figure img {
 
 figcaption,
 .caption {
-  font-size: 1.2em;
+  font-size: 1.25em;
   color: var(--zerp-muted);
   text-align: center;
 }
