@@ -3,25 +3,16 @@
   <div class="block-label">Part 2 · Two Dice</div>
   <div class="interactive-badge">🎯 INTERACTIVE</div>
   <h2>Two dice: what is the probability of a sum of 7?</h2>
-  <p style="font-size: 1.2em; text-align: center; color: var(--zerp-text); margin: 10px 0">
-    Total combinations: 6 × 6 = <span class="accent" style="font-weight: 700">36</span>. How many
-    give a sum of 7?
+  <p class="center">
+    Total combinations: 6 × 6 = <span class="accent">36</span>. How many give a sum of 7?
   </p>
   <div id="dice-grid" style="margin: 16px 0"></div>
-  <div style="display: flex; justify-content: center; gap: 20px; margin-top: 8px">
-    <div
-      id="dice-status"
-      style="font-size: 1.3em; font-weight: 700; color: var(--zerp-text); text-align: center"
-    >
-      Press ↓ to highlight combinations that sum to 7
-    </div>
+  <div id="dice-status" class="lg center" style="font-weight: 700">
+    Press ↓ to highlight combinations that sum to 7
   </div>
-  <div id="dice-result" style="text-align: center; margin-top: 12px; visibility: hidden">
-    <p style="font-size: 1.4em; font-weight: 700; color: var(--zerp-green)">
-      P(sum = 7) = 6/36 =
-      <span style="font-family: &quot;Roboto Mono&quot;, monospace">1/6 ≈ 16.7%</span>
-    </p>
-    <p style="font-size: 1.1em; color: var(--zerp-orange); font-weight: 700; margin-top: 6px">
+  <div id="dice-result" class="center" style="margin-top: 12px; visibility: hidden">
+    <p class="green xl">P(sum = 7) = 6/36 = <span class="mono">1/6 ≈ 16.7%</span></p>
+    <p class="orange" style="margin-top: 6px">
       Seven is the most common sum. But two (1+1) is only 1/36 ≈ 2.8%
     </p>
   </div>
@@ -105,98 +96,68 @@
 <div class="slide">
   <div class="block-label">Part 2 · Two Dice</div>
   <h2>Not all sums are equally likely</h2>
-  <div style="display: flex; justify-content: center; margin: 16px 0">
-    <table style="font-size: 1.05em; font-family: &quot;Roboto Mono&quot;, monospace">
-      <tr>
-        <th style="padding: 6px 14px">Sum</th>
-        <th style="padding: 6px 14px">Combinations</th>
-        <th style="padding: 6px 14px">Probability</th>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">2</td>
-        <td style="padding: 4px 14px; text-align: center">1</td>
-        <td style="padding: 4px 14px; text-align: center">2.8%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">3</td>
-        <td style="padding: 4px 14px; text-align: center">2</td>
-        <td style="padding: 4px 14px; text-align: center">5.6%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">4</td>
-        <td style="padding: 4px 14px; text-align: center">3</td>
-        <td style="padding: 4px 14px; text-align: center">8.3%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">5</td>
-        <td style="padding: 4px 14px; text-align: center">4</td>
-        <td style="padding: 4px 14px; text-align: center">11.1%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">6</td>
-        <td style="padding: 4px 14px; text-align: center">5</td>
-        <td style="padding: 4px 14px; text-align: center">13.9%</td>
-      </tr>
-      <tr class="tint-green">
-        <td
-          style="
-            padding: 6px 14px;
-            color: var(--zerp-green-on-tint);
-            text-align: center;
-            font-weight: 900;
-            font-size: 1.15em;
-          "
-        >
-          7
-        </td>
-        <td
-          style="
-            padding: 6px 14px;
-            color: var(--zerp-green-on-tint);
-            text-align: center;
-            font-weight: 700;
-          "
-        >
-          6
-        </td>
-        <td
-          style="
-            padding: 6px 14px;
-            color: var(--zerp-green-on-tint);
-            text-align: center;
-            font-weight: 700;
-          "
-        >
-          16.7%
-        </td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">8</td>
-        <td style="padding: 4px 14px; text-align: center">5</td>
-        <td style="padding: 4px 14px; text-align: center">13.9%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">9</td>
-        <td style="padding: 4px 14px; text-align: center">4</td>
-        <td style="padding: 4px 14px; text-align: center">11.1%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">10</td>
-        <td style="padding: 4px 14px; text-align: center">3</td>
-        <td style="padding: 4px 14px; text-align: center">8.3%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">11</td>
-        <td style="padding: 4px 14px; text-align: center">2</td>
-        <td style="padding: 4px 14px; text-align: center">5.6%</td>
-      </tr>
-      <tr>
-        <td style="padding: 4px 14px; text-align: center">12</td>
-        <td style="padding: 4px 14px; text-align: center">1</td>
-        <td style="padding: 4px 14px; text-align: center">2.8%</td>
-      </tr>
-    </table>
-  </div>
+  <table class="mono compact">
+    <tr>
+      <th>Sum</th>
+      <th>Combinations</th>
+      <th>Probability</th>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>1</td>
+      <td>2.8%</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>2</td>
+      <td>5.6%</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>3</td>
+      <td>8.3%</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>4</td>
+      <td>11.1%</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td>5</td>
+      <td>13.9%</td>
+    </tr>
+    <tr class="tint-green">
+      <td class="green">7</td>
+      <td class="green">6</td>
+      <td class="green">16.7%</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>5</td>
+      <td>13.9%</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td>4</td>
+      <td>11.1%</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td>3</td>
+      <td>8.3%</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td>2</td>
+      <td>5.6%</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td>1</td>
+      <td>2.8%</td>
+    </tr>
+  </table>
   <div class="key-thought">
     <p>
       Not all outcomes are equally likely, even if they feel like they should be.<br />

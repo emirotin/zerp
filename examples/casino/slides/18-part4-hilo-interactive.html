@@ -3,80 +3,31 @@
   <div class="block-label">Part 4 · Interactive</div>
   <div class="interactive-badge">🎯 INTERACTIVE</div>
   <h2>Let's practice counting</h2>
-  <p style="font-size: 1.58em; color: var(--zerp-text); text-align: center; margin-bottom: 10px">
-    Keep the Hi-Lo running count. Start from zero.
-  </p>
+  <p class="xl center">Keep the Hi-Lo running count. Start from zero.</p>
 
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      margin: 10px 0;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    "
-  >
-    <div style="text-align: center; min-width: 150px">
-      <p style="color: var(--zerp-text); font-size: 1.35em">Running count</p>
-      <div
-        id="hilo-count"
-        style="
-          font-size: 4.5em;
-          font-weight: 900;
-          color: var(--zerp-accent);
-          font-family: &quot;Roboto Mono&quot;, monospace;
-          line-height: 1.1;
-        "
-      >
-        0
-      </div>
+  <div class="stat-row" style="align-items: flex-start; margin: 10px 0">
+    <div class="stat">
+      <div class="label" style="margin-bottom: 4px">Running count</div>
+      <div id="hilo-count" class="value">0</div>
     </div>
-    <div style="text-align: center; min-width: 150px">
-      <p style="color: var(--zerp-text); font-size: 1.35em">Cards dealt</p>
-      <div
-        id="hilo-dealt"
-        style="
-          font-size: 3em;
-          font-weight: 700;
-          color: var(--zerp-muted);
-          font-family: &quot;Roboto Mono&quot;, monospace;
-          line-height: 1.1;
-          padding-top: 0.3em;
-        "
-      >
-        0 / 15
-      </div>
+    <div class="stat">
+      <div class="label" style="margin-bottom: 4px">Cards dealt</div>
+      <div id="hilo-dealt" class="value" style="color: var(--zerp-muted)">0 / 15</div>
     </div>
   </div>
 
-  <div
-    id="hilo-cards"
-    style="
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin: 12px 0;
-      flex-wrap: wrap;
-      min-height: 90px;
-    "
-  ></div>
+  <div id="hilo-cards" class="row" style="gap: 6px; margin: 12px 0; min-height: 90px"></div>
 
-  <div id="hilo-current" style="text-align: center; min-height: 40px; margin: 8px 0"></div>
+  <div id="hilo-current" class="center" style="min-height: 40px; margin: 8px 0"></div>
 
-  <div id="hilo-verdict" style="text-align: center; visibility: hidden; margin-top: 8px">
+  <div id="hilo-verdict" class="center" style="visibility: hidden; margin-top: 8px">
     <div class="key-thought" style="border-color: var(--zerp-green)">
-      <p style="color: var(--zerp-green); font-size: 1.8em">
+      <p class="green">
         Count is +5. The deck has lots of big cards left, so this is a favorable betting moment.
       </p>
     </div>
   </div>
-  <p
-    id="hilo-hint"
-    style="text-align: center; color: var(--zerp-muted); font-size: 1.28em; margin-top: 6px"
-  >
-    ↓ deal the next card
-  </p>
+  <p id="hilo-hint" class="caption" style="margin-top: 6px">↓ deal the next card</p>
 
   <script>
     (function () {

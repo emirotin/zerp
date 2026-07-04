@@ -5,36 +5,16 @@
   <h2>Experiment: flipping a coin</h2>
   <div class="stat-row" style="margin: 12px 0">
     <div class="stat">
-      <div class="label" style="margin-top: 0; margin-bottom: 4px">Total flips</div>
-      <div id="coin-total" class="value" style="font-size: 2.4em">0</div>
+      <div class="label" style="margin-bottom: 4px">Total flips</div>
+      <div id="coin-total" class="value">0</div>
     </div>
     <div class="stat">
-      <div class="label" style="margin-top: 0; margin-bottom: 4px">Heads</div>
-      <div
-        id="coin-heads"
-        style="
-          font-size: 2.4em;
-          font-weight: 900;
-          color: var(--zerp-orange);
-          font-family: &quot;Roboto Mono&quot;, monospace;
-        "
-      >
-        0
-      </div>
+      <div class="label" style="margin-bottom: 4px">Heads</div>
+      <div id="coin-heads" class="value" style="color: var(--zerp-orange)">0</div>
     </div>
     <div class="stat">
-      <div class="label" style="margin-top: 0; margin-bottom: 4px">Share of heads</div>
-      <div
-        id="coin-pct"
-        style="
-          font-size: 2.4em;
-          font-weight: 900;
-          color: var(--zerp-green);
-          font-family: &quot;Roboto Mono&quot;, monospace;
-        "
-      >
-        —
-      </div>
+      <div class="label" style="margin-bottom: 4px">Share of heads</div>
+      <div id="coin-pct" class="value" style="color: var(--zerp-green)">—</div>
     </div>
   </div>
   <div
@@ -74,51 +54,12 @@
       "
     ></div>
   </div>
-  <p
-    style="
-      text-align: center;
-      color: var(--zerp-muted);
-      font-size: 1em;
-      font-weight: 700;
-      margin-bottom: 6px;
-    "
-  >
-    Green line = 50%
-  </p>
-  <div
-    id="coin-last"
-    style="
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-      margin: 8px 0;
-      min-height: 36px;
-      flex-wrap: wrap;
-    "
-  ></div>
-  <p
-    id="coin-hint"
-    style="
-      text-align: center;
-      color: var(--zerp-muted);
-      font-size: 1em;
-      font-weight: 700;
-      margin-top: 6px;
-    "
-  >
+  <p class="caption">Green line = 50%</p>
+  <div id="coin-last" class="row" style="gap: 4px; margin: 8px 0; min-height: 36px"></div>
+  <p id="coin-hint" class="caption" style="margin-top: 6px">
     ↓ flip × 1 &nbsp;&nbsp;|&nbsp;&nbsp; press several times to see the pattern
   </p>
-  <p
-    id="coin-conclusion"
-    style="
-      text-align: center;
-      font-size: 1.15em;
-      color: var(--zerp-green);
-      font-weight: 700;
-      margin-top: 6px;
-      visibility: hidden;
-    "
-  >
+  <p id="coin-conclusion" class="green center" style="margin-top: 6px; visibility: hidden">
     The more flips you make, the closer you get to 50%. That is the law of large numbers.
   </p>
 
@@ -193,28 +134,19 @@
 <div class="slide">
   <div class="block-label">Part 2 · Law of Large Numbers</div>
   <h2>Law of large numbers</h2>
-  <div class="cols-2" style="margin-top: 20px">
-    <div>
-      <p style="font-size: 1.3em; margin-bottom: 16px">
-        <span class="orange" style="font-weight: 700">Few trials</span> means the result jumps
-        around.
-      </p>
-      <p style="font-size: 1.3em; margin-bottom: 16px">
-        <span class="green" style="font-weight: 700">Many trials</span> means the result approaches
-        the theory.
-      </p>
-      <p style="font-size: 1.3em">
-        The more trials you have, the
-        <span class="accent" style="font-weight: 700">more accurate the prediction</span>.
-      </p>
+  <div class="cols-2">
+    <div class="stack">
+      <p><span class="orange">Few trials</span> means the result jumps around.</p>
+      <p><span class="green">Many trials</span> means the result approaches the theory.</p>
+      <p>The more trials you have, the <span class="accent">more accurate the prediction</span>.</p>
     </div>
     <div>
       <div class="key-thought" style="border-color: var(--zerp-red)">
-        <p style="color: var(--zerp-red); font-size: 1.2em">This is the casino's main weapon.</p>
-        <p style="color: var(--zerp-text); font-size: 1em; margin-top: 8px; font-weight: 700">
+        <p class="red">This is the casino's main weapon.</p>
+        <p style="font-size: 1em; margin-top: 8px">
           The casino does not win every single round. It plays
-          <span class="accent" style="font-weight: 700">thousands of rounds every day</span>. The
-          law of large numbers turns a tiny edge into guaranteed profit.
+          <span class="accent">thousands of rounds every day</span>. The law of large numbers turns
+          a tiny edge into guaranteed profit.
         </p>
       </div>
     </div>

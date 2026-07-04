@@ -3,55 +3,39 @@
   <div class="block-label">Part 1 · Birthday Paradox</div>
   <div class="interactive-badge">🎯 VOTE</div>
   <h2>Birthday paradox</h2>
-  <p style="font-size: 1.4em; margin: 16px 0; text-align: center">
-    Do any two people in this room share a birthday?
-  </p>
-  <p style="font-size: 1.2em; text-align: center; color: var(--zerp-text)">
-    Not the year, just the day and month. Who thinks there is a match?
-  </p>
-  <div class="stat-row" style="margin: 30px 0">
+  <p class="xl center">Do any two people in this room share a birthday?</p>
+  <p class="center">Not the year, just the day and month. Who thinks there is a match?</p>
+  <div class="stat-row">
     <div class="stat">
-      <div class="value">23</div>
+      <div class="value" style="color: var(--zerp-orange)">23</div>
       <div class="label">people</div>
-      <p style="font-size: 1.3em; font-weight: 700; color: var(--zerp-orange)">50.7%</p>
+      <p class="orange">50.7%</p>
     </div>
     <div class="stat">
       <div class="value" style="color: var(--zerp-green)">30</div>
       <div class="label">people</div>
-      <p style="font-size: 1.3em; font-weight: 700; color: var(--zerp-green)">70.6%</p>
+      <p class="green">70.6%</p>
     </div>
     <div class="stat">
       <div class="value" style="color: var(--zerp-purple)">50</div>
       <div class="label">people</div>
-      <p style="font-size: 1.3em; font-weight: 700; color: var(--zerp-purple)">97%</p>
+      <p class="purple">97%</p>
     </div>
   </div>
-  <p style="font-size: 1.1em; text-align: center; color: var(--zerp-text)">
-    Let's test it. Who was born in January? Say the day...
-  </p>
+  <p class="center">Let's test it. Who was born in January? Say the day...</p>
 </div>
 
 <!-- Slide 2: Explanation -->
 <div class="slide">
   <div class="block-label">Part 1 · Birthday Paradox</div>
   <h2>Why so many?</h2>
-  <div class="cols-2" style="margin-top: 16px">
-    <div>
-      <p style="font-size: 1.3em; margin-bottom: 16px">
+  <div class="cols-2">
+    <div class="stack">
+      <p>
         We are not comparing "mine with everyone else's." We are comparing
-        <span class="accent" style="font-weight: 700">everyone with everyone</span>.
+        <span class="accent">everyone with everyone</span>.
       </p>
-      <p style="font-size: 1.3em; margin-bottom: 16px">
-        Number of pairs =
-        <span
-          style="
-            font-family: &quot;Roboto Mono&quot;, monospace;
-            color: var(--zerp-accent);
-            font-weight: 700;
-          "
-          >n(n−1)/2</span
-        >
-      </p>
+      <p>Number of pairs = <span class="accent mono">n(n−1)/2</span></p>
       <ul>
         <li>10 people → <span class="accent">45</span> pairs</li>
         <li>23 people → <span class="accent">253</span> pairs</li>
@@ -60,7 +44,7 @@
     </div>
     <div>
       <div class="key-thought">
-        <p style="font-size: 1.2em">
+        <p>
           Not many people.<br />
           <span class="orange">A huge number</span> of pairs.<br />
           Each pair is a chance for a match.
@@ -74,47 +58,33 @@
 <div class="slide">
   <div class="block-label">Part 1 · Birthday Paradox</div>
   <h2>Exact calculation</h2>
-  <p style="font-size: 1.2em; margin-bottom: 16px">
+  <p>
     It is easier to calculate the probability that all birthdays are
     <span class="accent">different</span>, then subtract from one.
   </p>
-  <div
-    class="card"
-    style="
-      font-family: &quot;Roboto Mono&quot;, monospace;
-      font-size: 1.15em;
-      line-height: 2;
-      margin-bottom: 20px;
-    "
-  >
+  <div class="card mono" style="line-height: 2">
     <div>P(all different) =</div>
     <div style="padding-left: 2em">
-      <span style="color: var(--zerp-accent); font-weight: 700">365</span>/365 ×
-      <span style="color: var(--zerp-accent); font-weight: 700">364</span>/365 ×
-      <span style="color: var(--zerp-accent); font-weight: 700">363</span>/365 × … ×
-      <span style="color: var(--zerp-accent); font-weight: 700">(365 − n + 1)</span>/365
+      <span class="accent">365</span>/365 × <span class="accent">364</span>/365 ×
+      <span class="accent">363</span>/365 × … × <span class="accent">(365 − n + 1)</span>/365
     </div>
     <div style="margin-top: 12px">P(match) = 1 − P(all different)</div>
   </div>
-  <div style="display: flex; justify-content: center; gap: 40px; margin-top: 16px">
-    <div style="text-align: center">
-      <p style="color: var(--zerp-text); margin-bottom: 4px">n = 23</p>
-      <p style="font-size: 1.3em; font-weight: 700; color: var(--zerp-orange)">
-        1 − 0.4927 = <span class="orange">50.7%</span>
-      </p>
+  <div class="row" style="gap: 40px">
+    <div class="center">
+      <p>n = 23</p>
+      <p class="orange">1 − 0.4927 = 50.7%</p>
     </div>
-    <div style="text-align: center">
-      <p style="color: var(--zerp-text); margin-bottom: 4px">n = 50</p>
-      <p style="font-size: 1.3em; font-weight: 700; color: var(--zerp-purple)">
-        1 − 0.0296 = <span class="purple">97.0%</span>
-      </p>
+    <div class="center">
+      <p>n = 50</p>
+      <p class="purple">1 − 0.0296 = 97.0%</p>
     </div>
   </div>
-  <div class="key-thought" style="margin-top: 20px">
+  <div class="key-thought">
     <p>
-      The first person has <span style="color: var(--zerp-accent)">365</span> free days. The second
-      has <span style="color: var(--zerp-accent)">364</span>. Each next person removes one more
-      option, so the space shrinks <span class="red">faster</span> than it feels.
+      The first person has <span class="accent">365</span> free days. The second has
+      <span class="accent">364</span>. Each next person removes one more option, so the space
+      shrinks <span class="red">faster</span> than it feels.
     </p>
   </div>
 </div>

@@ -1,110 +1,72 @@
 <div class="slide">
   <div class="block-label">Part 2 · Probability</div>
   <h2>What is probability?</h2>
-  <p style="font-size: 1.5em; margin: 16px 0; text-align: center">
+  <p class="xl center">
     Probability is simply a
-    <span class="accent" style="font-weight: 700">fraction</span>.
+    <span class="accent">fraction</span>.
   </p>
-  <div class="card" style="text-align: center; margin: 20px auto; max-width: 600px">
-    <p
-      style="
-        font-size: 1.8em;
-        font-family: &quot;Roboto Mono&quot;, monospace;
-        color: var(--zerp-accent);
-        font-weight: 700;
-      "
-    >
-      P = favorable / total
-    </p>
+  <div class="card center" style="max-width: 600px; margin: 20px auto">
+    <p class="xl mono accent">P = favorable / total</p>
   </div>
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      gap: 60px;
-      margin-top: 30px;
-    "
-  >
-    <div style="text-align: center">
-      <div style="height: 100px; display: flex; align-items: center; justify-content: center">
+  <div class="row" style="gap: 60px; align-items: flex-end; margin-top: 30px">
+    <div class="center">
+      <div class="row" style="height: 100px; margin: 0">
         <span style="font-size: 5em; line-height: 1">🎲</span>
       </div>
-      <p style="font-size: 1.8em; color: var(--zerp-text)">Roll a 6</p>
-      <p
-        style="
-          font-size: 2.1em;
-          font-weight: 700;
-          color: var(--zerp-accent);
-          font-family: &quot;Roboto Mono&quot;, monospace;
-          margin-top: 4px;
-        "
-      >
-        1/6
-      </p>
+      <p class="xl">Roll a 6</p>
+      <p class="xl mono accent">1/6</p>
     </div>
-    <div style="text-align: center">
-      <div style="height: 100px; display: flex; align-items: center; justify-content: center">
+    <div class="center">
+      <div class="row" style="height: 100px; margin: 0">
         <span style="font-size: 5em; line-height: 1">🪙</span>
       </div>
-      <p style="font-size: 1.8em; color: var(--zerp-text)">Flip heads</p>
-      <p
-        style="
-          font-size: 2.1em;
-          font-weight: 700;
-          color: var(--zerp-accent);
-          font-family: &quot;Roboto Mono&quot;, monospace;
-          margin-top: 4px;
-        "
-      >
-        1/2
-      </p>
+      <p class="xl">Flip heads</p>
+      <p class="xl mono accent">1/2</p>
     </div>
-    <div style="text-align: center">
-      <div style="height: 100px; display: flex; align-items: center; justify-content: center">
-        <div
-          style="
-            display: inline-block;
-            width: 64px;
-            height: 88px;
-            background: #fff;
-            border-radius: 8px;
-            color: #000;
-            font-size: 1.4em;
-            font-weight: 700;
-            line-height: 1;
-            position: relative;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          "
-        >
-          <span style="position: absolute; top: 4px; left: 4px">A</span>
-          <span
-            style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              font-size: 1.6em;
-            "
-            >♠</span
-          >
-          <span style="position: absolute; bottom: 4px; right: 4px; transform: rotate(180deg)"
-            >A</span
-          >
-        </div>
+    <div class="center">
+      <div class="row" style="height: 100px; margin: 0">
+        <span class="playing-card">
+          <span class="pip-tl">A</span>
+          <span class="pip-mid">♠</span>
+          <span class="pip-br">A</span>
+        </span>
       </div>
-      <p style="font-size: 1.8em; color: var(--zerp-text)">Draw an ace</p>
-      <p
-        style="
-          font-size: 2.1em;
-          font-weight: 700;
-          color: var(--zerp-accent);
-          font-family: &quot;Roboto Mono&quot;, monospace;
-          margin-top: 4px;
-        "
-      >
-        4/52
-      </p>
+      <p class="xl">Draw an ace</p>
+      <p class="xl mono accent">4/52</p>
     </div>
   </div>
 </div>
+
+<style>
+  .playing-card {
+    display: inline-block;
+    width: 64px;
+    height: 88px;
+    background: #fff;
+    border-radius: 8px;
+    color: #000;
+    font-size: 1.4em;
+    font-weight: 700;
+    line-height: 1;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  .pip-tl {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+  }
+  .pip-mid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.6em;
+  }
+  .pip-br {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    transform: rotate(180deg);
+  }
+</style>

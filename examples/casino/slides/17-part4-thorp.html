@@ -1,119 +1,84 @@
 <div class="slide">
   <div class="block-label">Part 4 · Story 2</div>
-  <div style="position: absolute; top: 40px; right: 60px; text-align: center">
-    <img
-      src="images/beat-the-dealer.jpg"
-      alt="Beat the Dealer book cover"
-      style="
-        width: 120px;
-        border-radius: 4px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-        display: block;
-      "
-    />
-    <p class="caption" style="margin-top: 6px">"Beat the Dealer", 1962</p>
-  </div>
+  <figure class="corner-figure">
+    <img src="images/beat-the-dealer.jpg" alt="Beat the Dealer book cover" />
+    <figcaption>"Beat the Dealer", 1962</figcaption>
+  </figure>
   <h2>Edward Thorp: a professor and card counting</h2>
-  <div class="cols-2" style="margin-top: 16px">
-    <div>
-      <p style="font-size: 1.15em; margin-bottom: 12px">
+  <div class="cols-2">
+    <div class="stack">
+      <p>
         A math professor wrote a book on how to
-        <span class="green" style="font-weight: 700">beat the casino at blackjack</span>.
+        <span class="green">beat the casino at blackjack</span>.
       </p>
-      <p style="font-size: 1.15em; margin-bottom: 12px">The key difference from roulette:</p>
-      <blockquote style="font-size: 1em">
+      <p>The key difference from roulette:</p>
+      <blockquote>
         In roulette, each spin is <span class="red">independent</span>.<br />
         In blackjack, cards are dealt from the deck and do not go back in. The deck
         <span class="green">"remembers"</span>.
       </blockquote>
     </div>
-    <div>
-      <p style="font-size: 1.15em; margin-bottom: 12px">
+    <div class="stack">
+      <p>
         If many <span class="orange">small</span> cards (2-6) have already come out, then there are
-        more <span class="accent" style="font-weight: 700">big</span> cards (10, J, Q, K, A) left in
-        the deck.
+        more <span class="accent">big</span> cards (10, J, Q, K, A) left in the deck.
       </p>
-      <p style="font-size: 1.15em">
-        Big cards are <span class="green" style="font-weight: 700">good for the player</span>
-        because they increase the chance of hitting 21 and the chance that the dealer busts.
+      <p>
+        Big cards are <span class="green">good for the player</span> because they increase the
+        chance of hitting 21 and the chance that the dealer busts.
       </p>
     </div>
   </div>
 </div>
 
+<style>
+  .corner-figure {
+    position: absolute;
+    top: 40px;
+    right: 60px;
+    margin: 0;
+    gap: 6px;
+  }
+  .corner-figure img {
+    width: 120px;
+    border-radius: 4px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+</style>
+
 <!-- Hi-Lo system -->
 <div class="slide">
   <div class="block-label">Part 4 · Hi-Lo System</div>
   <h2>Hi-Lo system</h2>
-  <p style="font-size: 1.15em; text-align: center; color: var(--zerp-text); margin-bottom: 16px">
-    A simple system for tracking the deck
-  </p>
-  <div style="display: flex; justify-content: center; margin: 16px 0">
-    <table style="font-size: 1.15em">
-      <tr>
-        <th style="padding: 10px 20px; text-align: left">Card</th>
-        <th style="padding: 10px 20px; text-align: center">Count</th>
-        <th style="padding: 10px 20px; text-align: left">Logic</th>
-      </tr>
-      <tr class="tint-green">
-        <td style="padding: 8px 20px; color: var(--zerp-green); font-weight: 700; font-size: 1.3em">
-          2, 3, 4, 5, 6
-        </td>
-        <td
-          style="
-            padding: 8px 20px;
-            color: var(--zerp-green);
-            font-weight: 900;
-            font-family: &quot;Roboto Mono&quot;, monospace;
-            text-align: center;
-            font-size: 1.5em;
-          "
-        >
-          +1
-        </td>
-        <td style="padding: 8px 20px">small card is gone → good</td>
-      </tr>
-      <tr>
-        <td style="padding: 8px 20px; font-weight: 700; font-size: 1.3em">7, 8, 9</td>
-        <td
-          style="
-            padding: 8px 20px;
-            font-weight: 900;
-            font-family: &quot;Roboto Mono&quot;, monospace;
-            text-align: center;
-            font-size: 1.5em;
-          "
-        >
-          0
-        </td>
-        <td style="padding: 8px 20px">neutral</td>
-      </tr>
-      <tr class="tint-red">
-        <td style="padding: 8px 20px; color: var(--zerp-red); font-weight: 700; font-size: 1.3em">
-          10, J, Q, K, A
-        </td>
-        <td
-          style="
-            padding: 8px 20px;
-            color: var(--zerp-red);
-            font-weight: 900;
-            font-family: &quot;Roboto Mono&quot;, monospace;
-            text-align: center;
-            font-size: 1.5em;
-          "
-        >
-          −1
-        </td>
-        <td style="padding: 8px 20px">big card is gone → bad</td>
-      </tr>
-    </table>
-  </div>
-  <div class="key-thought" style="margin-top: 16px">
-    <p style="font-size: 1.15em">
-      A <span class="green" style="font-weight: 700">high count (+5 or more)</span> means lots of
-      big cards remain, so bet more.<br />
-      A <span class="red" style="font-weight: 700">low or negative count</span> means the casino has
-      the edge, so bet the minimum.
+  <p class="center">A simple system for tracking the deck</p>
+  <table>
+    <tr>
+      <th>Card</th>
+      <th class="center">Count</th>
+      <th>Logic</th>
+    </tr>
+    <tr class="tint-green">
+      <td class="green lg">2, 3, 4, 5, 6</td>
+      <td class="green mono center xl">+1</td>
+      <td>small card is gone → good</td>
+    </tr>
+    <tr>
+      <td class="lg"><strong>7, 8, 9</strong></td>
+      <td class="mono center xl"><strong>0</strong></td>
+      <td>neutral</td>
+    </tr>
+    <tr class="tint-red">
+      <td class="red lg">10, J, Q, K, A</td>
+      <td class="red mono center xl">−1</td>
+      <td>big card is gone → bad</td>
+    </tr>
+  </table>
+  <div class="key-thought">
+    <p>
+      A <span class="green">high count (+5 or more)</span> means lots of big cards remain, so bet
+      more.<br />
+      A <span class="red">low or negative count</span> means the casino has the edge, so bet the
+      minimum.
     </p>
   </div>
 </div>

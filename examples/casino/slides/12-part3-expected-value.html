@@ -3,48 +3,23 @@
   <div class="block-label">Part 3 · Expected Value</div>
   <div class="interactive-badge">🎯 INTERACTIVE</div>
   <h2>Expected value</h2>
-  <p style="font-size: 1.15em; color: var(--zerp-text); text-align: center; margin-bottom: 12px">
-    A $100 bet on red. What happens <em>on average</em>?
-  </p>
+  <p class="center">A $100 bet on red. What happens <em>on average</em>?</p>
 
   <div
     id="ev-steps"
-    class="card"
-    style="
-      max-width: 650px;
-      margin: 0 auto;
-      font-family: &quot;Roboto Mono&quot;, monospace;
-      font-size: 1.15em;
-      line-height: 2.2;
-    "
+    class="card mono"
+    style="max-width: 650px; margin: 0 auto; line-height: 2.2"
   ></div>
 
-  <div id="ev-result" style="text-align: center; margin-top: 16px; visibility: hidden">
+  <div id="ev-result" class="center" style="margin-top: 16px; visibility: hidden">
     <div class="key-thought" style="border-color: var(--zerp-red)">
-      <p style="color: var(--zerp-red); font-size: 1.3em">
-        On average, you lose
-        <span style="font-family: &quot;Roboto Mono&quot;, monospace">$2.70</span> on every $100 bet
-      </p>
-      <p style="color: var(--zerp-text); font-size: 1em; margin-top: 8px; font-weight: 700">
-        House edge =
-        <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: var(--zerp-orange)"
-          >1/37 ≈ 2.7%</span
-        >
+      <p class="red">On average, you lose <span class="mono">$2.70</span> on every $100 bet</p>
+      <p style="font-size: 1em; margin-top: 8px">
+        House edge = <span class="orange mono">1/37 ≈ 2.7%</span>
       </p>
     </div>
   </div>
-  <p
-    id="ev-hint"
-    style="
-      text-align: center;
-      color: var(--zerp-muted);
-      font-size: 1em;
-      font-weight: 700;
-      margin-top: 10px;
-    "
-  >
-    ↓ next step
-  </p>
+  <p id="ev-hint" class="caption" style="margin-top: 10px">↓ next step</p>
 
   <script>
     (function () {

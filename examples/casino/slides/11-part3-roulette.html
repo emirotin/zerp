@@ -2,54 +2,26 @@
 <div class="slide">
   <div class="block-label">Part 3 · Roulette</div>
   <h2>Anatomy of roulette</h2>
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      margin: 16px 0;
-      flex-wrap: wrap;
-      align-items: center;
-    "
-  >
-    <div id="roulette-wheel" style="position: relative; width: 280px; height: 280px"></div>
-    <div style="max-width: 580px; padding-left: 20px">
-      <ul style="font-size: 1.15em">
-        <li>
-          <span class="accent" style="font-weight: 700">37</span>
-          slots: numbers 1-36 plus zero (0)
-        </li>
-        <li>
-          <span style="color: var(--zerp-red); font-weight: 700">18 red</span>
-          + <span style="font-weight: 700">18 black</span>
-        </li>
-        <li>
-          <span style="color: var(--zerp-green); font-weight: 700">Zero is green</span>: neither red
-          nor black
-        </li>
+  <div class="row">
+    <div id="roulette-wheel" style="width: 280px; height: 280px"></div>
+    <div style="max-width: 580px">
+      <ul>
+        <li><span class="accent">37</span> slots: numbers 1-36 plus zero (0)</li>
+        <li><span class="red">18 red</span> + <strong>18 black</strong></li>
+        <li><span class="green">Zero is green</span>: neither red nor black</li>
       </ul>
-      <div class="card" style="padding: 14px 20px; margin-top: 16px">
-        <p style="font-size: 1.15em; color: var(--zerp-text)">
-          A
-          <span class="accent" style="font-weight: 700">$100</span>
-          bet on red:
-        </p>
-        <p style="font-size: 1.05em; color: var(--zerp-text); margin-top: 6px">
+      <div class="card">
+        <p>A <span class="accent">$100</span> bet on red:</p>
+        <p style="margin-top: 6px">
           Red → you win $100<br />
           Black or zero → you lose $100
         </p>
       </div>
     </div>
   </div>
-  <div class="key-thought" style="margin-top: 12px">
-    <p>
-      Probability of winning =
-      <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: var(--zerp-orange)"
-        >18/37 ≈ 48.6%</span
-      >
-      - not 50%
-    </p>
-    <p style="font-size: 1em; color: var(--zerp-text); margin-top: 4px; font-weight: 700">
+  <div class="key-thought">
+    <p>Probability of winning = <span class="orange mono">18/37 ≈ 48.6%</span> - not 50%</p>
+    <p style="font-size: 1em; margin-top: 4px">
       The difference is only 1.4%, caused by a single zero.
     </p>
   </div>
@@ -85,7 +57,11 @@
         var x2i = 140 + ri * Math.cos(a2),
           y2i = 140 + ri * Math.sin(a2);
         var color =
-          numbers[i] === 0 ? "var(--zerp-green-solid)" : isRed[numbers[i]] ? "#b91c1c" : "#1e1e1e";
+          numbers[i] === 0
+            ? "var(--zerp-green-solid)"
+            : isRed[numbers[i]]
+              ? "var(--zerp-red-solid)"
+              : "#1e1e1e";
         svg +=
           '<path d="M' +
           x1i +
