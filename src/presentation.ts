@@ -150,8 +150,8 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
 
   const navHtml = [
     '    <div class="nav">',
-    '      <button onclick="prev()">←</button>',
-    '      <button onclick="next()">→</button>',
+    '      <button id="nav-prev" onclick="prev()">←</button>',
+    '      <button id="nav-next" onclick="next()">→</button>',
     "    </div>",
   ].join("\n");
 

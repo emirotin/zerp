@@ -4,6 +4,8 @@
   const total = slides.length;
   const counter = document.getElementById("counter");
   const progress = document.getElementById("progress");
+  const navPrev = document.getElementById("nav-prev");
+  const navNext = document.getElementById("nav-next");
 
   function clamp(index) {
     return Math.max(0, Math.min(index, total - 1));
@@ -24,6 +26,12 @@
     }
     if (progress) {
       progress.style.width = String(((current + 1) / Math.max(total, 1)) * 100) + "%";
+    }
+    if (navPrev) {
+      navPrev.disabled = current === 0;
+    }
+    if (navNext) {
+      navNext.disabled = current === total - 1;
     }
     history.replaceState(null, "", "#" + String(current + 1));
   }
