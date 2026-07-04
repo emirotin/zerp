@@ -1,9 +1,17 @@
+import { spawn } from "node:child_process";
 import { existsSync, statSync, watch } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
-import { buildPresentationHtml } from "../dist/presentation.js";
+// Imported per request with a cache-busting query so rebuilt framework
+// modules (and their internal asset caches) are always fresh.
+async function loadBuildPresentationHtml() {
+  const moduleUrl = `${pathToFileURL(path.resolve("dist/presentation.js")).href}?t=${Date.now()}`;
+  const mod = await import(moduleUrl);
+  return mod.buildPresentationHtml;
+}
 
 const name = process.argv[2];
 
@@ -66,6 +74,7 @@ const server = createServer(async (req, res) => {
 
   try {
     if (pathname === "/" || pathname === "/index.html") {
+      const buildPresentationHtml = await loadBuildPresentationHtml();
       const html = await buildPresentationHtml({ rootDir });
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
       res.end(html.replace("</body>", `${RELOAD_SNIPPET}\n</body>`));
@@ -101,12 +110,51 @@ server.listen(port, host, () => {
   console.log(`Serving examples/${name} at http://${host}:${port} (live reload active)`);
 });
 
+function broadcastReload() {
+  for (const client of sseClients) {
+    client.write("data: reload\n\n");
+  }
+}
+
 let reloadTimer;
 watch(slidesDir, { recursive: true }, () => {
   clearTimeout(reloadTimer);
-  reloadTimer = setTimeout(() => {
-    for (const client of sseClients) {
-      client.write("data: reload\n\n");
-    }
-  }, 100);
+  reloadTimer = setTimeout(broadcastReload, 100);
 });
+
+// Framework changes rebuild dist, then reload. Builds are serialized; a
+// change arriving mid-build queues exactly one follow-up build.
+let building = false;
+let buildQueued = false;
+
+function rebuildFramework() {
+  if (building) {
+    buildQueued = true;
+    return;
+  }
+  building = true;
+  console.log("Framework change detected - rebuilding dist/ ...");
+  const build = spawn("node", ["scripts/build.mjs"], { stdio: "inherit" });
+  build.on("exit", (code) => {
+    building = false;
+    if (code === 0) {
+      console.log("Rebuilt - reloading clients.");
+      broadcastReload();
+    } else {
+      console.error("Build failed - clients keep the previous bundle.");
+    }
+    if (buildQueued) {
+      buildQueued = false;
+      rebuildFramework();
+    }
+  });
+}
+
+const srcDir = path.resolve("src");
+if (existsSync(srcDir)) {
+  let buildTimer;
+  watch(srcDir, { recursive: true }, () => {
+    clearTimeout(buildTimer);
+    buildTimer = setTimeout(rebuildFramework, 300);
+  });
+}
