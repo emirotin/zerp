@@ -2,6 +2,8 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 
+import { checkPresentation } from "./check/checker.js";
+import { formatReport } from "./check/report.js";
 import { buildPresentationHtml } from "./presentation.js";
 import type { ThemeName } from "./presentation.js";
 
@@ -46,6 +48,11 @@ export async function servePresentation(
         });
         res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
         res.end(html);
+        checkPresentation({ rootDir: resolvedRoot })
+          .then((report) => process.stdout.write(formatReport(report, { summaryOnly: true })))
+          .catch(() => {
+            /* check is advisory during serve */
+          });
         return;
       }
 
