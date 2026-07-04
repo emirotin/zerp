@@ -6,6 +6,8 @@ import { APCAcontrast, sRGBtoY } from "apca-w3";
 const require = createRequire(import.meta.url);
 
 const HUES = ["blue", "green", "orange", "purple", "red", "amber", "teal"];
+// Harmony's "green" hue (123°) reads olive/lime in UI accents; zerp's green draws from emerald.
+const SOURCE_HUES = { green: "emerald" };
 const SEMANTIC = { accent: "blue", ok: "green", warn: "amber", danger: "red" };
 const NEUTRAL_STEPS = {
   dark: { bg: "950", surface: "900", border: "800", text: "100", muted: "300", faint: "600" },
@@ -30,7 +32,7 @@ async function loadHueHex(hue) {
 
 async function loadPalette() {
   const entries = await Promise.all(
-    [...HUES, "gray"].map(async (hue) => [hue, await loadHueHex(hue)]),
+    [...HUES, "gray"].map(async (hue) => [hue, await loadHueHex(SOURCE_HUES[hue] ?? hue)]),
   );
   return Object.fromEntries(entries);
 }
