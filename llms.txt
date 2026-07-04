@@ -36,21 +36,21 @@ Semantic aliases: `--zerp-accent` (blue), `--zerp-ok` (green), `--zerp-warn` (am
 
 ## Built-in classes
 
-Emphasis: `.accent .ok .warn .danger .blue .green .orange .purple .red .amber .teal` (bold colored text) · `.muted` · `.mono` · `.lg .xl .sm`
+Emphasis: `.accent .ok .warn .danger .blue .green .orange .purple .red .amber .teal` (bold colored text) · `.muted` · `.mono` · `.lg .xl .sm` · `.raised` (elevation shadow for images/cards)
 Layout: `.cols-2 .cols-3 .cols-4` (equal grids) · `.row` (centered flex row) · `.stack` (column) · `.spread` (space-between) · `.center` (center text — safe on headings, paragraphs, and containers) · `.grow` · `.slide.top` (top-align a busy slide)
 Components:
 
 - `.card` — surface box; add `.tint-<hue>` for a colored wash
 - `.stat` (`.value` + `.label` children) inside `.stat-row` — big numbers
 - `.compare` — two children side by side with a "vs" divider (`data-vs="→"` to customize)
-- `.flow` — process row, arrows auto-inserted between children
+- `.flow` — process row, arrows auto-inserted between children (works for text spans and for `.card` children)
 - `.steps` — auto-numbered card grid (children: plain divs with `h3` + `p`)
 - `.timeline` with `.item` (`.year`, `.label`) — milestones
 - `.key-thought` — boxed takeaway (one per slide max)
 - `.pill` — inline badge; combine with `.ok/.warn/.danger/.accent` or `.tint-<hue>`
 - `.interactive-badge` — marks slides that react to ↓/↑
 - `.block-label` — small top-left section label
-- `.img-row` — row of images · `figure` + `figcaption` for single captioned images
+- `.img-row` — row of images · `figure` + `figcaption` for single captioned images · `figure.corner` — pin a small reference figure (poster, book cover) to the slide's top-right, out of the content flow
 - `table` is styled by default (add `.mono` for numeric tables, `.compact` for dense centered data grids — combine as `class="mono compact"`; `.tint-green`/`.tint-red` on `<tr>` to highlight rows)
 - `blockquote`, `ol` (numbered takeaways), `ul` (arrow bullets), `code`, `pre`, `kbd` are styled by default
 

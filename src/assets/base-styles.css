@@ -330,18 +330,31 @@ figcaption,
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 36px;
   flex-wrap: wrap;
   margin: 20px 0;
   font-size: 1.25em;
   font-weight: 700;
 }
 
+.flow > * + * {
+  position: relative;
+}
+
 .flow > * + *::before {
   content: "→";
+  position: absolute;
+  top: 50%;
+  left: -18px;
+  transform: translate(-50%, -50%);
   color: var(--zerp-faint);
   font-weight: 400;
-  margin-right: 14px;
+  font-size: 1.25rem;
+}
+
+.flow > .card {
+  font-size: 1rem;
+  font-weight: 400;
 }
 
 .steps {
@@ -446,6 +459,17 @@ figcaption,
   letter-spacing: 3px;
 }
 
+.corner {
+  position: absolute;
+  top: 40px;
+  right: 70px;
+  margin: 0;
+}
+
+.corner img {
+  width: 140px;
+}
+
 .img-row {
   display: flex;
   gap: 24px;
@@ -534,6 +558,10 @@ figcaption,
 
 .mono {
   font-family: "Roboto Mono", monospace;
+}
+
+.raised {
+  box-shadow: var(--zerp-shadow);
 }
 
 .muted {
@@ -666,7 +694,9 @@ figcaption,
   position: fixed;
   bottom: 24px;
   right: 36px;
+  height: 36px;
   display: flex;
+  align-items: center;
   gap: 10px;
   z-index: 100;
 }
@@ -693,8 +723,11 @@ figcaption,
 
 .counter {
   position: fixed;
-  bottom: 28px;
+  bottom: 24px;
   left: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
   font-size: 1em;
   font-weight: 700;
   color: var(--zerp-muted);
@@ -716,6 +749,7 @@ figcaption,
   position: fixed;
   bottom: 24px;
   right: 110px;
+  height: 36px;
   display: flex;
   align-items: center;
   gap: 8px;

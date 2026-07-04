@@ -21,11 +21,12 @@ test("dark theme uses Harmony gray-950 background and gray-100 text", async () =
   assert.match(darkBlock, /color-scheme: dark;/);
 });
 
-test("every theme exposes all 39 tokens", async () => {
+test("every theme exposes all 40 tokens", async () => {
   const css = await generateTokensCss();
   for (const theme of ["dark", "light"]) {
     const block = css.match(new RegExp(`:root\\[data-zerp-theme="${theme}"\\] \\{[^}]*\\}`))[0];
-    assert.equal((block.match(/--zerp-/g) ?? []).length, 39);
+    assert.equal((block.match(/--zerp-/g) ?? []).length, 40);
+    assert.match(block, /--zerp-shadow: 0 8px 24px rgb\(0 0 0 \/ 0\.\d+\);/);
     for (const hue of ["blue", "green", "orange", "purple", "red", "amber", "teal"]) {
       for (const suffix of ["", "-solid", "-tint", "-on-tint"]) {
         assert.match(block, new RegExp(`--zerp-${hue}${suffix}: #[0-9a-f]{6};`));

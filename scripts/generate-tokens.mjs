@@ -35,6 +35,11 @@ async function loadPalette() {
   return Object.fromEntries(entries);
 }
 
+const SHADOW = {
+  dark: "0 8px 24px rgb(0 0 0 / 0.55)",
+  light: "0 8px 24px rgb(0 0 0 / 0.18)",
+};
+
 function themeTokens(palette, theme) {
   const tokens = {};
   for (const [name, step] of Object.entries(NEUTRAL_STEPS[theme])) {
@@ -48,6 +53,7 @@ function themeTokens(palette, theme) {
     tokens[`--zerp-${hue}-on-tint`] = palette[hue][steps.onTint];
   }
   tokens["--zerp-on-solid"] = palette.gray["50"];
+  tokens["--zerp-shadow"] = SHADOW[theme];
   for (const [semantic, hue] of Object.entries(SEMANTIC)) {
     tokens[`--zerp-${semantic}`] = tokens[`--zerp-${hue}`];
   }
