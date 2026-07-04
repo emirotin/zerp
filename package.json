@@ -46,6 +46,7 @@
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "demo": "node ./scripts/demo.mjs",
+    "shot": "node ./scripts/shot.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
     "prepublishOnly": "pnpm build",
