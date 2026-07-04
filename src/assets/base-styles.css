@@ -215,6 +215,12 @@ table.mono td {
   font-family: "Roboto Mono", monospace;
 }
 
+table.compact th,
+table.compact td {
+  padding: 4px 14px;
+  text-align: center;
+}
+
 figure {
   display: flex;
   flex-direction: column;
@@ -486,10 +492,6 @@ figcaption,
 
 .center {
   text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
 }
 
 .row {

@@ -37,7 +37,7 @@ Semantic aliases: `--zerp-accent` (blue), `--zerp-ok` (green), `--zerp-warn` (am
 ## Built-in classes
 
 Emphasis: `.accent .ok .warn .danger .blue .green .orange .purple .red .amber .teal` (bold colored text) · `.muted` · `.mono` · `.lg .xl .sm`
-Layout: `.cols-2 .cols-3 .cols-4` (equal grids) · `.row` (centered flex row) · `.stack` (column) · `.spread` (space-between) · `.center` · `.grow` · `.slide.top` (top-align a busy slide)
+Layout: `.cols-2 .cols-3 .cols-4` (equal grids) · `.row` (centered flex row) · `.stack` (column) · `.spread` (space-between) · `.center` (center text — safe on headings, paragraphs, and containers) · `.grow` · `.slide.top` (top-align a busy slide)
 Components:
 
 - `.card` — surface box; add `.tint-<hue>` for a colored wash
@@ -51,7 +51,7 @@ Components:
 - `.interactive-badge` — marks slides that react to ↓/↑
 - `.block-label` — small top-left section label
 - `.img-row` — row of images · `figure` + `figcaption` for single captioned images
-- `table` is styled by default (add `.mono` for numeric tables; `.tint-green`/`.tint-red` on `<tr>` to highlight rows)
+- `table` is styled by default (add `.mono` for numeric tables, `.compact` for dense centered data grids — combine as `class="mono compact"`; `.tint-green`/`.tint-red` on `<tr>` to highlight rows)
 - `blockquote`, `ol` (numbered takeaways), `ul` (arrow bullets), `code`, `pre`, `kbd` are styled by default
 
 ## Slide recipes
