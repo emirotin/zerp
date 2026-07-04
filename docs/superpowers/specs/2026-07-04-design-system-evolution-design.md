@@ -42,14 +42,14 @@ Analysis of three real decks (prime_ai — built on zerp 0.1.2; vrbas26_ai and v
 
 ### Neutrals (Harmony `gray`, hue 275)
 
-| Token | Dark | Light | Role |
-|---|---|---|---|
-| `--zerp-bg` | gray-950 | gray-100 | page background |
-| `--zerp-surface` | gray-900 | gray-50 | cards, panels, code blocks |
-| `--zerp-border` | gray-800 | gray-300 | borders, dividers, rules |
-| `--zerp-text` | gray-100 | gray-900 | body text (Lc ≈ 100) |
-| `--zerp-muted` | gray-300 | gray-700 | secondary text (Lc ≈ 77 — passes APCA at 16px/400) |
-| `--zerp-faint` | gray-600 | gray-400 | decorative only: arrows, tick marks, disabled glyphs. **Never text.** Documented in llms.txt and enforced by `zerp check`. |
+| Token            | Dark     | Light    | Role                                                                                                                       |
+| ---------------- | -------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `--zerp-bg`      | gray-950 | gray-100 | page background                                                                                                            |
+| `--zerp-surface` | gray-900 | gray-50  | cards, panels, code blocks                                                                                                 |
+| `--zerp-border`  | gray-800 | gray-300 | borders, dividers, rules                                                                                                   |
+| `--zerp-text`    | gray-100 | gray-900 | body text (Lc ≈ 100)                                                                                                       |
+| `--zerp-muted`   | gray-300 | gray-700 | secondary text (Lc ≈ 77 — passes APCA at 16px/400)                                                                         |
+| `--zerp-faint`   | gray-600 | gray-400 | decorative only: arrows, tick marks, disabled glyphs. **Never text.** Documented in llms.txt and enforced by `zerp check`. |
 
 Rationale for muted at Lc ≈ 77 rather than 65: `fontLookupAPCA` requires roughly ≥19px at weight 400 for Lc 65, which would fail 16–18px captions/labels; Lc 77 passes from ~15px up, keeping secondary text safe at every size the framework ships.
 
@@ -57,11 +57,11 @@ Rationale for muted at Lc ≈ 77 rather than 65: `fontLookupAPCA` requires rough
 
 Seven hues: `blue`, `green`, `orange`, `purple`, `red`, `amber`, `teal`. Per hue, three roles:
 
-| Token | Dark | Light | Use |
-|---|---|---|---|
-| `--zerp-<hue>` | step 400 | step 600 | colored text on the page/surface background (Lc ≈ 65; intended for body-size and larger text) |
-| `--zerp-<hue>-solid` | step 600 | step 600 | filled backgrounds: badges, progress fills, filled cells |
-| `--zerp-<hue>-tint` | step 900 | step 100 | subtle colored wash: highlight cards, table rows, pills |
+| Token                | Dark     | Light    | Use                                                                                           |
+| -------------------- | -------- | -------- | --------------------------------------------------------------------------------------------- |
+| `--zerp-<hue>`       | step 400 | step 600 | colored text on the page/surface background (Lc ≈ 65; intended for body-size and larger text) |
+| `--zerp-<hue>-solid` | step 600 | step 600 | filled backgrounds: badges, progress fills, filled cells                                      |
+| `--zerp-<hue>-tint`  | step 900 | step 100 | subtle colored wash: highlight cards, table rows, pills                                       |
 
 Shared: `--zerp-on-solid` (near-white; gray-50) — text on any `-solid` background. Solid 600 + white text yields |Lc| ≈ 60+, valid for the bold/large text badges use.
 
@@ -97,23 +97,23 @@ Principle: bare Markdown output must look finished with zero classes; the observ
 
 ### 3.2 Components (~15)
 
-| Class | Purpose / notes |
-|---|---|
-| `.card` | surface bg + border + radius 14px + padding. THE most-repeated deck pattern. Composable with `.tint-<hue>` (tinted bg, hue-text border). |
-| `.cols-2` `.cols-3` `.cols-4` | equal-column grid, 32px gap, `align-items: center`. Replaces `.two-col` (removed). |
-| `.stat` | centered stat unit: child `.value` (3em, mono, 900, accent by default) + `.label` (muted). |
-| `.stat-row` | flex row of `.stat`s, centered, generous gap. Replaces ad-hoc big-number wrappers. `.big-number` class removed. |
-| `.compare` | 1fr auto 1fr grid; two children + CSS-generated centered divider from `data-vs` attribute (default "vs"), faint, bold. |
-| `.flow` | horizontal process row; arrow separators CSS-generated between children (`> * + *::before`), faint. |
-| `.steps` | auto-numbered grid of cards (CSS counters render 01/02/03 in mono accent); children are plain divs with h3 + p. |
-| `.timeline` / `.item` / `.year` / `.label` | kept; year 1.3em mono accent 700, label raised to 1em muted. |
-| `.key-thought` | kept: surface bg, 2px accent border, radius, centered 1.4em/700 text. |
-| `.pill` | inline badge: tint bg + hue text + radius 999 + 700 weight. Hue selected by combining with `.tint-<hue>`; when combined with `.ok`/`.warn`/`.danger`/`.accent`, `.pill` maps the semantic class to the corresponding tint+text pair (overriding the plain text-color meaning those classes have elsewhere). |
-| `.interactive-badge` | kept as named component (tied to the interaction model docs); restyled as a green pill. |
-| `.block-label` | kept: absolute top-left section label; 1em / 700 / uppercase / letter-spacing / **muted** (was 0.8em faint — both fixed). |
-| `.img-row` | kept: flex row of images with surface padding + radius. |
-| `.grid-demo` / `.cell` / `.cell.filled` | kept (niche interactive visual, used by real decks). |
-| `.slide.top` | opt-out of vertical centering (justify-content: flex-start) for content-heavy slides. |
+| Class                                      | Purpose / notes                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.card`                                    | surface bg + border + radius 14px + padding. THE most-repeated deck pattern. Composable with `.tint-<hue>` (tinted bg, hue-text border).                                                                                                                                                                    |
+| `.cols-2` `.cols-3` `.cols-4`              | equal-column grid, 32px gap, `align-items: center`. Replaces `.two-col` (removed).                                                                                                                                                                                                                          |
+| `.stat`                                    | centered stat unit: child `.value` (3em, mono, 900, accent by default) + `.label` (muted).                                                                                                                                                                                                                  |
+| `.stat-row`                                | flex row of `.stat`s, centered, generous gap. Replaces ad-hoc big-number wrappers. `.big-number` class removed.                                                                                                                                                                                             |
+| `.compare`                                 | 1fr auto 1fr grid; two children + CSS-generated centered divider from `data-vs` attribute (default "vs"), faint, bold.                                                                                                                                                                                      |
+| `.flow`                                    | horizontal process row; arrow separators CSS-generated between children (`> * + *::before`), faint.                                                                                                                                                                                                         |
+| `.steps`                                   | auto-numbered grid of cards (CSS counters render 01/02/03 in mono accent); children are plain divs with h3 + p.                                                                                                                                                                                             |
+| `.timeline` / `.item` / `.year` / `.label` | kept; year 1.3em mono accent 700, label raised to 1em muted.                                                                                                                                                                                                                                                |
+| `.key-thought`                             | kept: surface bg, 2px accent border, radius, centered 1.4em/700 text.                                                                                                                                                                                                                                       |
+| `.pill`                                    | inline badge: tint bg + hue text + radius 999 + 700 weight. Hue selected by combining with `.tint-<hue>`; when combined with `.ok`/`.warn`/`.danger`/`.accent`, `.pill` maps the semantic class to the corresponding tint+text pair (overriding the plain text-color meaning those classes have elsewhere). |
+| `.interactive-badge`                       | kept as named component (tied to the interaction model docs); restyled as a green pill.                                                                                                                                                                                                                     |
+| `.block-label`                             | kept: absolute top-left section label; 1em / 700 / uppercase / letter-spacing / **muted** (was 0.8em faint — both fixed).                                                                                                                                                                                   |
+| `.img-row`                                 | kept: flex row of images with surface padding + radius.                                                                                                                                                                                                                                                     |
+| `.grid-demo` / `.cell` / `.cell.filled`    | kept (niche interactive visual, used by real decks).                                                                                                                                                                                                                                                        |
+| `.slide.top`                               | opt-out of vertical centering (justify-content: flex-start) for content-heavy slides.                                                                                                                                                                                                                       |
 
 ### 3.3 Micro-utilities (bounded set)
 
@@ -169,6 +169,7 @@ Suggestions come from the generated `token-contrast.json` (nearest passing token
 ### Testing
 
 Introduce `node:test` (zero new deps) with:
+
 - unit tests: cascade/specificity resolution, em-chain font sizes, var() theme resolution, ancestor background compositing, Lc math against known APCA reference pairs, floor logic;
 - integration fixture: `examples/casino` must check **clean in both themes** — doubles as the migration proof;
 - a deliberately-broken fixture deck asserting each violation class is caught (small text, faint text, hardcoded low-contrast hex, text over image → unverifiable).
@@ -193,19 +194,19 @@ Nice-to-have deliverable: `MIGRATION.md` — LLM-oriented mapping table (old cla
 
 ## 6. Implementation impact map
 
-| Area | Change |
-|---|---|
-| `src/assets/default-styles.css` | becomes hand-authored `base-styles.css` (no raw colors) |
-| `scripts/build.mjs` (+ new generator) | generate token CSS + `token-contrast.json` from `@evilmartians/harmony`; concat into `dist/assets/default-styles.css` |
-| `src/assets/default-runtime.js` | theme manager (resolution order, localStorage, matchMedia), ◐ switch UI, `t` key |
-| `src/presentation.ts` | `--theme` option → `data-zerp-theme`/`data-zerp-default-theme` on `<html>`; `data-zerp-src` on slides |
-| `src/cli.ts` | `--theme` flag parsing for build/serve; new `check` command with `--strict` |
-| `src/server.ts` | pass theme through; print check summary per rebuild |
-| `src/check/` (new) | cascade engine, background resolver, APCA evaluation, report formatting |
-| `src/index.ts` | export `checkPresentation` alongside build/write |
-| `examples/casino` | migrated to new classes/tokens; check-clean fixture |
-| `package.json` | v0.2.0; deps + `@evilmartians/harmony` devDep; `test` script |
-| `llms.txt`, README, CLAUDE.md, AGENTS.md, MIGRATION.md | per §5 |
+| Area                                                   | Change                                                                                                                |
+| ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `src/assets/default-styles.css`                        | becomes hand-authored `base-styles.css` (no raw colors)                                                               |
+| `scripts/build.mjs` (+ new generator)                  | generate token CSS + `token-contrast.json` from `@evilmartians/harmony`; concat into `dist/assets/default-styles.css` |
+| `src/assets/default-runtime.js`                        | theme manager (resolution order, localStorage, matchMedia), ◐ switch UI, `t` key                                      |
+| `src/presentation.ts`                                  | `--theme` option → `data-zerp-theme`/`data-zerp-default-theme` on `<html>`; `data-zerp-src` on slides                 |
+| `src/cli.ts`                                           | `--theme` flag parsing for build/serve; new `check` command with `--strict`                                           |
+| `src/server.ts`                                        | pass theme through; print check summary per rebuild                                                                   |
+| `src/check/` (new)                                     | cascade engine, background resolver, APCA evaluation, report formatting                                               |
+| `src/index.ts`                                         | export `checkPresentation` alongside build/write                                                                      |
+| `examples/casino`                                      | migrated to new classes/tokens; check-clean fixture                                                                   |
+| `package.json`                                         | v0.2.0; deps + `@evilmartians/harmony` devDep; `test` script                                                          |
+| `llms.txt`, README, CLAUDE.md, AGENTS.md, MIGRATION.md | per §5                                                                                                                |
 
 ## 7. Risks and mitigations
 

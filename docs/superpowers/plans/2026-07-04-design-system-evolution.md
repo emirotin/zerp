@@ -30,40 +30,42 @@
 
 ## File Structure
 
-| Path | Responsibility |
-|---|---|
-| `scripts/generate-tokens.mjs` | NEW — Harmony hex extraction, theme token tables, tokens CSS + token-contrast JSON generation |
-| `scripts/build.mjs` | MODIFY — call generator, concat tokens + base CSS into `dist/assets/default-styles.css`, emit `dist/check/token-contrast.json` |
-| `src/assets/base-styles.css` | NEW (replaces `default-styles.css`) — hand-authored token-referencing stylesheet |
-| `src/assets/default-styles.css` | DELETE in Task 2 |
-| `src/assets/default-runtime.js` | MODIFY — theme manager + switch wiring + `t` key |
-| `src/presentation.ts` | MODIFY — `theme` option, html attrs, fonts URL, `data-zerp-src` injection, theme-switch markup |
-| `src/cli.ts` | MODIFY — `parseArgs`, `--theme`, `check` command, `--strict` |
-| `src/server.ts` | MODIFY — theme pass-through, post-build check summary |
-| `src/index.ts` | MODIFY — export checker API |
-| `src/check/types.ts` | NEW — `CheckTheme`, `Severity`, `Finding`, `CheckReport`, `DomNode`, `DomElement` |
-| `src/check/vendor.d.ts` | NEW — module declarations for `css-tree`, `apca-w3`, `linkedom` |
-| `src/check/color.ts` | NEW — `Rgba`, `parseColor`, `blend`, `toHex` |
-| `src/check/apca.ts` | NEW — `contrastLc`, `requiredPx`, `neededLc`, floor constants |
-| `src/check/css-model.ts` | NEW — `parseStylesheets` → rules + theme var maps + skipped selectors |
-| `src/check/cascade.ts` | NEW — `StyleResolver` (computed text props, background resolution, var substitution) |
-| `src/check/checker.ts` | NEW — `checkPresentation` orchestration |
-| `src/check/report.ts` | NEW — `formatReport`, `reportHasFailures` |
-| `test/*.test.mjs` | NEW — node:test suites (import from `dist/` and `scripts/`) |
-| `test/fixtures/{clean-deck,broken-deck,kitchen-sink}/slides/…` | NEW — fixture decks |
-| `examples/casino/slides/*` | MODIFY — migrate to new classes/tokens |
-| `llms.txt`, `README.md`, `CLAUDE.md`, `AGENTS.md`, `MIGRATION.md`, `CHANGELOG.md`, `package.json` | MODIFY/NEW — docs + v0.2.0 |
+| Path                                                                                              | Responsibility                                                                                                                 |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `scripts/generate-tokens.mjs`                                                                     | NEW — Harmony hex extraction, theme token tables, tokens CSS + token-contrast JSON generation                                  |
+| `scripts/build.mjs`                                                                               | MODIFY — call generator, concat tokens + base CSS into `dist/assets/default-styles.css`, emit `dist/check/token-contrast.json` |
+| `src/assets/base-styles.css`                                                                      | NEW (replaces `default-styles.css`) — hand-authored token-referencing stylesheet                                               |
+| `src/assets/default-styles.css`                                                                   | DELETE in Task 2                                                                                                               |
+| `src/assets/default-runtime.js`                                                                   | MODIFY — theme manager + switch wiring + `t` key                                                                               |
+| `src/presentation.ts`                                                                             | MODIFY — `theme` option, html attrs, fonts URL, `data-zerp-src` injection, theme-switch markup                                 |
+| `src/cli.ts`                                                                                      | MODIFY — `parseArgs`, `--theme`, `check` command, `--strict`                                                                   |
+| `src/server.ts`                                                                                   | MODIFY — theme pass-through, post-build check summary                                                                          |
+| `src/index.ts`                                                                                    | MODIFY — export checker API                                                                                                    |
+| `src/check/types.ts`                                                                              | NEW — `CheckTheme`, `Severity`, `Finding`, `CheckReport`, `DomNode`, `DomElement`                                              |
+| `src/check/vendor.d.ts`                                                                           | NEW — module declarations for `css-tree`, `apca-w3`, `linkedom`                                                                |
+| `src/check/color.ts`                                                                              | NEW — `Rgba`, `parseColor`, `blend`, `toHex`                                                                                   |
+| `src/check/apca.ts`                                                                               | NEW — `contrastLc`, `requiredPx`, `neededLc`, floor constants                                                                  |
+| `src/check/css-model.ts`                                                                          | NEW — `parseStylesheets` → rules + theme var maps + skipped selectors                                                          |
+| `src/check/cascade.ts`                                                                            | NEW — `StyleResolver` (computed text props, background resolution, var substitution)                                           |
+| `src/check/checker.ts`                                                                            | NEW — `checkPresentation` orchestration                                                                                        |
+| `src/check/report.ts`                                                                             | NEW — `formatReport`, `reportHasFailures`                                                                                      |
+| `test/*.test.mjs`                                                                                 | NEW — node:test suites (import from `dist/` and `scripts/`)                                                                    |
+| `test/fixtures/{clean-deck,broken-deck,kitchen-sink}/slides/…`                                    | NEW — fixture decks                                                                                                            |
+| `examples/casino/slides/*`                                                                        | MODIFY — migrate to new classes/tokens                                                                                         |
+| `llms.txt`, `README.md`, `CLAUDE.md`, `AGENTS.md`, `MIGRATION.md`, `CHANGELOG.md`, `package.json` | MODIFY/NEW — docs + v0.2.0                                                                                                     |
 
 ---
 
 ### Task 1: Harmony token generator
 
 **Files:**
+
 - Modify: `package.json` (deps, `test` script, lint targets)
 - Create: `scripts/generate-tokens.mjs`
 - Test: `test/generate-tokens.test.mjs`
 
 **Interfaces:**
+
 - Produces: `generateTokensCss(): Promise<string>` and `generateTokenContrast(): Promise<{dark: ThemeContrastData, light: ThemeContrastData}>` where `ThemeContrastData = { bg: Record<token,hex>, fg: Record<token,hex>, lc: Record<bgToken, Record<fgToken, number>> }`. Task 2 wires both into the build; Task 7 reads the JSON at runtime.
 - Token names: neutrals `--zerp-bg|surface|border|text|muted|faint`; per hue (`blue green orange purple red amber teal`): `--zerp-<hue>`, `--zerp-<hue>-solid`, `--zerp-<hue>-tint`, `--zerp-<hue>-on-tint`; shared `--zerp-on-solid`; semantic `--zerp-accent|ok|warn|danger`.
 - Steps: dark text/solid/tint/on-tint = 400/600/900/200; light = 600/600/100/800. Neutral steps dark = 950/900/800/100/300/600, light = 100/50/300/900/700/400 (gray hue).
@@ -171,7 +173,9 @@ async function loadHueHex(hue) {
 }
 
 async function loadPalette() {
-  const entries = await Promise.all([...HUES, "gray"].map(async (hue) => [hue, await loadHueHex(hue)]));
+  const entries = await Promise.all(
+    [...HUES, "gray"].map(async (hue) => [hue, await loadHueHex(hue)]),
+  );
   return Object.fromEntries(entries);
 }
 
@@ -270,12 +274,14 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 2: Base stylesheet and build wiring
 
 **Files:**
+
 - Create: `src/assets/base-styles.css`
 - Delete: `src/assets/default-styles.css`
 - Modify: `scripts/build.mjs`
 - Test: `test/build-output.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `generateTokensCss`, `generateTokenContrast` from Task 1.
 - Produces: `dist/assets/default-styles.css` (tokens + base concatenated — `src/presentation.ts` keeps reading this exact path) and `dist/check/token-contrast.json` (read by Task 7's checker via `new URL("./token-contrast.json", import.meta.url)`).
 - CSS class surface (used by Tasks 7, 9, 10): components `.card .cols-2 .cols-3 .cols-4 .stat .stat-row .compare .flow .steps .timeline .key-thought .pill .interactive-badge .block-label .img-row .grid-demo`; utilities `.center .row .stack .spread .grow .lg .xl .sm .mono .muted .accent .ok .warn .danger .blue .green .orange .purple .red .amber .teal .tint-<hue>`; removed classes `.two-col .big-number .quote .accent-green .accent-orange .accent-purple .accent-red`.
@@ -1124,11 +1130,13 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 3: Theming — build options, CLI flag, runtime switch
 
 **Files:**
+
 - Modify: `src/presentation.ts`, `src/cli.ts`, `src/server.ts`, `src/assets/default-runtime.js`, `src/index.ts`
 - Create: `test/fixtures/clean-deck/slides/00-ok.md`
 - Test: `test/presentation.test.mjs`
 
 **Interfaces:**
+
 - Produces: `export type ThemeName = "dark" | "light" | "system"` in `src/presentation.ts`; `BuildOptions.theme?: ThemeName`; `servePresentation(rootDir: string, port: number, options?: { theme?: ThemeName })`; built HTML carries `data-zerp-theme` + `data-zerp-default-theme` on `<html>`, `data-zerp-src="slides/<file>"` on every slide div, and the `#theme-switch` markup. Tasks 7–8 rely on `data-zerp-src`; Task 8 relies on the CLI accepting `--theme`.
 
 - [ ] **Step 1: Create fixture** — `test/fixtures/clean-deck/slides/00-ok.md`:
@@ -1230,76 +1238,76 @@ Replace the `<html>` line, fonts line, and add the theme switch before the nav l
 - [ ] **Step 5: Implement runtime theme manager** — append inside the IIFE of `src/assets/default-runtime.js` (before the final `show(...)` call), plus a `t` handler inside the existing keydown listener:
 
 ```js
-  const THEME_KEY = "zerp-theme";
-  const THEME_ORDER = ["light", "system", "dark"];
-  const themeSwitch = document.getElementById("theme-switch");
-  const themeOptions = themeSwitch ? themeSwitch.querySelector(".theme-options") : null;
+const THEME_KEY = "zerp-theme";
+const THEME_ORDER = ["light", "system", "dark"];
+const themeSwitch = document.getElementById("theme-switch");
+const themeOptions = themeSwitch ? themeSwitch.querySelector(".theme-options") : null;
 
-  function syncThemeSwitch(value) {
-    if (!themeSwitch) {
-      return;
-    }
-    for (const button of themeSwitch.querySelectorAll("[data-theme-choice]")) {
-      button.classList.toggle("selected", button.dataset.themeChoice === value);
-    }
+function syncThemeSwitch(value) {
+  if (!themeSwitch) {
+    return;
   }
-
-  function applyTheme(value) {
-    document.documentElement.dataset.zerpTheme = value;
-    try {
-      localStorage.setItem(THEME_KEY, value);
-    } catch {
-      /* storage unavailable */
-    }
-    syncThemeSwitch(value);
+  for (const button of themeSwitch.querySelectorAll("[data-theme-choice]")) {
+    button.classList.toggle("selected", button.dataset.themeChoice === value);
   }
+}
 
-  function cycleTheme() {
-    const current = document.documentElement.dataset.zerpTheme || "system";
-    const index = THEME_ORDER.indexOf(current);
-    applyTheme(THEME_ORDER[(index + 1) % THEME_ORDER.length]);
+function applyTheme(value) {
+  document.documentElement.dataset.zerpTheme = value;
+  try {
+    localStorage.setItem(THEME_KEY, value);
+  } catch {
+    /* storage unavailable */
   }
+  syncThemeSwitch(value);
+}
 
-  function initTheme() {
-    let stored = null;
-    try {
-      stored = localStorage.getItem(THEME_KEY);
-    } catch {
-      /* storage unavailable */
-    }
-    const value = THEME_ORDER.includes(stored)
-      ? stored
-      : document.documentElement.dataset.zerpDefaultTheme || "system";
-    document.documentElement.dataset.zerpTheme = value;
-    syncThemeSwitch(value);
+function cycleTheme() {
+  const current = document.documentElement.dataset.zerpTheme || "system";
+  const index = THEME_ORDER.indexOf(current);
+  applyTheme(THEME_ORDER[(index + 1) % THEME_ORDER.length]);
+}
+
+function initTheme() {
+  let stored = null;
+  try {
+    stored = localStorage.getItem(THEME_KEY);
+  } catch {
+    /* storage unavailable */
   }
+  const value = THEME_ORDER.includes(stored)
+    ? stored
+    : document.documentElement.dataset.zerpDefaultTheme || "system";
+  document.documentElement.dataset.zerpTheme = value;
+  syncThemeSwitch(value);
+}
 
-  if (themeSwitch && themeOptions) {
-    const trigger = themeSwitch.querySelector(".theme-trigger");
-    if (trigger) {
-      trigger.addEventListener("click", () => {
-        themeOptions.hidden = !themeOptions.hidden;
-      });
-    }
-    themeOptions.addEventListener("click", (event) => {
-      const choice = event.target.closest("[data-theme-choice]");
-      if (choice) {
-        applyTheme(choice.dataset.themeChoice);
-        themeOptions.hidden = true;
-      }
+if (themeSwitch && themeOptions) {
+  const trigger = themeSwitch.querySelector(".theme-trigger");
+  if (trigger) {
+    trigger.addEventListener("click", () => {
+      themeOptions.hidden = !themeOptions.hidden;
     });
   }
+  themeOptions.addEventListener("click", (event) => {
+    const choice = event.target.closest("[data-theme-choice]");
+    if (choice) {
+      applyTheme(choice.dataset.themeChoice);
+      themeOptions.hidden = true;
+    }
+  });
+}
 
-  initTheme();
+initTheme();
 ```
 
 Inside the keydown handler add:
 
 ```js
-    if (event.key === "t" || event.key === "T") {
-      event.preventDefault();
-      cycleTheme();
-    }
+if (event.key === "t" || event.key === "T") {
+  event.preventDefault();
+  cycleTheme();
+}
 ```
 
 - [ ] **Step 6: Thread theme through CLI and server**
@@ -1349,15 +1357,15 @@ function parseTheme(raw: string | undefined): ThemeName {
 Replace the `process.argv` destructuring with:
 
 ```ts
-  const { values, positionals } = parseArgs({
-    args: process.argv.slice(2),
-    allowPositionals: true,
-    options: {
-      theme: { type: "string" },
-      strict: { type: "boolean", default: false },
-    },
-  });
-  const [command, firstArg, secondArg] = positionals;
+const { values, positionals } = parseArgs({
+  args: process.argv.slice(2),
+  allowPositionals: true,
+  options: {
+    theme: { type: "string" },
+    strict: { type: "boolean", default: false },
+  },
+});
+const [command, firstArg, secondArg] = positionals;
 ```
 
 Pass `theme: parseTheme(values.theme)` to `writePresentation`, and `{ theme: parseTheme(values.theme) }` as third arg to `servePresentation`. Import `ThemeName` from `./presentation.js`. Update `printUsage` strings to `zerp serve [deck-dir] [port] [--theme dark|light|system]` and `zerp build [deck-dir] [--theme dark|light|system]`.
@@ -1386,10 +1394,12 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 4: Checker foundations — color parsing and APCA wrappers
 
 **Files:**
+
 - Create: `src/check/types.ts`, `src/check/vendor.d.ts`, `src/check/color.ts`, `src/check/apca.ts`
 - Test: `test/color.test.mjs`, `test/apca.test.mjs`
 
 **Interfaces:**
+
 - Produces (consumed by Tasks 5–8):
 
 ```ts
@@ -1422,14 +1432,19 @@ export interface DomElement extends DomNode {
   matches(selector: string): boolean;
 }
 // color.ts
-export interface Rgba { r: number; g: number; b: number; a: number }
+export interface Rgba {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
 export function parseColor(value: string): Rgba | null;
 export function blend(fg: Rgba, bg: Rgba): Rgba;
 export function toHex(color: Rgba): string;
 // apca.ts
 export const MIN_WARN_PX = 16;
 export const MIN_ERROR_PX = 14;
-export function contrastLc(fg: Rgba, bg: Rgba): number;          // signed Lc
+export function contrastLc(fg: Rgba, bg: Rgba): number; // signed Lc
 export function requiredPx(lc: number, weight: number): number | null; // null = unusable at any size
 export function neededLc(px: number, weight: number): number | null;
 ```
@@ -1636,8 +1651,7 @@ export function blend(fg: Rgba, bg: Rgba): Rgba {
   if (a === 0) {
     return { r: 0, g: 0, b: 0, a: 0 };
   }
-  const mix = (f: number, b: number): number =>
-    Math.round((f * fg.a + b * bg.a * (1 - fg.a)) / a);
+  const mix = (f: number, b: number): number => Math.round((f * fg.a + b * bg.a * (1 - fg.a)) / a);
   return { r: mix(fg.r, bg.r), g: mix(fg.g, bg.g), b: mix(fg.b, bg.b), a };
 }
 
@@ -1708,10 +1722,12 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 5: CSS model — rules, specificity, theme variables
 
 **Files:**
+
 - Create: `src/check/css-model.ts`
 - Test: `test/css-model.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `CheckTheme` from `./types.js`.
 - Produces (consumed by Task 6's resolver and Task 7's checker):
 
@@ -1722,7 +1738,10 @@ export interface StyleRule {
   order: number;
   declarations: ReadonlyMap<string, string>;
 }
-export interface StyleSheetInput { css: string; origin: "framework" | "deck" }
+export interface StyleSheetInput {
+  css: string;
+  origin: "framework" | "deck";
+}
 export interface CssModel {
   rules: StyleRule[];
   themeVars: Record<CheckTheme, Map<string, string>>;
@@ -1929,21 +1948,28 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 6: Cascade resolver — computed text style and effective background
 
 **Files:**
+
 - Create: `src/check/cascade.ts`
 - Test: `test/cascade.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `CssModel`, `StyleRule` (Task 5); `parseColor`, `blend`, `Rgba` (Task 4); `DomElement` (Task 4 types).
 - Produces (consumed by Task 7):
 
 ```ts
-export interface ComputedText { color: string; fontSizePx: number; fontWeight: number; opacity: number }
+export interface ComputedText {
+  color: string;
+  fontSizePx: number;
+  fontWeight: number;
+  opacity: number;
+}
 export type BackgroundResult =
   | { kind: "color"; color: Rgba }
   | { kind: "unverifiable"; reason: string };
 export class StyleResolver {
   constructor(model: CssModel, vars: Map<string, string>);
-  resolveVars(value: string): string;      // leaves "unresolved" placeholder for unknown vars
+  resolveVars(value: string): string; // leaves "unresolved" placeholder for unknown vars
   computedFor(el: DomElement): ComputedText; // color kept raw (may contain var()); size/weight resolved
   backgroundFor(el: DomElement): BackgroundResult;
 }
@@ -2233,7 +2259,8 @@ export class StyleResolver {
     const color = !colorRaw || colorRaw === "inherit" ? parentComputed.color : colorRaw;
     const opacityRaw = Number.parseFloat(own.get("opacity") ?? "1");
     const opacity =
-      parentComputed.opacity * (Number.isNaN(opacityRaw) ? 1 : Math.min(Math.max(opacityRaw, 0), 1));
+      parentComputed.opacity *
+      (Number.isNaN(opacityRaw) ? 1 : Math.min(Math.max(opacityRaw, 0), 1));
     const computed: ComputedText = { color, fontSizePx, fontWeight, opacity };
     this.computedCache.set(el, computed);
     return computed;
@@ -2294,18 +2321,22 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 7: Checker core and report formatting
 
 **Files:**
+
 - Create: `src/check/checker.ts`, `src/check/report.ts`
 - Create: `test/fixtures/broken-deck/slides/00-bad.html`
 - Modify: `src/index.ts`
 - Test: `test/checker.test.mjs`
 
 **Interfaces:**
+
 - Consumes: everything from Tasks 4–6; `buildPresentationHtml` from `../presentation.js`; `dist/check/token-contrast.json` (Task 2) via `new URL("./token-contrast.json", import.meta.url)`.
 - Produces:
 
 ```ts
 // checker.ts
-export interface CheckOptions { rootDir: string }
+export interface CheckOptions {
+  rootDir: string;
+}
 export async function checkPresentation(options: CheckOptions): Promise<CheckReport>;
 // report.ts
 export function formatReport(report: CheckReport, options?: { summaryOnly?: boolean }): string;
@@ -2346,7 +2377,11 @@ test("broken deck produces the expected finding classes in both themes", async (
   const messages = report.findings.map((f) => `${f.theme}:${f.severity}:${f.message}`);
   assert.ok(messages.some((m) => m.includes("dark:error") && m.includes("below the 14px")));
   assert.ok(messages.some((m) => m.startsWith("light:error")));
-  assert.ok(report.findings.some((f) => f.severity === "unverifiable" && f.message.includes("background image")));
+  assert.ok(
+    report.findings.some(
+      (f) => f.severity === "unverifiable" && f.message.includes("background image"),
+    ),
+  );
   assert.ok(report.findings.some((f) => f.severity === "error" && f.message.includes("#6a6f78")));
   const suggested = report.findings.find((f) => f.suggestion !== null);
   assert.ok(suggested && suggested.suggestion.includes("var(--zerp-"));
@@ -2447,10 +2482,7 @@ function suggestionFor(
   return `use color: ${picks.map((token) => `var(${token})`).join(" or ")}`;
 }
 
-function walkText(
-  el: DomElement,
-  visit: (text: string, parent: DomElement) => void,
-): void {
+function walkText(el: DomElement, visit: (text: string, parent: DomElement) => void): void {
   if (SKIP_TAGS.has(el.tagName)) {
     return;
   }
@@ -2499,8 +2531,20 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
         }
         evaluated.add(parentEl);
         const snippet = snippetOf(text);
-        const push = (severity: Finding["severity"], message: string, suggestion: string | null = null): void => {
-          findings.push({ severity, theme, slideIndex: slideIndex + 1, slideSrc, snippet, message, suggestion });
+        const push = (
+          severity: Finding["severity"],
+          message: string,
+          suggestion: string | null = null,
+        ): void => {
+          findings.push({
+            severity,
+            theme,
+            slideIndex: slideIndex + 1,
+            slideSrc,
+            snippet,
+            message,
+            suggestion,
+          });
         };
         const computed = resolver.computedFor(parentEl);
         const sizePx = Math.round(computed.fontSizePx * 10) / 10;
@@ -2570,10 +2614,7 @@ export function reportHasFailures(report: CheckReport, strict: boolean): boolean
   );
 }
 
-export function formatReport(
-  report: CheckReport,
-  options: { summaryOnly?: boolean } = {},
-): string {
+export function formatReport(report: CheckReport, options: { summaryOnly?: boolean } = {}): string {
   const lines: string[] = [];
   const summary = `zerp check — ${report.slideCount} slides · ${countBy(report, "dark")} · ${countBy(report, "light")}`;
   if (options.summaryOnly) {
@@ -2654,10 +2695,12 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 8: CLI `check` command and build/serve summaries
 
 **Files:**
+
 - Modify: `src/cli.ts` (full rewrite below), `src/server.ts`
 - Test: `test/cli.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `checkPresentation`, `formatReport`, `reportHasFailures` (Task 7); `parseTheme` groundwork from Task 3.
 - Produces: `zerp check [deck-dir] [--strict]` (exit 1 on errors, or warnings with `--strict`); `zerp build` prints the check summary after writing; serve prints the summary per page build.
 
@@ -2797,11 +2840,11 @@ main().catch((error: unknown) => {
 In `src/server.ts`, after successfully serving `/` (inside the `if` block, after `res.end(html)`), add a non-fatal summary print:
 
 ```ts
-        checkPresentation({ rootDir: resolvedRoot })
-          .then((report) => process.stdout.write(formatReport(report, { summaryOnly: true })))
-          .catch(() => {
-            /* check is advisory during serve */
-          });
+checkPresentation({ rootDir: resolvedRoot })
+  .then((report) => process.stdout.write(formatReport(report, { summaryOnly: true })))
+  .catch(() => {
+    /* check is advisory during serve */
+  });
 ```
 
 with imports:
@@ -2831,12 +2874,14 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 9: Kitchen-sink fixture and casino example migration
 
 **Files:**
+
 - Create: `test/fixtures/kitchen-sink/slides/00-elements.md`, `test/fixtures/kitchen-sink/slides/01-components.html`, `test/fixtures/kitchen-sink/slides/02-utilities.html`
 - Modify: `examples/casino/slides/*.html` and `*.md` (24 files), regenerate `examples/casino/index.html`
 - Modify (calibration only, if needed): `src/assets/base-styles.css`
 - Test: `test/examples.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `checkPresentation` (Task 7), full class surface (Task 2).
 - Produces: proof that framework defaults and a real migrated deck check clean in both themes.
 
@@ -2882,8 +2927,14 @@ Plain paragraph with **bold** and `inline code`.
     <div class="card tint-blue"><p>Tinted card</p></div>
   </div>
   <div class="stat-row">
-    <div class="stat"><div class="value">42%</div><div class="label">share</div></div>
-    <div class="stat"><div class="value">1907</div><div class="label">year</div></div>
+    <div class="stat">
+      <div class="value">42%</div>
+      <div class="label">share</div>
+    </div>
+    <div class="stat">
+      <div class="value">1907</div>
+      <div class="label">year</div>
+    </div>
   </div>
   <div class="compare" data-vs="→">
     <div class="card"><p>Before</p></div>
@@ -2894,13 +2945,28 @@ Plain paragraph with **bold** and `inline code`.
 <div class="slide">
   <h2>More components</h2>
   <div class="steps">
-    <div><h3>Install</h3><p>add the package</p></div>
-    <div><h3>Author</h3><p>write slides</p></div>
-    <div><h3>Present</h3><p>serve the deck</p></div>
+    <div>
+      <h3>Install</h3>
+      <p>add the package</p>
+    </div>
+    <div>
+      <h3>Author</h3>
+      <p>write slides</p>
+    </div>
+    <div>
+      <h3>Present</h3>
+      <p>serve the deck</p>
+    </div>
   </div>
   <div class="timeline">
-    <div class="item"><div class="year">1873</div><div class="label">Monte Carlo</div></div>
-    <div class="item"><div class="year">1962</div><div class="label">Thorp</div></div>
+    <div class="item">
+      <div class="year">1873</div>
+      <div class="label">Monte Carlo</div>
+    </div>
+    <div class="item">
+      <div class="year">1962</div>
+      <div class="label">Thorp</div>
+    </div>
   </div>
   <div class="key-thought"><p>The key takeaway.</p></div>
   <p>
@@ -2908,7 +2974,10 @@ Plain paragraph with **bold** and `inline code`.
     <span class="pill tint-teal">info</span>
   </p>
   <div class="interactive-badge">Interactive</div>
-  <div class="grid-demo"><div class="cell">1</div><div class="cell filled">2</div></div>
+  <div class="grid-demo">
+    <div class="cell">1</div>
+    <div class="cell filled">2</div>
+  </div>
 </div>
 ```
 
@@ -2929,7 +2998,10 @@ Plain paragraph with **bold** and `inline code`.
     <p class="muted">Muted secondary line</p>
   </div>
   <p class="mono">monospace 1907</p>
-  <p><span class="danger">danger</span> and <span class="ok">ok</span> and <span class="accent">accent</span></p>
+  <p>
+    <span class="danger">danger</span> and <span class="ok">ok</span> and
+    <span class="accent">accent</span>
+  </p>
 </div>
 ```
 
@@ -2960,29 +3032,29 @@ Expected: kitchen-sink SHOULD pass (if not, calibrate `base-styles.css` — that
 
 Mechanical replacements across all 24 slide files (classes first, then inline styles, including inline styles emitted by `<script>` blocks):
 
-| Old | New |
-|---|---|
-| `class="two-col"` | `class="cols-2"` |
-| `accent-green` / `accent-orange` / `accent-purple` / `accent-red` | `green` / `orange` / `purple` / `red` |
-| `<div class="quote">…</div>` | `<blockquote>…</blockquote>` |
-| `<div class="big-number">X</div>` + sibling label | `<div class="stat"><div class="value">X</div><div class="label">…</div></div>` (wrap row in `.stat-row`) |
-| `#0d1117` | `var(--zerp-bg)` |
-| `#161b22` | `var(--zerp-surface)` |
-| `#30363d` | `var(--zerp-border)` |
-| `#e6edf3`, `#c9d1d9` | `var(--zerp-text)` |
-| `#8b949e` | `var(--zerp-muted)` |
-| `#484f58` (as text color) | `var(--zerp-muted)` |
-| `#484f58` (borders/decorative) | `var(--zerp-faint)` |
-| `#58a6ff` | `var(--zerp-accent)` |
-| `#3fb950` | `var(--zerp-green)` |
-| `#f0883e` | `var(--zerp-orange)` |
-| `#bc8cff` | `var(--zerp-purple)` |
-| `#f85149` | `var(--zerp-red)` |
-| `#238636` (badge bg) | `var(--zerp-green-solid)` (text `var(--zerp-on-solid)`) |
-| `#0e2a1a` (row highlight) | `.tint-green` class on the `<tr>` |
-| `#2a1a1a` (row highlight) | `.tint-red` class on the `<tr>` |
-| `white` on colored solid circles | `var(--zerp-on-solid)` |
-| ad-hoc `background: #161b22; border: 1px solid #30363d; border-radius: …; padding: …` divs | `class="card"` (drop those inline props) |
+| Old                                                                                        | New                                                                                                      |
+| ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `class="two-col"`                                                                          | `class="cols-2"`                                                                                         |
+| `accent-green` / `accent-orange` / `accent-purple` / `accent-red`                          | `green` / `orange` / `purple` / `red`                                                                    |
+| `<div class="quote">…</div>`                                                               | `<blockquote>…</blockquote>`                                                                             |
+| `<div class="big-number">X</div>` + sibling label                                          | `<div class="stat"><div class="value">X</div><div class="label">…</div></div>` (wrap row in `.stat-row`) |
+| `#0d1117`                                                                                  | `var(--zerp-bg)`                                                                                         |
+| `#161b22`                                                                                  | `var(--zerp-surface)`                                                                                    |
+| `#30363d`                                                                                  | `var(--zerp-border)`                                                                                     |
+| `#e6edf3`, `#c9d1d9`                                                                       | `var(--zerp-text)`                                                                                       |
+| `#8b949e`                                                                                  | `var(--zerp-muted)`                                                                                      |
+| `#484f58` (as text color)                                                                  | `var(--zerp-muted)`                                                                                      |
+| `#484f58` (borders/decorative)                                                             | `var(--zerp-faint)`                                                                                      |
+| `#58a6ff`                                                                                  | `var(--zerp-accent)`                                                                                     |
+| `#3fb950`                                                                                  | `var(--zerp-green)`                                                                                      |
+| `#f0883e`                                                                                  | `var(--zerp-orange)`                                                                                     |
+| `#bc8cff`                                                                                  | `var(--zerp-purple)`                                                                                     |
+| `#f85149`                                                                                  | `var(--zerp-red)`                                                                                        |
+| `#238636` (badge bg)                                                                       | `var(--zerp-green-solid)` (text `var(--zerp-on-solid)`)                                                  |
+| `#0e2a1a` (row highlight)                                                                  | `.tint-green` class on the `<tr>`                                                                        |
+| `#2a1a1a` (row highlight)                                                                  | `.tint-red` class on the `<tr>`                                                                          |
+| `white` on colored solid circles                                                           | `var(--zerp-on-solid)`                                                                                   |
+| ad-hoc `background: #161b22; border: 1px solid #30363d; border-radius: …; padding: …` divs | `class="card"` (drop those inline props)                                                                 |
 
 Then iterate: `node dist/cli.js check examples/casino` → fix every error and warning (expected residuals: captions/hints below 16px → raise to `1em`+/use `.caption`; muted text at small sizes → bigger or weight 700; table cell inline colors → drop, defaults cover them). Keep slide content and interactivity identical — this is a re-skin, not a rewrite.
 
@@ -2992,6 +3064,7 @@ Then iterate: `node dist/cli.js check examples/casino` → fix every error and w
 node dist/cli.js build examples/casino
 pnpm test
 ```
+
 Expected: all tests PASS including `examples.test.mjs`. Open `pnpm demo casino`, flip themes with `t` — verify both themes look coherent.
 
 - [ ] **Step 6: Commit**
@@ -3009,6 +3082,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ### Task 10: Documentation, migration guide, version 0.2.0
 
 **Files:**
+
 - Rewrite: `llms.txt`
 - Create: `MIGRATION.md`, `CHANGELOG.md`
 - Modify: `README.md`, `CLAUDE.md`, `AGENTS.md`, `package.json`
@@ -3114,10 +3188,16 @@ Interactive slide pattern (works in `.html` files and raw HTML inside `.md`):
         slide.querySelector("#demo-output").textContent = "Step " + step;
       }
       slide.addEventListener("slide-next", function () {
-        if (step < 3) { step++; render(); }
+        if (step < 3) {
+          step++;
+          render();
+        }
       });
       slide.addEventListener("slide-prev", function () {
-        if (step > 0) { step--; render(); }
+        if (step > 0) {
+          step--;
+          render();
+        }
       });
       render();
     })();
@@ -3156,32 +3236,32 @@ zerp 0.2.0 replaces the hardcoded GitHub-dark palette with Harmony-based design 
 
 ## 1. Replace removed classes
 
-| 0.1.x | 0.2.0 |
-|---|---|
-| `.two-col` | `.cols-2` |
-| `.big-number` | `.stat` with `.value` + `.label` children (row wrapped in `.stat-row`) |
-| `.quote` div | `<blockquote>` element |
-| `.accent-green` `.accent-orange` `.accent-purple` `.accent-red` | `.green` `.orange` `.purple` `.red` |
+| 0.1.x                                                           | 0.2.0                                                                  |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `.two-col`                                                      | `.cols-2`                                                              |
+| `.big-number`                                                   | `.stat` with `.value` + `.label` children (row wrapped in `.stat-row`) |
+| `.quote` div                                                    | `<blockquote>` element                                                 |
+| `.accent-green` `.accent-orange` `.accent-purple` `.accent-red` | `.green` `.orange` `.purple` `.red`                                    |
 
 `.accent`, `.caption`, `.timeline`, `.key-thought`, `.interactive-badge`, `.block-label`, `.img-row`, `.grid-demo` are unchanged.
 
 ## 2. Replace hardcoded colors with tokens
 
-| Hex | Token |
-|---|---|
-| `#0d1117` | `var(--zerp-bg)` |
-| `#161b22` | `var(--zerp-surface)` (also: replace ad-hoc panel divs with `.card`) |
-| `#30363d` | `var(--zerp-border)` |
-| `#e6edf3`, `#c9d1d9` | `var(--zerp-text)` |
-| `#8b949e` | `var(--zerp-muted)` |
-| `#484f58` | `var(--zerp-muted)` for text, `var(--zerp-faint)` for decoration |
-| `#58a6ff` | `var(--zerp-accent)` |
-| `#3fb950` | `var(--zerp-green)` |
-| `#f0883e` | `var(--zerp-orange)` |
-| `#bc8cff` | `var(--zerp-purple)` |
-| `#f85149` | `var(--zerp-red)` |
-| `#238636` | `var(--zerp-green-solid)` with `var(--zerp-on-solid)` text |
-| dark tinted rows like `#0e2a1a` / `#2a1a1a` | `.tint-green` / `.tint-red` on the row |
+| Hex                                         | Token                                                                |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `#0d1117`                                   | `var(--zerp-bg)`                                                     |
+| `#161b22`                                   | `var(--zerp-surface)` (also: replace ad-hoc panel divs with `.card`) |
+| `#30363d`                                   | `var(--zerp-border)`                                                 |
+| `#e6edf3`, `#c9d1d9`                        | `var(--zerp-text)`                                                   |
+| `#8b949e`                                   | `var(--zerp-muted)`                                                  |
+| `#484f58`                                   | `var(--zerp-muted)` for text, `var(--zerp-faint)` for decoration     |
+| `#58a6ff`                                   | `var(--zerp-accent)`                                                 |
+| `#3fb950`                                   | `var(--zerp-green)`                                                  |
+| `#f0883e`                                   | `var(--zerp-orange)`                                                 |
+| `#bc8cff`                                   | `var(--zerp-purple)`                                                 |
+| `#f85149`                                   | `var(--zerp-red)`                                                    |
+| `#238636`                                   | `var(--zerp-green-solid)` with `var(--zerp-on-solid)` text           |
+| dark tinted rows like `#0e2a1a` / `#2a1a1a` | `.tint-green` / `.tint-red` on the row                               |
 
 ## 3. Behavior changes
 
@@ -3263,6 +3343,7 @@ AGENTS.md — Commands block: add `pnpm test` and `pnpm exec zerp check examples
 ```bash
 pnpm build && pnpm test && pnpm lint && pnpm format:check
 ```
+
 Expected: everything green.
 
 ```bash
@@ -3271,4 +3352,3 @@ git commit -m "Rewrite docs for the 0.2.0 design system
 
 Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 ```
-
