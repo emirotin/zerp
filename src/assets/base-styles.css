@@ -675,7 +675,12 @@ figcaption,
   background: none;
   border: none;
   color: var(--zerp-muted);
-  padding: 4px 8px;
+  padding: 0 8px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
   cursor: pointer;
   font-size: 1em;
   font-weight: 700;
@@ -723,7 +728,12 @@ figcaption,
   color: var(--zerp-muted);
   cursor: pointer;
   font-size: 1em;
-  padding: 4px 8px;
+  padding: 0 8px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .theme-switch .theme-trigger:hover {
@@ -752,7 +762,11 @@ figcaption,
   font-family: "Roboto Mono", monospace;
   font-size: 1em;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 0 12px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .theme-switch .theme-options button.selected {
