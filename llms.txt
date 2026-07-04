@@ -122,7 +122,7 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 ## What to avoid
 
 - No full HTML documents inside slide files; no duplicated framework CSS or runtime.
-- No hardcoded colors anywhere (including inline styles and scripts).
+- No hardcoded colors anywhere (including inline styles and scripts). Sole exemption: colors of depicted real-world objects (a playing card's white face, a roulette pocket's black) may stay literal — they represent the object and must not flip with the theme.
 - No text below 1em; no `--zerp-faint` for text; no `.sm .muted` combos.
 - No `<div class="slide">` wrappers inside Markdown files (added automatically).
 - Do not recreate navigation; do not edit generated `index.html`.
