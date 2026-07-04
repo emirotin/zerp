@@ -3,17 +3,14 @@
   <div class="block-label">Part 3 · Expected Value</div>
   <div class="interactive-badge">🎯 INTERACTIVE</div>
   <h2>Expected value</h2>
-  <p style="font-size: 1.15em; color: #8b949e; text-align: center; margin-bottom: 12px">
+  <p style="font-size: 1.15em; color: var(--zerp-text); text-align: center; margin-bottom: 12px">
     A ₽100 bet on red. What happens <em>on average</em>?
   </p>
 
   <div
     id="ev-steps"
+    class="card"
     style="
-      background: #161b22;
-      border: 2px solid #30363d;
-      border-radius: 14px;
-      padding: 24px 36px;
       max-width: 650px;
       margin: 0 auto;
       font-family: &quot;Roboto Mono&quot;, monospace;
@@ -23,20 +20,29 @@
   ></div>
 
   <div id="ev-result" style="text-align: center; margin-top: 16px; visibility: hidden">
-    <div class="key-thought" style="border-color: #f85149">
-      <p style="color: #f85149; font-size: 1.3em">
+    <div class="key-thought" style="border-color: var(--zerp-red)">
+      <p style="color: var(--zerp-red); font-size: 1.3em">
         On average, you lose
         <span style="font-family: &quot;Roboto Mono&quot;, monospace">₽2.70</span> on every ₽100 bet
       </p>
-      <p style="color: #8b949e; font-size: 1em; margin-top: 8px; font-weight: 400">
+      <p style="color: var(--zerp-text); font-size: 1em; margin-top: 8px; font-weight: 700">
         House edge =
-        <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: #f0883e"
+        <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: var(--zerp-orange)"
           >1/37 ≈ 2.7%</span
         >
       </p>
     </div>
   </div>
-  <p id="ev-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 10px">
+  <p
+    id="ev-hint"
+    style="
+      text-align: center;
+      color: var(--zerp-muted);
+      font-size: 1em;
+      font-weight: 700;
+      margin-top: 10px;
+    "
+  >
     ↓ next step
   </p>
 
@@ -46,16 +52,16 @@
       var step = 0;
       var maxStep = 4;
       var lines = [
-        { html: '<span style="color: #3fb950">P(red)</span> = 18/37', step: 0 },
-        { html: '<span style="color: #f85149">P(not red)</span> = 19/37', step: 1 },
+        { html: '<span style="color: var(--zerp-green)">P(red)</span> = 18/37', step: 0 },
+        { html: '<span style="color: var(--zerp-red)">P(not red)</span> = 19/37', step: 1 },
         { html: "", step: 2 },
         {
-          html: 'E = <span style="color: #3fb950">(18/37)</span> × (+100) + <span style="color: #f85149">(19/37)</span> × (−100)',
+          html: 'E = <span style="color: var(--zerp-green)">(18/37)</span> × (+100) + <span style="color: var(--zerp-red)">(19/37)</span> × (−100)',
           step: 2,
         },
         { html: "E = (1800 − 1900) / 37", step: 3 },
         {
-          html: 'E = <span style="color: #f85149; font-weight: 900">−100/37 ≈ −2.70 ₽</span>',
+          html: 'E = <span style="color: var(--zerp-red); font-weight: 900">−100/37 ≈ −2.70 ₽</span>',
           step: 4,
         },
       ];

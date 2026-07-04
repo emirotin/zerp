@@ -3,42 +3,33 @@
   <div class="block-label">Part 2 · Law of Large Numbers</div>
   <div class="interactive-badge">🎯 INTERACTIVE</div>
   <h2>Experiment: flipping a coin</h2>
-  <div
-    style="
-      display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin: 12px 0;
-      align-items: flex-start;
-      flex-wrap: wrap;
-    "
-  >
-    <div style="text-align: center; min-width: 200px">
-      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Total flips</p>
-      <div id="coin-total" class="big-number" style="font-size: 2.4em">0</div>
+  <div class="stat-row" style="margin: 12px 0">
+    <div class="stat">
+      <div class="label" style="margin-top: 0; margin-bottom: 4px">Total flips</div>
+      <div id="coin-total" class="value" style="font-size: 2.4em">0</div>
     </div>
-    <div style="text-align: center; min-width: 200px">
-      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Heads</p>
+    <div class="stat">
+      <div class="label" style="margin-top: 0; margin-bottom: 4px">Heads</div>
       <div
         id="coin-heads"
         style="
           font-size: 2.4em;
           font-weight: 900;
-          color: #f0883e;
+          color: var(--zerp-orange);
           font-family: &quot;Roboto Mono&quot;, monospace;
         "
       >
         0
       </div>
     </div>
-    <div style="text-align: center; min-width: 200px">
-      <p style="color: #8b949e; font-size: 0.95em; margin-bottom: 4px">Share of heads</p>
+    <div class="stat">
+      <div class="label" style="margin-top: 0; margin-bottom: 4px">Share of heads</div>
       <div
         id="coin-pct"
         style="
           font-size: 2.4em;
           font-weight: 900;
-          color: #3fb950;
+          color: var(--zerp-green);
           font-family: &quot;Roboto Mono&quot;, monospace;
         "
       >
@@ -49,8 +40,8 @@
   <div
     id="coin-bar-wrap"
     style="
-      background: #161b22;
-      border: 2px solid #30363d;
+      background: var(--zerp-surface);
+      border: 2px solid var(--zerp-border);
       border-radius: 10px;
       height: 48px;
       width: 100%;
@@ -65,7 +56,7 @@
       id="coin-bar"
       style="
         height: 100%;
-        background: #f0883e;
+        background: var(--zerp-orange-solid);
         width: 0%;
         transition: width 0.3s;
         border-radius: 8px;
@@ -78,12 +69,20 @@
         top: 0;
         bottom: 0;
         width: 3px;
-        background: #3fb950;
+        background: var(--zerp-green-solid);
         transform: translateX(-50%);
       "
     ></div>
   </div>
-  <p style="text-align: center; color: #484f58; font-size: 0.85em; margin-bottom: 6px">
+  <p
+    style="
+      text-align: center;
+      color: var(--zerp-muted);
+      font-size: 1em;
+      font-weight: 700;
+      margin-bottom: 6px;
+    "
+  >
     Green line = 50%
   </p>
   <div
@@ -97,7 +96,16 @@
       flex-wrap: wrap;
     "
   ></div>
-  <p id="coin-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
+  <p
+    id="coin-hint"
+    style="
+      text-align: center;
+      color: var(--zerp-muted);
+      font-size: 1em;
+      font-weight: 700;
+      margin-top: 6px;
+    "
+  >
     ↓ flip × 1 &nbsp;&nbsp;|&nbsp;&nbsp; press several times to see the pattern
   </p>
   <p
@@ -105,7 +113,7 @@
     style="
       text-align: center;
       font-size: 1.15em;
-      color: #3fb950;
+      color: var(--zerp-green);
       font-weight: 700;
       margin-top: 6px;
       visibility: hidden;
@@ -143,12 +151,12 @@
 
         var lastHtml = "";
         for (var i = 0; i < lastResults.length; i++) {
-          var c = lastResults[i] ? "#f0883e" : "#58a6ff";
+          var c = lastResults[i] ? "var(--zerp-orange-solid)" : "var(--zerp-blue-solid)";
           var t = lastResults[i] ? "H" : "T";
           lastHtml +=
             '<span style="display: inline-flex; width: 30px; height: 30px; border-radius: 50%; background: ' +
             c +
-            '; color: #0d1117; font-weight: 900; font-size: 0.75em; align-items: center; justify-content: center; font-family: Roboto Mono, monospace">' +
+            '; color: var(--zerp-on-solid); font-weight: 900; font-size: 0.75em; align-items: center; justify-content: center; font-family: Roboto Mono, monospace">' +
             t +
             "</span>";
         }
@@ -185,15 +193,15 @@
 <div class="slide">
   <div class="block-label">Part 2 · Law of Large Numbers</div>
   <h2>Law of large numbers</h2>
-  <div class="two-col" style="margin-top: 20px">
+  <div class="cols-2" style="margin-top: 20px">
     <div>
       <p style="font-size: 1.3em; margin-bottom: 16px">
-        <span class="accent-orange" style="font-weight: 700">Few trials</span> means the result
-        jumps around.
+        <span class="orange" style="font-weight: 700">Few trials</span> means the result jumps
+        around.
       </p>
       <p style="font-size: 1.3em; margin-bottom: 16px">
-        <span class="accent-green" style="font-weight: 700">Many trials</span> means the result
-        approaches the theory.
+        <span class="green" style="font-weight: 700">Many trials</span> means the result approaches
+        the theory.
       </p>
       <p style="font-size: 1.3em">
         The more trials you have, the
@@ -201,9 +209,9 @@
       </p>
     </div>
     <div>
-      <div class="key-thought" style="border-color: #f85149">
-        <p style="color: #f85149; font-size: 1.2em">This is the casino's main weapon.</p>
-        <p style="color: #c9d1d9; font-size: 1em; margin-top: 8px; font-weight: 400">
+      <div class="key-thought" style="border-color: var(--zerp-red)">
+        <p style="color: var(--zerp-red); font-size: 1.2em">This is the casino's main weapon.</p>
+        <p style="color: var(--zerp-text); font-size: 1em; margin-top: 8px; font-weight: 700">
           The casino does not win every single round. It plays
           <span class="accent" style="font-weight: 700">thousands of rounds every day</span>. The
           law of large numbers turns a tiny edge into guaranteed profit.

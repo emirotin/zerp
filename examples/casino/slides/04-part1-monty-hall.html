@@ -3,37 +3,45 @@
   <div class="block-label">Part 1 · Monty Hall</div>
   <div class="interactive-badge">🎯 VOTE</div>
   <h2>The Monty Hall problem</h2>
-  <p style="font-size: 1.25em; margin: 12px 0; text-align: center; color: #c9d1d9">
+  <p style="font-size: 1.25em; margin: 12px 0; text-align: center; color: var(--zerp-text)">
     Three doors. Behind one is a car. Behind two are goats.
   </p>
   <div id="monty-doors" style="display: flex; justify-content: center; gap: 24px; margin: 20px 0">
     <div class="door door-selected" id="monty-d1">
       <div class="door-label">Your choice</div>
       <span class="door-icon" style="font-size: 5em">🚪</span>
-      <p style="font-size: 1.35em; color: #58a6ff; margin-top: 6px">Door 1</p>
+      <p style="font-size: 1.35em; font-weight: 700; color: var(--zerp-accent); margin-top: 6px">
+        Door 1
+      </p>
     </div>
     <div class="door" id="monty-d2">
       <div class="door-label">&nbsp;</div>
       <span class="door-icon" style="font-size: 5em">🚪</span>
-      <p style="font-size: 1.35em; color: #8b949e; margin-top: 6px">Door 2</p>
+      <p style="font-size: 1.35em; color: var(--zerp-text); margin-top: 6px">Door 2</p>
     </div>
     <div class="door" id="monty-d3">
       <div class="door-label">&nbsp;</div>
       <span class="door-icon" style="font-size: 5em">🚪</span>
-      <p style="font-size: 1.35em; color: #8b949e; margin-top: 6px">Door 3</p>
+      <p style="font-size: 1.35em; color: var(--zerp-text); margin-top: 6px">Door 3</p>
     </div>
   </div>
   <div id="monty-question" style="visibility: hidden">
     <div class="key-thought">
       <p style="font-size: 1.3em">Do you want to switch your choice?</p>
-      <p style="font-size: 1em; color: #8b949e; margin-top: 6px; font-weight: 400">
+      <p style="font-size: 1em; color: var(--zerp-text); margin-top: 6px; font-weight: 700">
         Who would switch doors? Raise your hand!
       </p>
     </div>
   </div>
   <p
     id="monty-hint"
-    style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 10px"
+    style="
+      text-align: center;
+      color: var(--zerp-muted);
+      font-size: 1em;
+      font-weight: 700;
+      margin-top: 10px;
+    "
   >
     ↓ the host opens a door
   </p>
@@ -52,13 +60,13 @@
         if (step >= 1) {
           d2.className = "door door-opened";
           d2.querySelector(".door-label").textContent = "Opened";
-          d2.querySelector(".door-label").style.color = "#f85149";
+          d2.querySelector(".door-label").style.color = "var(--zerp-red)";
           d2.querySelector(".door-icon").textContent = "🐐";
-          d2.querySelector("p").style.color = "#f85149";
+          d2.querySelector("p").style.color = "var(--zerp-red)";
 
           d3.querySelector(".door-label").textContent = "Switch?";
-          d3.querySelector(".door-label").style.color = "#f0883e";
-          d3.querySelector("p").style.color = "#f0883e";
+          d3.querySelector(".door-label").style.color = "var(--zerp-orange)";
+          d3.querySelector("p").style.color = "var(--zerp-orange)";
 
           question.style.visibility = "visible";
           hint.style.visibility = "hidden";
@@ -67,11 +75,11 @@
           d2.querySelector(".door-label").innerHTML = "&nbsp;";
           d2.querySelector(".door-label").style.color = "";
           d2.querySelector(".door-icon").textContent = "🚪";
-          d2.querySelector("p").style.color = "#8b949e";
+          d2.querySelector("p").style.color = "var(--zerp-text)";
 
           d3.querySelector(".door-label").innerHTML = "&nbsp;";
           d3.querySelector(".door-label").style.color = "";
-          d3.querySelector("p").style.color = "#8b949e";
+          d3.querySelector("p").style.color = "var(--zerp-text)";
 
           question.style.visibility = "hidden";
           hint.style.visibility = "visible";
@@ -100,31 +108,31 @@
 <div class="slide">
   <div class="block-label">Part 1 · Monty Hall</div>
   <h2>Switching is correct!</h2>
-  <div style="display: flex; justify-content: center; gap: 60px; margin: 30px 0">
-    <div style="text-align: center">
-      <p style="font-size: 1.2em; color: #8b949e; margin-bottom: 8px">Stay</p>
-      <div class="big-number" style="color: #f85149">1/3</div>
-      <p style="color: #f85149; font-weight: 700; margin-top: 4px">33%</p>
+  <div class="stat-row" style="margin: 30px 0">
+    <div class="stat">
+      <div class="label" style="margin-bottom: 8px; margin-top: 0">Stay</div>
+      <div class="value" style="color: var(--zerp-red)">1/3</div>
+      <div class="label" style="color: var(--zerp-red); font-weight: 700">33%</div>
     </div>
-    <div style="text-align: center">
-      <p style="font-size: 1.2em; color: #8b949e; margin-bottom: 8px">Switch</p>
-      <div class="big-number" style="color: #3fb950">2/3</div>
-      <p style="color: #3fb950; font-weight: 700; margin-top: 4px">67%</p>
+    <div class="stat">
+      <div class="label" style="margin-bottom: 8px; margin-top: 0">Switch</div>
+      <div class="value" style="color: var(--zerp-green)">2/3</div>
+      <div class="label" style="color: var(--zerp-green); font-weight: 700">67%</div>
     </div>
   </div>
-  <div class="quote">
+  <blockquote>
     Your intuition says "it makes no difference."<br />
     Mathematics says "switch."
-  </div>
-  <p style="text-align: center; margin-top: 16px; font-size: 1.2em; color: #8b949e">
+  </blockquote>
+  <p style="text-align: center; margin-top: 16px; font-size: 1.2em; color: var(--zerp-text)">
     Remember this feeling. This is what the whole lesson is about.
   </p>
 </div>
 
 <style>
   .door {
-    background: #161b22;
-    border: 2px solid #30363d;
+    background: var(--zerp-surface);
+    border: 2px solid var(--zerp-border);
     border-radius: 14px;
     padding: 16px 24px;
     text-align: center;
@@ -132,16 +140,16 @@
     position: relative;
   }
   .door-selected {
-    border-color: #58a6ff;
+    border-color: var(--zerp-accent);
   }
   .door-opened {
-    border-color: #f85149;
-    background: #1c1214;
+    border-color: var(--zerp-red);
+    background: var(--zerp-red-tint);
   }
   .door-label {
-    font-size: 0.75em;
+    font-size: 1em;
     font-weight: 700;
-    color: #58a6ff;
+    color: var(--zerp-accent);
     text-transform: uppercase;
     letter-spacing: 1px;
     margin-bottom: 6px;

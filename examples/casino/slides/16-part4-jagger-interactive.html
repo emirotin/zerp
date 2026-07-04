@@ -3,19 +3,35 @@
   <div class="block-label">Part 4 · Interactive</div>
   <div class="interactive-badge">🎯 INTERACTIVE</div>
   <h2>Find the biased wheel</h2>
-  <p style="font-size: 1.05em; color: #8b949e; text-align: center; margin-bottom: 8px">
+  <p style="font-size: 1.05em; color: var(--zerp-text); text-align: center; margin-bottom: 8px">
     1,000 spins. Expected frequency =
-    <span style="font-family: &quot;Roboto Mono&quot;, monospace; color: #58a6ff">1000/37 ≈ 27</span
+    <span
+      style="
+        font-family: &quot;Roboto Mono&quot;, monospace;
+        color: var(--zerp-accent);
+        font-weight: 700;
+        font-size: 1.1em;
+      "
+      >1000/37 ≈ 27</span
     >. Which numbers look suspicious?
   </p>
   <div id="freq-table" style="margin: 8px 0"></div>
   <div
     id="freq-status"
-    style="text-align: center; margin-top: 8px; font-size: 1.1em; color: #8b949e"
+    style="text-align: center; margin-top: 8px; font-size: 1.1em; color: var(--zerp-text)"
   >
     Press ↓ to highlight anomalies
   </div>
-  <p id="freq-hint" style="text-align: center; color: #484f58; font-size: 0.85em; margin-top: 6px">
+  <p
+    id="freq-hint"
+    style="
+      text-align: center;
+      color: var(--zerp-muted);
+      font-size: 1em;
+      font-weight: 700;
+      margin-top: 6px;
+    "
+  >
     ↓ highlight anomalies
   </p>
 
@@ -73,7 +89,7 @@
 
         for (var c = 0; c < cols; c++) {
           html +=
-            '<div style="display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid #30363d; color: #484f58; font-size: 0.85em"><span>Number</span><span>Frequency</span></div>';
+            '<div style="display: flex; justify-content: space-between; padding: 2px 8px; border-bottom: 1px solid var(--zerp-border); color: var(--zerp-muted); font-size: 1em"><span>Number</span><span>Frequency</span></div>';
         }
 
         for (var r = 0; r < perCol; r++) {
@@ -88,16 +104,16 @@
             var isHigh = freq >= highThresh;
             var isLow = freq <= lowThresh;
             var bg = "transparent";
-            var color = "#c9d1d9";
+            var color = "var(--zerp-text)";
             var weight = "400";
             if (step >= 1) {
               if (isHigh) {
-                bg = "#1a2e1a";
-                color = "#f85149";
+                bg = "var(--zerp-red-tint)";
+                color = "var(--zerp-red)";
                 weight = "900";
               } else if (isLow) {
-                bg = "#1a1a2e";
-                color = "#58a6ff";
+                bg = "var(--zerp-blue-tint)";
+                color = "var(--zerp-accent)";
                 weight = "700";
               }
             }
@@ -128,11 +144,11 @@
           hint.style.visibility = "visible";
         } else if (step === 1) {
           status.innerHTML =
-            '<span style="color: #f85149; font-weight: 700">High ⚠:</span> 8 (39), 16 (41), 27 (42), 32 (44) &nbsp; <span style="color: #58a6ff; font-weight: 700">Low ▼:</span> 19 (16), 24 (17)';
+            '<span style="color: var(--zerp-red); font-weight: 700">High ⚠:</span> 8 (39), 16 (41), 27 (42), 32 (44) &nbsp; <span style="color: var(--zerp-accent); font-weight: 700">Low ▼:</span> 19 (16), 24 (17)';
           hint.innerHTML = "↓ explanation";
         } else {
           status.innerHTML =
-            '<span style="color: #3fb950">On the real wheel, numbers 8, 16, 27, and 32 were <strong>next to each other</strong>. That means one zone of the wheel was biased.</span>';
+            '<span style="color: var(--zerp-green)">On the real wheel, numbers 8, 16, 27, and 32 were <strong>next to each other</strong>. That means one zone of the wheel was biased.</span>';
           hint.style.visibility = "hidden";
         }
       }
