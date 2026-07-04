@@ -47,15 +47,20 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
     "prepublishOnly": "pnpm build",
+    "test": "pnpm build && node --test test/",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
-    "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts .zed",
-    "lint:fix": "oxlint --fix --deny-warnings --node-plugin --import-plugin src scripts .zed"
+    "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts test .zed",
+    "lint:fix": "oxlint --fix --deny-warnings --node-plugin --import-plugin src scripts test .zed"
   },
   "dependencies": {
+    "apca-w3": "^0.1.9",
+    "css-tree": "^3.2.1",
+    "linkedom": "^0.18.12",
     "marked": "^18.0.5"
   },
   "devDependencies": {
+    "@evilmartians/harmony": "^1.4.0",
     "@types/node": "^24.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
