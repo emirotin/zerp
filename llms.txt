@@ -33,6 +33,7 @@ Semantic aliases: `--zerp-accent` (blue), `--zerp-ok` (green), `--zerp-warn` (am
 - Do not combine `.sm` with `.muted` — small muted text fails contrast.
 - Colored text classes are bold by design (emphasis). Do not fight the weight.
 - Captions: use `.caption` or `<figcaption>` — already sized and colored safely.
+- Direct slide children space themselves automatically (14px rhythm). Do not add margins for ordinary spacing; use an inline margin only to deliberately tighten or widen one specific gap. To center a width-capped block horizontally, use `margin-inline: auto` (a full `margin: 0 auto` kills the automatic rhythm).
 
 ## Built-in classes
 

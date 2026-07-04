@@ -74,6 +74,12 @@ hr {
   justify-content: flex-start;
 }
 
+/* Default vertical rhythm between slide blocks. Kept before component
+   rules so a component's own margin wins the specificity tie. */
+.slide > * + * {
+  margin-top: 14px;
+}
+
 .slide h1 {
   font-size: 3.2em;
   font-weight: 900;
