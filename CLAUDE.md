@@ -33,6 +33,13 @@ This repository contains the `zerp` presentation framework.
 - `husky` runs `lint-staged` and a build check on every commit.
 - `.zed/settings.json` and `.zed/format.sh` wire Zed to `oxfmt`.
 
+## Verifying design changes
+
+Never judge visual changes from memory or full-slide thumbnails — measure, then look:
+
+- `pnpm exec zerp check <deck>` — APCA text contrast, font-size floors, and surface-blend detection, for both themes. Run after every styling change; the kitchen-sink fixture (`test/fixtures/kitchen-sink`) must stay clean.
+- `pnpm shot <deck> --slide N --theme dark|light|both` — headless-Chrome screenshots into `shots/` (read the PNGs). Use `--focus ".selector"` to outline an element in magenta and `--scale 2` for close inspection of small elements; `--setup "js"` drives interactive state (e.g. stepping reveals, opening the theme popover).
+
 ## Development
 
 ```bash

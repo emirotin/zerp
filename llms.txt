@@ -74,7 +74,7 @@ After authoring or editing slides, ALWAYS run:
 zerp check .
 ```
 
-Fix every `✗` error and `⚠` warning (font too small, contrast too low — the report names the slide file, the text, and suggests passing tokens). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp build` prints the same summary.
+Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp build` prints the same summary.
 
 ## Interaction model
 

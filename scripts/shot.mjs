@@ -3,7 +3,11 @@
  *
  * Usage (after `pnpm build`):
  *   pnpm shot <deck-dir> [--slide 1,16] [--theme dark|light|both] \
- *     [--setup "js to run after the runtime"] [--out shots] [--size 1920x1080]
+ *     [--setup "js to run after the runtime"] [--focus ".selector"] \
+ *     [--scale 2] [--out shots] [--size 1920x1080]
+ *
+ * --focus outlines matching elements in magenta; --scale renders at a
+ * higher device pixel ratio for close inspection of small elements.
  *
  * Writes <out>/<deck>-s<N>-<theme>.png. Requires Google Chrome or Chromium
  * (override the binary with CHROME_BIN).
@@ -46,6 +50,8 @@ const { values, positionals } = parseArgs({
     slide: { type: "string", default: "1" },
     theme: { type: "string", default: "both" },
     setup: { type: "string" },
+    focus: { type: "string" },
+    scale: { type: "string", default: "1" },
     out: { type: "string", default: "shots" },
     size: { type: "string", default: "1920x1080" },
   },
@@ -87,8 +93,13 @@ try {
     let html = await buildPresentationHtml({ rootDir: deckDir, theme });
     // Freeze the theme: shots must not depend on a stale localStorage profile.
     const freeze = `<script>try{localStorage.setItem("zerp-theme",${JSON.stringify(theme)})}catch{}</script>`;
+    const focus = values.focus
+      ? `<script>for (const el of document.querySelectorAll(${JSON.stringify(values.focus)})) { el.style.outline = "4px solid magenta"; el.style.outlineOffset = "3px"; }</script>`
+      : "";
     const setup = values.setup ? `<script>${values.setup}</script>` : "";
-    html = html.replace("<body>", `<body>${freeze}`).replace("</body>", `${setup}\n</body>`);
+    html = html
+      .replace("<body>", `<body>${freeze}`)
+      .replace("</body>", `${setup}${focus}\n</body>`);
     writeFileSync(tempHtml, html);
 
     for (const slide of slides) {
@@ -101,6 +112,7 @@ try {
           "--disable-gpu",
           "--hide-scrollbars",
           `--window-size=${sizeMatch[1]},${sizeMatch[2]}`,
+          `--force-device-scale-factor=${values.scale}`,
           "--virtual-time-budget=4000",
           `--user-data-dir=${profile}`,
           `--screenshot=${outPath}`,

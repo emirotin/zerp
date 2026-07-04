@@ -153,12 +153,9 @@ kbd {
   font-family: "Roboto Mono", monospace;
   font-size: 0.95em;
   background: var(--zerp-surface);
+  border: 1px solid var(--zerp-border);
   border-radius: 6px;
   padding: 2px 8px;
-}
-
-kbd {
-  border: 1px solid var(--zerp-border);
 }
 
 pre {
@@ -173,12 +170,14 @@ pre {
 
 pre code {
   background: none;
+  border: none;
   padding: 0;
   font-size: 1.05em;
   line-height: 1.6;
 }
 
 blockquote {
+  border: 1px solid var(--zerp-border);
   border-left: 4px solid var(--zerp-accent);
   padding: 14px 20px;
   margin: 16px 0;
@@ -463,6 +462,7 @@ figcaption,
   font-weight: 700;
   background: var(--zerp-green-tint);
   color: var(--zerp-green-on-tint);
+  border: 1px solid var(--zerp-green-solid);
   margin-bottom: 14px;
 }
 
@@ -499,6 +499,7 @@ figcaption,
 
 .img-row img {
   max-height: 300px;
+  border: 1px solid var(--zerp-border);
   border-radius: 10px;
   object-fit: contain;
   background: var(--zerp-surface);
@@ -669,43 +670,83 @@ figcaption,
   background: var(--zerp-teal-tint);
 }
 
+/* Colored emphasis inside a matching tint auto-pairs with the on-tint role. */
+.tint-blue .blue,
+.tint-blue .accent {
+  color: var(--zerp-blue-on-tint);
+}
+
+.tint-green .green,
+.tint-green .ok {
+  color: var(--zerp-green-on-tint);
+}
+
+.tint-orange .orange {
+  color: var(--zerp-orange-on-tint);
+}
+
+.tint-purple .purple {
+  color: var(--zerp-purple-on-tint);
+}
+
+.tint-red .red,
+.tint-red .danger {
+  color: var(--zerp-red-on-tint);
+}
+
+.tint-amber .amber,
+.tint-amber .warn {
+  color: var(--zerp-amber-on-tint);
+}
+
+.tint-teal .teal {
+  color: var(--zerp-teal-on-tint);
+}
+
 .pill.tint-blue,
 .pill.accent {
   background: var(--zerp-blue-tint);
   color: var(--zerp-blue-on-tint);
+  border-color: var(--zerp-blue-solid);
 }
 
 .pill.tint-green,
 .pill.ok {
   background: var(--zerp-green-tint);
   color: var(--zerp-green-on-tint);
+  border-color: var(--zerp-green-solid);
 }
 
 .pill.tint-orange {
   background: var(--zerp-orange-tint);
   color: var(--zerp-orange-on-tint);
+  border-color: var(--zerp-orange-solid);
 }
 
 .pill.tint-purple {
   background: var(--zerp-purple-tint);
   color: var(--zerp-purple-on-tint);
+  border-color: var(--zerp-purple-solid);
 }
 
 .pill.tint-red,
 .pill.danger {
   background: var(--zerp-red-tint);
   color: var(--zerp-red-on-tint);
+  border-color: var(--zerp-red-solid);
 }
 
 .pill.tint-amber,
 .pill.warn {
   background: var(--zerp-amber-tint);
   color: var(--zerp-amber-on-tint);
+  border-color: var(--zerp-amber-solid);
 }
 
 .pill.tint-teal {
   background: var(--zerp-teal-tint);
   color: var(--zerp-teal-on-tint);
+  border-color: var(--zerp-teal-solid);
 }
 
 .nav {

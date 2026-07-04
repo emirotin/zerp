@@ -95,6 +95,10 @@ export function blend(fg: Rgba, bg: Rgba): Rgba {
   return { r: mix(fg.r, bg.r), g: mix(fg.g, bg.g), b: mix(fg.b, bg.b), a };
 }
 
+export function rgbDistance(a: Rgba, b: Rgba): number {
+  return Math.hypot(a.r - b.r, a.g - b.g, a.b - b.b);
+}
+
 export function toHex(color: Rgba): string {
   const part = (n: number): string => n.toString(16).padStart(2, "0");
   return `#${part(color.r)}${part(color.g)}${part(color.b)}`;

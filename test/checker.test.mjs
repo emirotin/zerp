@@ -16,6 +16,11 @@ test("broken deck produces the expected finding classes in both themes", async (
     ),
   );
   assert.ok(report.findings.some((f) => f.severity === "error" && f.message.includes("#6a6f78")));
+  const surface = report.findings.filter(
+    (f) => f.severity === "warning" && f.message.includes("blends into"),
+  );
+  assert.equal(surface.length, 2, "ghost panel flagged in both themes");
+  assert.ok(surface[0].suggestion.includes("stronger tint"));
   const suggested = report.findings.find((f) => f.suggestion !== null);
   assert.ok(suggested && suggested.suggestion.includes("var(--zerp-"));
   assert.deepEqual(report.skippedSelectors, [".door:hover"]);

@@ -13,6 +13,13 @@ export type BackgroundResult =
   | { kind: "color"; color: Rgba }
   | { kind: "unverifiable"; reason: string };
 
+export interface SurfaceInfo {
+  hasBackground: boolean;
+  hasShadow: boolean;
+  borderWidthPx: number;
+  borderColor: Rgba | null;
+}
+
 const ROOT_PX = 16;
 const VIEWPORT = { w: 1920, h: 1080 };
 
@@ -244,5 +251,38 @@ export class StyleResolver {
     }
     const base = parseColor(this.vars.get("--zerp-bg") ?? "") ?? { r: 0, g: 0, b: 0, a: 1 };
     return { kind: "color", color: compositeLayers(layers, base) };
+  }
+
+  surfaceInfo(el: DomElement): SurfaceInfo {
+    const own = this.ownDeclarations(el);
+    const backgroundRaw = own.get("background-color") ?? own.get("background");
+    const hasBackground =
+      backgroundRaw !== undefined &&
+      backgroundRaw.trim() !== "none" &&
+      this.resolveVars(backgroundRaw).trim() !== "transparent";
+    const shadow = own.get("box-shadow");
+    const hasShadow = shadow !== undefined && shadow.trim() !== "none";
+    const borderRaw = own.get("border");
+    let borderWidthPx = 0;
+    let borderColor: Rgba | null = null;
+    if (borderRaw && borderRaw.trim() !== "none" && borderRaw.trim() !== "0") {
+      const resolved = this.resolveVars(borderRaw);
+      const widthMatch = resolved.match(/(\d+(?:\.\d+)?)px/);
+      borderWidthPx = widthMatch ? Number.parseFloat(widthMatch[1] ?? "0") : 1;
+      borderColor = extractColor(resolved);
+    }
+    const borderColorRaw = own.get("border-color");
+    if (borderColorRaw) {
+      borderColor = extractColor(this.resolveVars(borderColorRaw)) ?? borderColor;
+      borderWidthPx = Math.max(borderWidthPx, 1);
+    }
+    const borderWidthRaw = own.get("border-width");
+    if (borderWidthRaw) {
+      const widthMatch = this.resolveVars(borderWidthRaw).match(/(\d+(?:\.\d+)?)px/);
+      if (widthMatch) {
+        borderWidthPx = Number.parseFloat(widthMatch[1] ?? "0");
+      }
+    }
+    return { hasBackground, hasShadow, borderWidthPx, borderColor };
   }
 }

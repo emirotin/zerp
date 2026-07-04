@@ -5,7 +5,7 @@ import { parseHTML } from "linkedom";
 import { buildPresentationHtml } from "../presentation.js";
 import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./apca.js";
 import { StyleResolver } from "./cascade.js";
-import { blend, parseColor, toHex } from "./color.js";
+import { blend, parseColor, rgbDistance, toHex } from "./color.js";
 import { parseStylesheets, type StyleSheetInput } from "./css-model.js";
 import type { CheckReport, CheckTheme, DomElement, DomNode, Finding } from "./types.js";
 
@@ -30,6 +30,11 @@ interface DomQueryable {
 
 const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT", "TITLE"]);
 const THEMES: CheckTheme[] = ["dark", "light"];
+// Surfaces need either a luminance step (APCA clips small deltas to 0 near
+// the poles, so RGB channel distance carries near-white/near-black cases) or
+// a visible border/shadow to read as a distinct panel.
+const SURFACE_MIN_RGB_DIST = 30;
+const SURFACE_MIN_LC = 15;
 
 let tokenContrastCache: TokenContrast | null = null;
 
@@ -96,6 +101,28 @@ function walkText(el: DomElement, visit: (text: string, parent: DomElement) => v
   }
 }
 
+function walkElements(el: DomElement, visit: (el: DomElement) => void): void {
+  if (SKIP_TAGS.has(el.tagName)) {
+    return;
+  }
+  if (el.getAttribute("aria-hidden") === "true" || el.getAttribute("hidden") !== null) {
+    return;
+  }
+  visit(el);
+  for (let i = 0; i < el.childNodes.length; i++) {
+    const child = el.childNodes[i];
+    if (child && child.nodeType === 1) {
+      walkElements(child as DomElement, visit);
+    }
+  }
+}
+
+function elementLabel(el: DomElement): string {
+  const cls = el.getAttribute("class");
+  const label = `<${el.tagName.toLowerCase()}${cls ? ` class="${cls}"` : ""}>`;
+  return label.length > 40 ? `${label.slice(0, 37)}…>` : label;
+}
+
 export async function checkPresentation(options: CheckOptions): Promise<CheckReport> {
   const html = await buildPresentationHtml({ rootDir: options.rootDir });
   const { document } = parseHTML(html) as unknown as { document: DomQueryable };
@@ -113,6 +140,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
   for (const theme of THEMES) {
     const resolver = new StyleResolver(model, model.themeVars[theme]);
     const evaluated = new Set<DomElement>();
+    const surfaceEvaluated = new Set<DomElement>();
     for (let slideIndex = 0; slideIndex < slideNodes.length; slideIndex++) {
       const slide = slideNodes[slideIndex] as DomElement;
       const slideSrc = slide.getAttribute("data-zerp-src");
@@ -174,6 +202,48 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
             suggestionFor(tokenContrast[theme], toHex(bg.color), sizePx, weight),
           );
         }
+      });
+
+      walkElements(slide, (el) => {
+        if (el === slide || surfaceEvaluated.has(el)) {
+          return;
+        }
+        surfaceEvaluated.add(el);
+        const surface = resolver.surfaceInfo(el);
+        if (!surface.hasBackground || surface.hasShadow) {
+          return;
+        }
+        const parent = el.parentElement;
+        if (!parent) {
+          return;
+        }
+        const ownBg = resolver.backgroundFor(el);
+        const behindBg = resolver.backgroundFor(parent);
+        if (ownBg.kind !== "color" || behindBg.kind !== "color") {
+          return;
+        }
+        const dist = rgbDistance(ownBg.color, behindBg.color);
+        const lcSurface = Math.abs(contrastLc(ownBg.color, behindBg.color));
+        if (dist >= SURFACE_MIN_RGB_DIST || lcSurface >= SURFACE_MIN_LC) {
+          return;
+        }
+        if (
+          surface.borderWidthPx >= 1 &&
+          surface.borderColor &&
+          rgbDistance(blend(surface.borderColor, behindBg.color), behindBg.color) >=
+            SURFACE_MIN_RGB_DIST
+        ) {
+          return;
+        }
+        findings.push({
+          severity: "warning",
+          theme,
+          slideIndex: slideIndex + 1,
+          slideSrc,
+          snippet: elementLabel(el),
+          message: `surface ${toHex(ownBg.color)} blends into ${toHex(behindBg.color)} behind it (Δ${Math.round(dist)})`,
+          suggestion: "use a stronger tint, or add a visible border or shadow",
+        });
       });
     }
   }

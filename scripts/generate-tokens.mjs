@@ -15,7 +15,7 @@ const NEUTRAL_STEPS = {
 };
 const HUE_STEPS = {
   dark: { text: "400", solid: "600", tint: "900", onTint: "200" },
-  light: { text: "600", solid: "600", tint: "100", onTint: "800" },
+  light: { text: "600", solid: "600", tint: "200", onTint: "800" },
 };
 
 async function loadHueHex(hue) {
