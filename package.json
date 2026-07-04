@@ -47,7 +47,7 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
     "prepublishOnly": "pnpm build",
-    "test": "pnpm build && node --test test/",
+    "test": "pnpm build && node --test test/*.test.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts test .zed",
