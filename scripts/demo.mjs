@@ -90,8 +90,13 @@ const server = createServer(async (req, res) => {
   }
 });
 
+function parseInt(str, fallback) {
+  const parsed = str ? Number.parseInt(str) : null;
+  return parsed === null || Number.isNaN(parsed) ? fallback : parsed;
+}
+
 const host = "127.0.0.1";
-const port = 8000;
+const port = parseInt(process.argv[3], 8000);
 server.listen(port, host, () => {
   console.log(`Serving examples/${name} at http://${host}:${port} (live reload active)`);
 });
