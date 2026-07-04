@@ -540,67 +540,56 @@ figcaption,
 .accent {
   color: var(--zerp-accent);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .ok {
   color: var(--zerp-ok);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .warn {
   color: var(--zerp-warn);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .danger {
   color: var(--zerp-danger);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .blue {
   color: var(--zerp-blue);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .green {
   color: var(--zerp-green);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .orange {
   color: var(--zerp-orange);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .purple {
   color: var(--zerp-purple);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .red {
   color: var(--zerp-red);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .amber {
   color: var(--zerp-amber);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .teal {
   color: var(--zerp-teal);
   font-weight: 700;
-  font-size: 1.1em;
 }
 
 .tint-blue {

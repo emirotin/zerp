@@ -67,7 +67,7 @@
 
       var svg = '<svg viewBox="0 0 280 280" width="280" height="280">';
       svg +=
-        '<circle cx="140" cy="140" r="136" fill="var(--zerp-surface)" stroke="var(--zerp-border)" stroke-width="2"/>';
+        '<circle cx="140" cy="140" r="136" style="fill: var(--zerp-surface); stroke: var(--zerp-border)" stroke-width="2"/>';
       var n = numbers.length;
       var angleStep = 360 / n;
       for (var i = 0; i < n; i++) {
@@ -115,9 +115,9 @@
           x1i +
           "," +
           y1i +
-          '" fill="' +
+          '" style="fill: ' +
           color +
-          '" stroke="var(--zerp-border)" stroke-width="0.5"/>';
+          '; stroke: var(--zerp-border)" stroke-width="0.5"/>';
         var tx = 140 + ((r + ri) / 2) * Math.cos(am);
         var ty = 140 + ((r + ri) / 2) * Math.sin(am);
         svg +=
@@ -125,14 +125,14 @@
           tx +
           '" y="' +
           ty +
-          '" fill="var(--zerp-on-solid)" font-size="8" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Roboto Mono, monospace">' +
+          '" style="fill: var(--zerp-on-solid)" font-size="8" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Roboto Mono, monospace">' +
           numbers[i] +
           "</text>";
       }
       svg +=
-        '<circle cx="140" cy="140" r="85" fill="var(--zerp-bg)" stroke="var(--zerp-border)" stroke-width="1"/>';
+        '<circle cx="140" cy="140" r="85" style="fill: var(--zerp-bg); stroke: var(--zerp-border)" stroke-width="1"/>';
       svg +=
-        '<text x="140" y="140" fill="var(--zerp-muted)" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, sans-serif">ROULETTE</text>';
+        '<text x="140" y="140" style="fill: var(--zerp-muted)" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, sans-serif">ROULETTE</text>';
       svg += "</svg>";
       wheel.innerHTML = svg;
     })();
