@@ -155,6 +155,9 @@ export class StyleResolver {
     const merged = new Map<string, string>();
     for (const rule of matched) {
       for (const [property, value] of rule.declarations) {
+        if (property === "background") {
+          merged.delete("background-color");
+        }
         merged.set(property, value);
       }
     }
@@ -163,7 +166,11 @@ export class StyleResolver {
       for (const part of inline.split(";")) {
         const idx = part.indexOf(":");
         if (idx > 0) {
-          merged.set(part.slice(0, idx).trim().toLowerCase(), part.slice(idx + 1).trim());
+          const property = part.slice(0, idx).trim().toLowerCase();
+          if (property === "background") {
+            merged.delete("background-color");
+          }
+          merged.set(property, part.slice(idx + 1).trim());
         }
       }
     }

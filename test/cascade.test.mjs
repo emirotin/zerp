@@ -67,3 +67,29 @@ test("background images are unverifiable", () => {
   const resolver = new StyleResolver(model, model.themeVars.dark);
   assert.equal(resolver.backgroundFor(document.querySelector("#t")).kind, "unverifiable");
 });
+
+test("later background shorthand resets earlier background-color longhand", () => {
+  const orderedCss = `${css}
+.a { background-color: #0000ff; }
+.b { background: #ff0000; }
+`;
+  const model = parseStylesheets([{ css: orderedCss, origin: "framework" }]);
+  const { document } = parseHTML('<html><body><div class="a b" id="el">x</div></body></html>');
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+  const result = resolver.backgroundFor(document.querySelector("#el"));
+  assert.equal(result.kind, "color");
+  assert.equal(toHex(result.color), "#ff0000");
+});
+
+test("later background-color longhand overrides earlier background shorthand", () => {
+  const orderedCss = `${css}
+.a { background: #ff0000; }
+.b { background-color: #0000ff; }
+`;
+  const model = parseStylesheets([{ css: orderedCss, origin: "framework" }]);
+  const { document } = parseHTML('<html><body><div class="a b" id="el">x</div></body></html>');
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+  const result = resolver.backgroundFor(document.querySelector("#el"));
+  assert.equal(result.kind, "color");
+  assert.equal(toHex(result.color), "#0000ff");
+});
