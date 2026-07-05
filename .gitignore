@@ -6,4 +6,4 @@ dist/
 examples/**/index.html
 test/**/index.html
 shots/
-.zerp-shot.html
+.zerp-shot*.html

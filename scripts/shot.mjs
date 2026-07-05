@@ -7,7 +7,10 @@
  *     [--scale 2] [--out shots] [--size 1920x1080]
  *
  * --focus outlines matching elements in magenta; --scale renders at a
- * higher device pixel ratio for close inspection of small elements.
+ * higher device pixel ratio for close inspection of small elements;
+ * --no-web-fonts blackholes Google Fonts (fast + offline-safe layout shots).
+ * Shots are capped at 15s per page — a hung network fetch degrades to
+ * fallback rendering instead of hanging the harness.
  *
  * Writes <out>/<deck>-s<N>-<theme>.png. Requires Google Chrome or Chromium
  * (override the binary with CHROME_BIN).
@@ -52,6 +55,7 @@ const { values, positionals } = parseArgs({
     setup: { type: "string" },
     focus: { type: "string" },
     scale: { type: "string", default: "1" },
+    "no-web-fonts": { type: "boolean", default: false },
     out: { type: "string", default: "shots" },
     size: { type: "string", default: "1920x1080" },
   },
@@ -85,7 +89,7 @@ const chrome = findChrome();
 const outDir = path.resolve(values.out);
 mkdirSync(outDir, { recursive: true });
 const deckName = path.basename(deckDir);
-const tempHtml = path.join(deckDir, ".zerp-shot.html");
+const tempHtml = path.join(deckDir, `.zerp-shot-${process.pid}.html`);
 const shots = [];
 
 try {
@@ -111,6 +115,19 @@ try {
           "--headless=new",
           "--disable-gpu",
           "--hide-scrollbars",
+          "--no-first-run",
+          "--no-default-browser-check",
+          "--disable-sync",
+          "--disable-extensions",
+          "--disable-component-update",
+          // Hard cap: a wedged subresource (e.g. throttled webfont fetch)
+          // must not hang the shot; Chrome captures whatever has rendered.
+          "--timeout=15000",
+          ...(values["no-web-fonts"]
+            ? [
+                "--host-resolver-rules=MAP fonts.googleapis.com 127.0.0.1, MAP fonts.gstatic.com 127.0.0.1",
+              ]
+            : []),
           `--window-size=${sizeMatch[1]},${sizeMatch[2]}`,
           `--force-device-scale-factor=${values.scale}`,
           "--virtual-time-budget=4000",
