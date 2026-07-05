@@ -7,7 +7,7 @@ import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./a
 import { StyleResolver } from "./cascade.js";
 import { blend, parseColor, rgbDistance, toHex } from "./color.js";
 import { parseStylesheets, type StyleSheetInput } from "./css-model.js";
-import type { CheckReport, CheckTheme, DomElement, DomNode, Finding } from "./types.js";
+import type { CheckReport, CheckTheme, DomElement, Finding } from "./types.js";
 
 export interface CheckOptions {
   rootDir: string;
@@ -129,8 +129,11 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
   const styleNodes = document.querySelectorAll("style");
   const sheets: StyleSheetInput[] = [];
   for (let i = 0; i < styleNodes.length; i++) {
-    const node = styleNodes[i] as DomNode;
-    sheets.push({ css: node.textContent ?? "", origin: i === 0 ? "framework" : "deck" });
+    const node = styleNodes[i] as DomElement;
+    sheets.push({
+      css: node.textContent ?? "",
+      origin: node.getAttribute("data-zerp") ? "framework" : "deck",
+    });
   }
   const model = parseStylesheets(sheets);
   const slideNodes = document.querySelectorAll(".slide");

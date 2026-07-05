@@ -14,7 +14,7 @@ my-deck/
       cover.jpg
 ```
 
-`zerp` finds `slides/**/*.html` and `slides/**/*.md`, sorts them by filename, rewrites relative asset URLs so slide-local assets keep working, injects default styles/runtime, and serves or builds a single-page deck.
+`zerp` finds `slides/**/*.html` and `slides/**/*.md`, sorts them by filename, rewrites relative asset URLs so slide-local assets keep working, injects default styles/runtime, and serves or builds a single-page deck. Fonts are bundled into the output, so a built deck is one self-contained file that presents fully offline.
 
 ## Maintainer Policy
 

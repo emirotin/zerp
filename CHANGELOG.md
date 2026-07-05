@@ -7,7 +7,8 @@ Breaking — clean redesign of the styling layer; see MIGRATION.md.
 - Design tokens generated from @evilmartians/harmony (OKLCH-designed, APCA-uniform palette); dark AND light themes in every build.
 - Theme selection: `--theme dark|light|system` flag (default `system`), ◐ runtime switch + `t` key, persisted in localStorage.
 - Richer defaults: styled tables, blockquotes, ordered lists, figures, code blocks; new components (.card, .cols-N, .stat/.stat-row, .compare, .flow, .steps, .pill) and bounded utilities.
-- `zerp check`: built-in static APCA contrast + font-size checker covering both themes; summary printed by build/serve; `--strict` promotes warnings.
+- `zerp check`: built-in static APCA contrast + font-size checker covering both themes, including surface-blend detection; summary printed by build/serve; `--strict` promotes warnings.
+- Bundled fonts: Montserrat + Roboto Mono (latin/cyrillic + ext) inlined as woff2 data URLs — built decks are single-file and fully offline, no Google Fonts requests.
 - Removed: `.two-col`, `.big-number`, `.quote`, `.accent-<hue>` classes; hardcoded palette; always-dark default.
 
 ## 0.1.2

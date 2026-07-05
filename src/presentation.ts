@@ -1,6 +1,7 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { fontFaceCss } from "./fonts.js";
 import { renderMarkdownSlides } from "./markdown.js";
 
 const SLIDE_EXTENSIONS = new Set([".html", ".md"]);
@@ -116,9 +117,10 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
   const lang = options.lang ?? "en";
   const theme = options.theme ?? "system";
   const slideFiles = await listSlides(options.rootDir);
-  const [defaultStyles, defaultRuntime] = await Promise.all([
+  const [defaultStyles, defaultRuntime, fontCss] = await Promise.all([
     readAsset("./assets/default-styles.css"),
     readAsset("./assets/default-runtime.js"),
+    fontFaceCss(),
   ]);
 
   if (slideFiles.length === 0) {
@@ -155,13 +157,6 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     "    </div>",
   ].join("\n");
 
-  const fontLink = [
-    "    <link",
-    '      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Roboto+Mono:wght@400;700&display=swap"',
-    '      rel="stylesheet"',
-    "    />",
-  ].join("\n");
-
   return [
     "<!doctype html>",
     `<html lang="${escapeHtml(lang)}" data-zerp-theme="${theme}" data-zerp-default-theme="${theme}">`,
@@ -169,8 +164,10 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     '    <meta charset="UTF-8" />',
     '    <meta name="viewport" content="width=device-width, initial-scale=1.0" />',
     `    <title>${escapeHtml(title)}</title>`,
-    fontLink,
-    "    <style>",
+    '    <style data-zerp="fonts">',
+    fontCss,
+    "    </style>",
+    '    <style data-zerp="base">',
     defaultStyles,
     "    </style>",
     "  </head>",

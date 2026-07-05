@@ -11,6 +11,7 @@ This repository contains the `zerp` presentation framework.
 - `src/server.ts` serves a deck and static assets from a target directory.
 - `src/assets/base-styles.css` contains the hand-authored presentation styles (token references only).
 - `scripts/generate-tokens.mjs` derives theme tokens and the token-contrast table from `@evilmartians/harmony`; the build concatenates tokens + base styles into `dist/assets/default-styles.css`.
+- `src/fonts.ts` inlines Montserrat and Roboto Mono woff2 (latin/cyrillic + ext subsets, from `@fontsource/*`) as base64 `@font-face` — built decks are single-file and fully offline, with no external requests.
 - `src/check/` implements `zerp check`: a static APCA contrast/font-size analyzer (linkedom + css-tree + apca-w3) that runs against both themes.
 - `src/assets/default-runtime.js` contains the browser navigation/runtime logic and theme switch.
 - `scripts/build.mjs` builds TypeScript output into `dist/`, copies assets, and formats generated files.
