@@ -5,12 +5,32 @@ import { createServer } from "node:http";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
-// Imported per request with a cache-busting query so rebuilt framework
-// modules (and their internal asset caches) are always fresh.
-async function loadBuildPresentationHtml() {
-  const moduleUrl = `${pathToFileURL(path.resolve("dist/presentation.js")).href}?t=${Date.now()}`;
-  const mod = await import(moduleUrl);
-  return mod.buildPresentationHtml;
+// Each page build runs in a short-lived child process. Re-importing in
+// this process cannot work: a cache-busting query only refreshes the top
+// module, while its imports (fonts.js, markdown.js) stay pinned to
+// whatever dist/ contained at the first request.
+function buildHtmlFresh(deckDir) {
+  const entry = pathToFileURL(path.resolve("dist/presentation.js")).href;
+  const script = [
+    `const mod = await import(${JSON.stringify(entry)});`,
+    `const html = await mod.buildPresentationHtml({ rootDir: ${JSON.stringify(deckDir)} });`,
+    "process.stdout.write(html);",
+  ].join("\n");
+  return new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, ["--input-type=module", "-e", script], {
+      stdio: ["ignore", "pipe", "inherit"],
+    });
+    const chunks = [];
+    child.stdout.on("data", (chunk) => chunks.push(chunk));
+    child.on("error", reject);
+    child.on("exit", (code) => {
+      if (code === 0) {
+        resolve(Buffer.concat(chunks).toString("utf8"));
+      } else {
+        reject(new Error(`deck build exited with code ${code}`));
+      }
+    });
+  });
 }
 
 const name = process.argv[2];
@@ -74,8 +94,7 @@ const server = createServer(async (req, res) => {
 
   try {
     if (pathname === "/" || pathname === "/index.html") {
-      const buildPresentationHtml = await loadBuildPresentationHtml();
-      const html = await buildPresentationHtml({ rootDir });
+      const html = await buildHtmlFresh(rootDir);
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
       res.end(html.replace("</body>", `${RELOAD_SNIPPET}\n</body>`));
       return;
