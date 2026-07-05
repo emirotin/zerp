@@ -80,6 +80,11 @@ hr {
   margin-top: 14px;
 }
 
+/* The hidden attribute must win over display-setting classes like .row. */
+[hidden] {
+  display: none !important;
+}
+
 .slide h1 {
   font-size: 3.2em;
   font-weight: 900;
@@ -845,10 +850,6 @@ figcaption,
   border: 1px solid var(--zerp-border);
   border-radius: 999px;
   padding: 4px;
-}
-
-.theme-switch .theme-options[hidden] {
-  display: none;
 }
 
 .theme-switch .theme-options button {

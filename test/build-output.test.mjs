@@ -7,6 +7,7 @@ test("built default stylesheet = generated tokens + token-free base styles", asy
   assert.match(css, /--zerp-bg: #12141c;/);
   assert.match(css, /\.card \{/);
   assert.match(css, /\.stat-row \{/);
+  assert.match(css, /\[hidden\] \{[^}]*display: none !important/);
   const afterTokens = css.split("/* base styles */")[1];
   assert.ok(afterTokens, "base styles marker present");
   assert.doesNotMatch(afterTokens, /#[0-9a-fA-F]{3,8}\b/, "no raw hex outside generated tokens");
