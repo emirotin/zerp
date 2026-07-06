@@ -11,6 +11,33 @@
     return Math.max(0, Math.min(index, total - 1));
   }
 
+  // Source badge ("s" key): shows the active slide's deck position and the
+  // source file it came from, read off the data-zerp-* attributes.
+  const sourceBadge = document.createElement("div");
+  sourceBadge.className = "source-badge";
+  sourceBadge.hidden = true;
+  document.body.appendChild(sourceBadge);
+
+  function updateSourceBadge() {
+    if (sourceBadge.hidden) {
+      return;
+    }
+    const active = slides[current];
+    if (!active) {
+      return;
+    }
+    const src = active.getAttribute("data-zerp-src") || "unknown source";
+    const inFile = active.getAttribute("data-zerp-src-slide") || "";
+    const ofFile = Number.parseInt(inFile.split("/")[1] ?? "", 10);
+    const suffix = ofFile > 1 ? " · " + inFile + " in file" : "";
+    sourceBadge.textContent = "#" + String(current + 1) + " · " + src + suffix;
+  }
+
+  function toggleSourceBadge() {
+    sourceBadge.hidden = !sourceBadge.hidden;
+    updateSourceBadge();
+  }
+
   function show(index) {
     current = clamp(index);
     for (const slide of slides) {
@@ -21,6 +48,7 @@
       return;
     }
     active.classList.add("active");
+    updateSourceBadge();
     if (counter) {
       counter.textContent = String(current + 1) + " / " + String(total);
     }
@@ -137,6 +165,10 @@
     if (event.key === "t" || event.key === "T") {
       event.preventDefault();
       cycleTheme();
+    }
+    if (event.key === "s" || event.key === "S") {
+      event.preventDefault();
+      toggleSourceBadge();
     }
   });
 

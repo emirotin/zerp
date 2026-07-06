@@ -976,6 +976,29 @@ figcaption,
   z-index: 100;
 }
 
+.source-badge {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid var(--zerp-border);
+  background: var(--zerp-surface);
+  color: var(--zerp-muted);
+  font-size: 1em;
+  font-weight: 700;
+  font-family: "Roboto Mono", monospace;
+  z-index: 100;
+}
+
+.source-badge[hidden] {
+  display: none;
+}
+
 .progress {
   position: fixed;
   top: 0;
