@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+- Tables inside a `.row` are laid out by the row's gap — their auto-centering margins no longer swallow the row's free space and fling them apart.
+- Decorative glyphs marked `aria-hidden="true"` are skipped by `zerp check` (documented; screen readers ignore them too). Recommended pattern for step markers: absolutely positioned, shown via the parent's `.revealed`, so they never skew centered content or shift layout.
+- Casino specimen: the birthday slide no longer spoils its own vote (odds and live-test prompt are step reveals; the percentages are now the stat values); biased-wheel anomaly markers are paired ▲/▼ triangles, out of flow so the frequency column stays aligned, and the reveal no longer jiggles the slide.
+
 ## 0.3.0
 
 - Utility classes now reliably override component defaults: component "soft defaults" (colors and sizes meant to be overridable) are declared via `:where()`, so `h3.accent`, `p.xl`, `.value.red`, `.year.xl` apply as written. Decks that carried previously-ignored utility classes will now render them — the intent taking effect. Inside `.card`/`.key-thought`/`.steps` cells an `h3` defaults to text color (card title), not muted.

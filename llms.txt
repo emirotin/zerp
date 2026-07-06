@@ -34,6 +34,7 @@ Semantic aliases: `--zerp-accent` (blue), `--zerp-ok` (green), `--zerp-warn` (am
 - Do not combine `.sm` with `.muted` — small muted text fails contrast.
 - For a detail line under a heading or bold statement use `.sub` (1em, bold, muted — safe by construction). This is the idiom for the second line of a `.key-thought` and for card sub-text.
 - Colored text classes are bold by design (emphasis). Do not fight the weight.
+- Decorative glyphs (arrows, ▲/▼ markers) may be small: mark them `aria-hidden="true"` — screen readers and `zerp check` skip them. Keep the real information in text.
 - Captions: use `.caption` or `<figcaption>` — already sized and colored safely.
 - Direct slide children space themselves automatically (14px rhythm). Do not add margins for ordinary spacing; use an inline margin only to deliberately tighten or widen one specific gap. For a width-capped centered block use `.narrow` (or `margin-inline: auto`; a full `margin: 0 auto` kills the automatic rhythm).
 - Utility classes reliably override component defaults (component "soft defaults" are declared with `:where()`): `h3.accent` recolors a heading, `.value.red` recolors a stat, `p.xl` enlarges a paragraph, `.year.xl` enlarges a timeline year. Say what you mean with classes instead of inline styles.
@@ -57,7 +58,7 @@ Components:
 - `.interactive-badge` — marks slides that react to ↓/↑ · `.step-hint` — the "↓ do X" affordance line for stepped slides
 - `.block-label` — small top-left section label
 - `.img-row` — row of images; wrap each img in a `figure` + `figcaption` for captioned entries · `figure` + `figcaption` for single captioned images · `figure.corner` — pin a small reference figure (poster, book cover) to the slide's top-right, out of the content flow
-- `table` is styled by default (add `.mono` for numeric tables, `.compact` for dense centered data grids — combine as `class="mono compact"`; `.tint-green`/`.tint-red` on `<tr>` to highlight rows)
+- `table` is styled by default (add `.mono` for numeric tables, `.compact` for dense centered data grids — combine as `class="mono compact"`; `.tint-green`/`.tint-red` on `<tr>` to highlight rows); side-by-side tables go in a `.row`, which lays them out by its gap
 - `blockquote`, `ol` (numbered takeaways), `ul` (arrow bullets), `code`, `pre`, `kbd` are styled by default
 
 ## Slide recipes
@@ -94,6 +95,7 @@ Mark elements with step attributes; the runtime toggles classes as ↓/↑ move 
 - Space is reserved (visibility, not display), so stepping never reflows a centered slide.
 - Add `.swap` to exchange same-sized content in place (a label, a glyph): swapped elements collapse instead of reserving, so the counterpart takes the slot.
 - Highlight-type steps (element always visible, restyled at step N): keep `data-step` and override in deck CSS — `.my-scope [data-step] { visibility: visible; }` plus `.my-scope [data-step].revealed { /* highlight */ }`.
+- Glyph markers accompanying a highlight (▲ ▼ next to a number): absolutely position them so they never skew centered content, and show them via the parent's `.revealed` (`.my-scope tr.revealed .marker { visibility: visible }`) — no `data-step` needed on the marker itself.
 
 ```html
 <div class="slide">
