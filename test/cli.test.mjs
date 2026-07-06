@@ -26,6 +26,27 @@ test("zerp build prints wrote-path and check summary", () => {
   assert.match(result.stdout, /zerp check — 1 slides/);
 });
 
+test("zerp slides prints the deck mapping", () => {
+  const result = runCli(["slides", "test/fixtures/multi-deck"]);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /1\s+slides\/00-two\.html\s+1\/2\s+Alpha/);
+  assert.match(result.stdout, /4\s+slides\/01-more\.md\s+2\/2\s+Delta/);
+});
+
+test("zerp slides --json emits the machine-readable mapping", () => {
+  const result = runCli(["slides", "test/fixtures/multi-deck", "--json"]);
+  assert.equal(result.status, 0);
+  const slides = JSON.parse(result.stdout);
+  assert.equal(slides.length, 4);
+  assert.deepEqual(slides[1], {
+    index: 2,
+    file: "slides/00-two.html",
+    slideInFile: 2,
+    slidesInFile: 2,
+    title: "Beta",
+  });
+});
+
 test("invalid theme is rejected", () => {
   const result = runCli(["build", "test/fixtures/clean-deck", "--theme", "sepia"]);
   assert.equal(result.status, 1);

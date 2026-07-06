@@ -6,6 +6,7 @@ import { checkPresentation } from "./check/checker.js";
 import { formatReport, reportHasFailures } from "./check/report.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
 import { servePresentation } from "./server.js";
+import { formatSlideList, listDeckSlides } from "./slides.js";
 
 const THEME_NAMES = new Set(["dark", "light", "system"]);
 
@@ -16,6 +17,7 @@ function printUsage(): void {
       "  zerp serve [deck-dir] [port] [--theme dark|light|system]",
       "  zerp build [deck-dir] [--theme dark|light|system]",
       "  zerp check [deck-dir] [--strict]",
+      "  zerp slides [deck-dir] [--json]",
       "",
       "A deck directory must contain slides/.",
       "",
@@ -40,6 +42,7 @@ async function main(): Promise<void> {
     options: {
       theme: { type: "string" },
       strict: { type: "boolean", default: false },
+      json: { type: "boolean", default: false },
     },
   });
   const [command, firstArg, secondArg] = positionals;
@@ -76,6 +79,15 @@ async function main(): Promise<void> {
     const report = await checkPresentation({ rootDir });
     process.stdout.write(formatReport(report));
     process.exitCode = reportHasFailures(report, values.strict ?? false) ? 1 : 0;
+    return;
+  }
+
+  if (command === "slides") {
+    const rootDir = path.resolve(firstArg ?? ".");
+    const slides = await listDeckSlides(rootDir);
+    process.stdout.write(
+      values.json ? `${JSON.stringify(slides, null, 2)}\n` : formatSlideList(slides),
+    );
     return;
   }
 
