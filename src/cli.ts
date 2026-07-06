@@ -11,18 +11,14 @@ import { formatSlideList, listDeckSlides } from "./slides.js";
 const THEME_NAMES = new Set(["dark", "light", "system"]);
 
 function printUsage(): void {
-  process.stderr.write(
-    [
-      "Usage:",
-      "  zerp serve [deck-dir] [port] [--theme dark|light|system]",
-      "  zerp build [deck-dir] [--theme dark|light|system]",
-      "  zerp check [deck-dir] [--strict]",
-      "  zerp slides [deck-dir] [--json]",
-      "",
-      "A deck directory must contain slides/.",
-      "",
-    ].join("\n"),
-  );
+  process.stderr.write(`Usage:
+  zerp serve [deck-dir] [port] [--theme dark|light|system]
+  zerp build [deck-dir] [--theme dark|light|system]
+  zerp check [deck-dir] [--strict]
+  zerp slides [deck-dir] [--json]
+
+A deck directory must contain slides/.
+`);
 }
 
 function parseTheme(raw: string | undefined): ThemeName {

@@ -162,6 +162,20 @@ export async function composeSlidesHtml(rootDir: string): Promise<string> {
   );
 }
 
+const THEME_SWITCH_HTML = `    <div class="theme-switch" id="theme-switch">
+      <button class="theme-trigger" aria-label="Theme">◐</button>
+      <div class="theme-options" hidden>
+        <button data-theme-choice="light">Light</button>
+        <button data-theme-choice="system">Auto</button>
+        <button data-theme-choice="dark">Dark</button>
+      </div>
+    </div>`;
+
+const NAV_HTML = `    <div class="nav">
+      <button id="nav-prev" onclick="prev()">←</button>
+      <button id="nav-next" onclick="next()">→</button>
+    </div>`;
+
 export async function buildPresentationHtml(options: BuildOptions): Promise<string> {
   const title = options.title ?? path.basename(path.resolve(options.rootDir));
   const lang = options.lang ?? "en";
@@ -173,50 +187,30 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     fontFaceCss(),
   ]);
 
-  const themeSwitchHtml = [
-    '    <div class="theme-switch" id="theme-switch">',
-    '      <button class="theme-trigger" aria-label="Theme">◐</button>',
-    '      <div class="theme-options" hidden>',
-    '        <button data-theme-choice="light">Light</button>',
-    '        <button data-theme-choice="system">Auto</button>',
-    '        <button data-theme-choice="dark">Dark</button>',
-    "      </div>",
-    "    </div>",
-  ].join("\n");
-
-  const navHtml = [
-    '    <div class="nav">',
-    '      <button id="nav-prev" onclick="prev()">←</button>',
-    '      <button id="nav-next" onclick="next()">→</button>',
-    "    </div>",
-  ].join("\n");
-
-  return [
-    "<!doctype html>",
-    `<html lang="${escapeHtml(lang)}" data-zerp-theme="${theme}" data-zerp-default-theme="${theme}">`,
-    "  <head>",
-    '    <meta charset="UTF-8" />',
-    '    <meta name="viewport" content="width=device-width, initial-scale=1.0" />',
-    `    <title>${escapeHtml(title)}</title>`,
-    '    <style data-zerp="fonts">',
-    fontCss,
-    "    </style>",
-    '    <style data-zerp="base">',
-    defaultStyles,
-    "    </style>",
-    "  </head>",
-    "  <body>",
-    slidesHtml,
-    '    <div class="progress" id="progress"></div>',
-    '    <div class="counter" id="counter"></div>',
-    themeSwitchHtml,
-    navHtml,
-    "    <script>",
-    defaultRuntime,
-    "    </script>",
-    "  </body>",
-    "</html>",
-  ].join("\n");
+  return `<!doctype html>
+<html lang="${escapeHtml(lang)}" data-zerp-theme="${theme}" data-zerp-default-theme="${theme}">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${escapeHtml(title)}</title>
+    <style data-zerp="fonts">
+${fontCss}
+    </style>
+    <style data-zerp="base">
+${defaultStyles}
+    </style>
+  </head>
+  <body>
+${slidesHtml}
+    <div class="progress" id="progress"></div>
+    <div class="counter" id="counter"></div>
+${THEME_SWITCH_HTML}
+${NAV_HTML}
+    <script>
+${defaultRuntime}
+    </script>
+  </body>
+</html>`;
 }
 
 export async function writePresentation(options: BuildOptions): Promise<string> {

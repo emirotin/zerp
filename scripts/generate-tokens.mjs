@@ -66,7 +66,10 @@ function cssBlock(selector, tokens, scheme) {
   const body = Object.entries(tokens)
     .map(([name, value]) => `  ${name}: ${value};`)
     .join("\n");
-  return `${selector} {\n  color-scheme: ${scheme};\n${body}\n}`;
+  return `${selector} {
+  color-scheme: ${scheme};
+${body}
+}`;
 }
 
 export async function generateTokensCss() {
