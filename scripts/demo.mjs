@@ -71,8 +71,10 @@ const CONTENT_TYPES = {
   ".webp": "image/webp",
 };
 
+// Sets the same sessionStorage flag as the zerp serve reload client, so the
+// runtime replays stepped slides after the reload (see default-runtime.js).
 const RELOAD_SNIPPET =
-  '<script>new EventSource("/_zerp/reload").onmessage=()=>location.reload()</script>';
+  '<script>new EventSource("/_zerp/reload").onmessage=()=>{try{sessionStorage.setItem("zerp-live-reload","1")}catch{}location.reload()}</script>';
 
 const sseClients = new Set();
 
