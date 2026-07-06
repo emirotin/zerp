@@ -47,7 +47,7 @@
       </tr>
       <tr class="hi" data-step="1">
         <td>8</td>
-        <td>39 <span data-step="1">⚠</span></td>
+        <td>39<span class="marker" aria-hidden="true">▲</span></td>
       </tr>
       <tr>
         <td>9</td>
@@ -85,7 +85,7 @@
       </tr>
       <tr class="hi" data-step="1">
         <td>16</td>
-        <td>41 <span data-step="1">⚠</span></td>
+        <td>41<span class="marker" aria-hidden="true">▲</span></td>
       </tr>
       <tr>
         <td>17</td>
@@ -97,7 +97,7 @@
       </tr>
       <tr class="lo" data-step="1">
         <td>19</td>
-        <td>16 <span data-step="1">▼</span></td>
+        <td>16<span class="marker" aria-hidden="true">▼</span></td>
       </tr>
       <tr>
         <td>20</td>
@@ -117,7 +117,7 @@
       </tr>
       <tr class="lo" data-step="1">
         <td>24</td>
-        <td>17 <span data-step="1">▼</span></td>
+        <td>17<span class="marker" aria-hidden="true">▼</span></td>
       </tr>
       <tr>
         <td>25</td>
@@ -135,7 +135,7 @@
       </tr>
       <tr class="hi" data-step="1">
         <td>27</td>
-        <td>42 <span data-step="1">⚠</span></td>
+        <td>42<span class="marker" aria-hidden="true">▲</span></td>
       </tr>
       <tr>
         <td>28</td>
@@ -155,7 +155,7 @@
       </tr>
       <tr class="hi" data-step="1">
         <td>32</td>
-        <td>44 <span data-step="1">⚠</span></td>
+        <td>44<span class="marker" aria-hidden="true">▲</span></td>
       </tr>
       <tr>
         <td>33</td>
@@ -195,6 +195,21 @@
 <style>
   /* Anomaly rows are always visible; step one highlights them in place. */
   .freq tr[data-step] {
+    visibility: visible;
+  }
+  /* Markers sit out of flow at the row edge so numbers stay aligned. */
+  .freq td {
+    position: relative;
+  }
+  .freq .marker {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+    visibility: hidden;
+  }
+  .freq tr[data-step].revealed .marker {
     visibility: visible;
   }
   .freq tr[data-step].revealed.hi {
