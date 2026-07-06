@@ -36,3 +36,29 @@ test("clean deck passes with no findings", async () => {
   assert.equal(reportHasFailures(report, true), false);
   assert.match(formatReport(report), /all clear/);
 });
+
+const findingAt = (overrides) => ({
+  severity: "error",
+  theme: "dark",
+  slideIndex: 30,
+  slideSrc: "slides/28-attention.html",
+  slideSrcSlide: "2/2",
+  snippet: "x",
+  message: "boom",
+  suggestion: null,
+  ...overrides,
+});
+
+test("report shows the in-file ordinal for multi-slide files", () => {
+  const out = formatReport({ slideCount: 42, findings: [findingAt({})], skippedSelectors: [] });
+  assert.match(out, /slide 30 \(slides\/28-attention\.html · 2\/2 in file\) \[dark\]/);
+});
+
+test("report omits the ordinal for single-slide files", () => {
+  const out = formatReport({
+    slideCount: 1,
+    findings: [findingAt({ slideSrcSlide: "1/1" })],
+    skippedSelectors: [],
+  });
+  assert.match(out, /slide 30 \(slides\/28-attention\.html\) \[dark\]/);
+});
