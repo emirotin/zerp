@@ -10,13 +10,23 @@
  * higher device pixel ratio for close inspection of small elements;
  * --no-web-fonts blackholes Google Fonts (fast + offline-safe layout shots).
  * Shots are capped at 15s per page — a hung network fetch degrades to
- * fallback rendering instead of hanging the harness.
+ * fallback rendering instead of hanging the harness. Chrome itself is
+ * killed as soon as the PNG is stable: headless Chrome can hang on
+ * shutdown for minutes, so the harness never waits for a clean exit.
  *
  * Writes <out>/<deck>-s<N>-<theme>.png. Requires Google Chrome or Chromium
  * (override the binary with CHROME_BIN).
  */
-import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { spawn, spawnSync } from "node:child_process";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { parseArgs } from "node:util";
@@ -85,12 +95,25 @@ if (!sizeMatch) {
   process.exit(1);
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const chrome = findChrome();
 const outDir = path.resolve(values.out);
 mkdirSync(outDir, { recursive: true });
 const deckName = path.basename(deckDir);
 const tempHtml = path.join(deckDir, `.zerp-shot-${process.pid}.html`);
 const shots = [];
+
+// Sweep temp files orphaned by killed runs; an hour of age keeps us clear of
+// any run that is still legitimately in flight.
+for (const name of readdirSync(deckDir)) {
+  if (/^\.zerp-shot-\d+\.html$/.test(name)) {
+    const stale = path.join(deckDir, name);
+    if (Date.now() - statSync(stale).mtimeMs > 60 * 60 * 1000) {
+      rmSync(stale, { force: true });
+    }
+  }
+}
 
 try {
   for (const theme of themes) {
@@ -109,7 +132,11 @@ try {
     for (const slide of slides) {
       const outPath = path.join(outDir, `${deckName}-s${slide}-${theme}.png`);
       const profile = mkdtempSync(path.join(tmpdir(), "zerp-shot-"));
-      const result = spawnSync(
+      rmSync(outPath, { force: true });
+      // Chrome writes the PNG quickly but can hang on shutdown for minutes
+      // (observed with headless 149 on macOS). Don't wait for exit: poll for
+      // a stable PNG, then kill the whole process group.
+      const child = spawn(
         chrome,
         [
           "--headless=new",
@@ -135,12 +162,38 @@ try {
           `--screenshot=${outPath}`,
           `file://${tempHtml}#${slide}`,
         ],
-        { stdio: "pipe" },
+        { stdio: ["ignore", "ignore", "pipe"], detached: true },
       );
+      let stderr = "";
+      child.stderr.on("data", (chunk) => {
+        stderr += chunk;
+      });
+      const deadline = Date.now() + 25000;
+      let ok = false;
+      while (Date.now() < deadline) {
+        await sleep(300);
+        if (existsSync(outPath)) {
+          const size = statSync(outPath).size;
+          await sleep(400);
+          if (existsSync(outPath) && statSync(outPath).size === size && size > 0) {
+            ok = true;
+            break;
+          }
+        }
+      }
+      try {
+        process.kill(-child.pid, "SIGKILL");
+      } catch {
+        try {
+          child.kill("SIGKILL");
+        } catch {
+          // already gone
+        }
+      }
       rmSync(profile, { force: true, recursive: true });
-      if (result.status !== 0 || !existsSync(outPath)) {
+      if (!ok) {
         console.error(`Chrome failed for slide ${slide} (${theme}):`);
-        console.error(String(result.stderr));
+        console.error(stderr);
         process.exit(1);
       }
       shots.push(outPath);
