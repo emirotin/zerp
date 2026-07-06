@@ -108,6 +108,20 @@
     }
   }
 
+  // The dev server's live-reload client sets this flag before reloading;
+  // the step counter of the active slide is then replayed so a save while
+  // rehearsing a stepped slide doesn't collapse it back to step 0.
+  const LIVE_RELOAD_FLAG = "zerp-live-reload";
+
+  function persistStep() {
+    try {
+      const slide = slides[current];
+      sessionStorage.setItem("zerp-step:" + String(current), String(stepCounters.get(slide) ?? 0));
+    } catch {
+      /* storage unavailable */
+    }
+  }
+
   function stepForward() {
     const slide = slides[current];
     if (!slide) {
@@ -117,6 +131,7 @@
     if (count < maxStep(slide)) {
       stepCounters.set(slide, count + 1);
       applySteps(slide);
+      persistStep();
     }
     slide.dispatchEvent(new Event("slide-next"));
   }
@@ -130,6 +145,7 @@
     if (count > 0) {
       stepCounters.set(slide, count - 1);
       applySteps(slide);
+      persistStep();
     }
     slide.dispatchEvent(new Event("slide-prev"));
   }
@@ -250,4 +266,21 @@
   initTheme();
 
   show((Number.parseInt(location.hash.slice(1), 10) || 1) - 1);
+
+  // After a live reload, replay the active slide's steps (dispatching
+  // slide-next each time, so scripted slides re-run their sequences too).
+  try {
+    if (sessionStorage.getItem(LIVE_RELOAD_FLAG)) {
+      sessionStorage.removeItem(LIVE_RELOAD_FLAG);
+      const saved = Number.parseInt(
+        sessionStorage.getItem("zerp-step:" + String(current)) ?? "",
+        10,
+      );
+      for (let i = 0; i < saved; i++) {
+        stepForward();
+      }
+    }
+  } catch {
+    /* storage unavailable */
+  }
 })();

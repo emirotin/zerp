@@ -43,7 +43,7 @@ pnpm exec zerp build .
 Commands:
 
 ```bash
-pnpm exec zerp serve                      # serve the current deck on http://localhost:8000
+pnpm exec zerp serve                      # serve the current deck on http://localhost:8000 (live-reloads on save)
 pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default theme
 pnpm exec zerp build --theme light        # write ./index.html (light default)
 pnpm exec zerp check                      # APCA contrast + font-size report (both themes)
