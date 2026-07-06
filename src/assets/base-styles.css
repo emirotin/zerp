@@ -658,6 +658,12 @@ figcaption,
   margin: 16px 0;
 }
 
+/* A table inside a row is laid out by the row's gap — its own auto-centering
+   margins would swallow the row's free space and fling the tables apart. */
+.row > :where(table) {
+  margin: 0;
+}
+
 .stack {
   display: flex;
   flex-direction: column;
