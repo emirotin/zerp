@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.2
+
+- Slide numbering is first-class: "slide N" means the 1-based deck position everywhere — runtime counter, URL hash, `zerp check`, and the new tooling below. File prefixes only order files.
+- Source-tracing attributes on every composed slide div: `data-zerp-src` (source file, as before), plus new `data-zerp-src-slide` ("i/n" ordinal within the file) and `data-zerp-index` (deck position).
+- New `zerp slides [deck-dir] [--json]` command and `listDeckSlides()` / `formatSlideList()` API: the position → source file / in-file ordinal / title mapping, for humans and agents.
+- `zerp check` findings in multi-slide files point at the exact block: `slide 30 (slides/28-attention.html · 2/2 in file)`.
+- Runtime: press `s` to toggle a source badge with the active slide's deck position and source file.
+- Library: `composeSlidesHtml()` exported (annotated slides HTML without the page shell).
+
 ## 0.3.1
 
 - Tables inside a `.row` are laid out by the row's gap — their auto-centering margins no longer swallow the row's free space and fling them apart.

@@ -47,6 +47,7 @@ pnpm exec zerp serve                      # serve the current deck on http://loc
 pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default theme
 pnpm exec zerp build --theme light        # write ./index.html (light default)
 pnpm exec zerp check                      # APCA contrast + font-size report (both themes)
+pnpm exec zerp slides                     # deck position → source file mapping (--json for tooling)
 ```
 
 ## Tooling
@@ -79,6 +80,7 @@ pnpm format:check
 - The framework default CSS and browser runtime are stored as separate source assets and inlined into generated HTML during `serve` and `build`.
 - Colors come from design tokens (`var(--zerp-*)`) generated from the Harmony palette; decks render in dark and light themes. Do not hardcode colors.
 - Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
+- "Slide N" means the 1-based deck position (what the on-screen counter shows) — file prefixes only order files. `zerp slides` prints the position → file mapping; pressing `s` in a running deck shows the active slide's source.
 
 ## Library API
 

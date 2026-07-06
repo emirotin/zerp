@@ -9,6 +9,14 @@
 - Each `.html` file contains one or more `<div class="slide">` blocks. Each `.md` file is auto-wrapped; separate multiple slides with `---` on its own line.
 - Never hand-edit the generated `index.html`.
 
+## Slide numbering
+
+**"Slide N" always means the 1-based deck position** — the number the runtime counter shows to presenter and audience. File name prefixes only order files; a file may contain several slides, so a prefix is NOT a slide number. The runtime counter, the URL hash (`#N`), `zerp check` findings, and `zerp slides` all use deck positions.
+
+- Before editing "slide N", run `zerp slides .` (add `--json` for tooling): it prints each slide's position, source file, in-file ordinal, and title. Confirm the target by its heading.
+- Every composed slide div carries source-tracing attributes: `data-zerp-src` (source file), `data-zerp-src-slide` (`i/n` within that file), `data-zerp-index` (deck position).
+- In a running deck, press `s` to toggle a source badge showing the active slide's position and source file.
+
 ## Design system — colors
 
 Colors come from CSS custom properties (design tokens). The framework ships a dark and a light theme; tokens flip automatically. **Never hardcode hex/rgb colors. Never invent new colors. Pick tokens by meaning.**
