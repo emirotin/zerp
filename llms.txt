@@ -30,28 +30,33 @@ Semantic aliases: `--zerp-accent` (blue), `--zerp-ok` (green), `--zerp-warn` (am
 ## Typography rules
 
 - Body text is 1.25em (~20px). **Never set text below 1em; `.sm` (0.9×) is the only sanctioned shrink.** Prefer trimming content over shrinking text.
+- `.sm` is for inline spans within body text; on a bare paragraph it lands below the 16px floor and `zerp check` will flag it.
 - Do not combine `.sm` with `.muted` — small muted text fails contrast.
+- For a detail line under a heading or bold statement use `.sub` (1em, bold, muted — safe by construction). This is the idiom for the second line of a `.key-thought` and for card sub-text.
 - Colored text classes are bold by design (emphasis). Do not fight the weight.
 - Captions: use `.caption` or `<figcaption>` — already sized and colored safely.
-- Direct slide children space themselves automatically (14px rhythm). Do not add margins for ordinary spacing; use an inline margin only to deliberately tighten or widen one specific gap. To center a width-capped block horizontally, use `margin-inline: auto` (a full `margin: 0 auto` kills the automatic rhythm).
+- Direct slide children space themselves automatically (14px rhythm). Do not add margins for ordinary spacing; use an inline margin only to deliberately tighten or widen one specific gap. For a width-capped centered block use `.narrow` (or `margin-inline: auto`; a full `margin: 0 auto` kills the automatic rhythm).
+- Utility classes reliably override component defaults (component "soft defaults" are declared with `:where()`): `h3.accent` recolors a heading, `.value.red` recolors a stat, `p.xl` enlarges a paragraph, `.year.xl` enlarges a timeline year. Say what you mean with classes instead of inline styles.
 
 ## Built-in classes
 
-Emphasis: `.accent .ok .warn .danger .blue .green .orange .purple .red .amber .teal` (bold colored text) · `.muted` · `.mono` · `.lg .xl .sm` · `.raised` (elevation shadow for images/cards)
-Layout: `.cols-2 .cols-3 .cols-4` (equal grids) · `.row` (centered flex row) · `.stack` (column) · `.spread` (space-between) · `.center` (center text — safe on headings, paragraphs, and containers) · `.grow` · `.slide.top` (top-align a busy slide)
+Emphasis: `.accent .ok .warn .danger .blue .green .orange .purple .red .amber .teal` (bold colored text) · `.muted` · `.mono` · `.lg .xl .sm .sub` · `.raised` (elevation shadow for images/cards)
+Layout: `.cols-2 .cols-3 .cols-4` (equal grids) · `.row` (centered flex row) · `.stack` (column) · `.spread` (space-between) · `.center` (center text — safe on headings, paragraphs, and containers) · `.narrow` (width-capped centered block) · `.grow` · `.slide.top` (top-align a busy slide)
 Components:
 
-- `.card` — surface box; add `.tint-<hue>` for a colored wash
-- `.stat` (`.value` + `.label` children) inside `.stat-row` — big numbers; for stat×operator compositions (`a × b = c`) use `.row` instead so operators center vertically
+- `.card` — surface box; add `.tint-<hue>` for a colored wash, `.edge-<hue>` (or `.edge-ok/.edge-warn/.edge-danger/.edge-accent`) to recolor the border by meaning — works on `.key-thought`, `.timeline .item`, and `.steps` cells too
+- `.stat` (`.value` + `.label` children) inside `.stat-row` — big numbers; color a value with a hue class (`.value.red`); for stat×operator compositions (`a × b = c`) use `.row` instead so operators center vertically
+- `.concept` (`.icon` + `.label` children) — definition-slide header: big emoji icon over a shouty accent label; follow with a plain or `.muted` tagline paragraph
+- `.slide.title` — title-slide recipe: `h1` + `h3` (auto-accent) + `.meta` block for presenter/date
 - `.compare` — two children side by side with a "vs" divider (`data-vs="→"` to customize)
 - `.flow` — process row, arrows auto-inserted between children (works for text spans and for `.card` children)
 - `.steps` — auto-numbered card grid (children: plain divs with `h3` + `p`)
 - `.timeline` with `.item` (`.year`, `.label`) — milestones
 - `.key-thought` — boxed takeaway (one per slide max)
 - `.pill` — inline badge; combine with `.ok/.warn/.danger/.accent` or `.tint-<hue>`
-- `.interactive-badge` — marks slides that react to ↓/↑
+- `.interactive-badge` — marks slides that react to ↓/↑ · `.step-hint` — the "↓ do X" affordance line for stepped slides
 - `.block-label` — small top-left section label
-- `.img-row` — row of images · `figure` + `figcaption` for single captioned images · `figure.corner` — pin a small reference figure (poster, book cover) to the slide's top-right, out of the content flow
+- `.img-row` — row of images; wrap each img in a `figure` + `figcaption` for captioned entries · `figure` + `figcaption` for single captioned images · `figure.corner` — pin a small reference figure (poster, book cover) to the slide's top-right, out of the content flow
 - `table` is styled by default (add `.mono` for numeric tables, `.compact` for dense centered data grids — combine as `class="mono compact"`; `.tint-green`/`.tint-red` on `<tr>` to highlight rows)
 - `blockquote`, `ol` (numbered takeaways), `ul` (arrow bullets), `code`, `pre`, `kbd` are styled by default
 
@@ -78,9 +83,32 @@ Fix every `✗` error and `⚠` warning (font too small, text contrast too low, 
 
 ## Interaction model
 
-`zerp` handles navigation (arrows, space, PageUp/Down, Home/End). Down/Up arrows dispatch `slide-next` / `slide-prev` events to the current slide for stepwise reveals.
+`zerp` handles navigation (arrows, space, PageUp/Down, Home/End). Down/Up arrows advance the current slide's step counter and dispatch `slide-next` / `slide-prev` events to it.
 
-Interactive slide pattern (works in `.html` files and raw HTML inside `.md`):
+### Declarative step reveals (default — no JavaScript)
+
+Mark elements with step attributes; the runtime toggles classes as ↓/↑ move the counter:
+
+- `data-step="N"` — appears once the counter reaches N (gets `.revealed`)
+- `data-until-step="N"` — disappears at N (gets `.step-done`)
+- Space is reserved (visibility, not display), so stepping never reflows a centered slide.
+- Add `.swap` to exchange same-sized content in place (a label, a glyph): swapped elements collapse instead of reserving, so the counterpart takes the slot.
+- Highlight-type steps (element always visible, restyled at step N): keep `data-step` and override in deck CSS — `.my-scope [data-step] { visibility: visible; }` plus `.my-scope [data-step].revealed { /* highlight */ }`.
+
+```html
+<div class="slide">
+  <div class="interactive-badge">Interactive</div>
+  <h2>Example</h2>
+  <p>Always visible.</p>
+  <p data-step="1">Appears on the first ↓.</p>
+  <div class="key-thought" data-step="2"><p>The payoff.</p></div>
+  <p class="step-hint" data-until-step="2">↓ next</p>
+</div>
+```
+
+### Scripted slides (escape hatch for real simulations)
+
+For state that isn't a fixed reveal sequence (random draws, live counters), use a script (works in `.html` files and raw HTML inside `.md`):
 
 ```html
 <div class="slide">
@@ -112,13 +140,14 @@ Interactive slide pattern (works in `.html` files and raw HTML inside `.md`):
 </div>
 ```
 
-Rules: scope queries to `document.currentScript.closest(".slide")`; keep state in the closure; make `slide-prev` reverse state; no global key listeners; no external dependencies. When a script sets colors, use tokens: `el.style.color = "var(--zerp-green)"`.
+Rules: scope queries to `document.currentScript.closest(".slide")`; keep state in the closure; make `slide-prev` reverse state; no global key listeners; no external dependencies. Build static markup in HTML and have the script toggle classes / set `textContent` — do not assemble HTML strings with inline styles (static markup is what `zerp check` can verify). When a script must set a color, use a class or a token: `el.className = "value green"`.
 
 ## Custom CSS policy (last resort)
 
 1. Reach for built-in classes and styled elements first — they cover title, list, column, stat, comparison, flow, step, timeline, quote, table, and image slides.
 2. If a layout truly needs custom CSS, put a `<style>` inside the slide file, use ONLY `var(--zerp-*)` tokens, keep text at 1em+.
-3. Re-run `zerp check` — custom CSS is checked too. Selectors it cannot verify are listed as skipped; keep them simple (tag/class selectors).
+3. A `<style>` block is document-global. For deck-wide styles the convention is a style-only file sorted first (e.g. `slides/00-styles.html` containing just a `<style>` — it contributes no slide).
+4. Re-run `zerp check` — custom CSS is checked too (`:where()` is understood). Selectors it cannot verify are listed as skipped; keep them simple (tag/class selectors).
 
 ## What to avoid
 

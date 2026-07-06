@@ -85,6 +85,29 @@ hr {
   display: none !important;
 }
 
+/* Declarative step reveals: the runtime toggles .revealed on [data-step]
+   elements and .step-done on [data-until-step] elements as ↓/↑ advance the
+   slide's step counter. Space is reserved (visibility, not display) so
+   stepping never reflows a centered slide. Restyle [data-step].revealed in
+   deck CSS for highlight-type steps instead of appear-type steps. */
+[data-step]:not(.revealed) {
+  visibility: hidden;
+}
+
+[data-until-step].step-done {
+  visibility: hidden;
+}
+
+/* Swap-type steps exchange same-sized content in place (a label, a glyph):
+   collapse instead of reserving, so the counterpart can take the slot. */
+[data-step].swap:not(.revealed) {
+  display: none;
+}
+
+[data-until-step].swap.step-done {
+  display: none;
+}
+
 .slide h1 {
   font-size: 3.2em;
   font-weight: 900;
@@ -103,11 +126,23 @@ hr {
   font-size: 1.4em;
   font-weight: 700;
   margin-bottom: 10px;
+}
+
+/* Soft defaults live in :where() so a utility class on the element always
+   wins (e.g. h3.accent, p.xl, .value.red). Structural properties stay in
+   the specific rules above/below and are not meant to be overridden. */
+.slide :where(h3) {
   color: var(--zerp-muted);
 }
 
-.slide p,
-.slide li {
+/* Inside a boxed component an h3 is a card title, not a muted subtitle. */
+.card :where(h3),
+.key-thought :where(h3),
+.steps > * :where(h3) {
+  color: var(--zerp-text);
+}
+
+.slide :where(p, li) {
   font-size: 1.25em;
   line-height: 1.5;
 }
@@ -296,14 +331,20 @@ figcaption,
   font-family: "Roboto Mono", monospace;
   font-size: 3em;
   font-weight: 900;
-  color: var(--zerp-accent);
   line-height: 1.1;
 }
 
+.stat :where(.value) {
+  color: var(--zerp-accent);
+}
+
 .stat .label {
+  margin-top: 6px;
+}
+
+.stat :where(.label) {
   font-size: 1.25em;
   color: var(--zerp-muted);
-  margin-top: 6px;
 }
 
 .stat-row {
@@ -372,7 +413,7 @@ figcaption,
   font-size: 1.25rem;
 }
 
-.flow > .card {
+.flow > :where(.card) {
   font-size: 1rem;
   font-weight: 400;
 }
@@ -423,14 +464,20 @@ figcaption,
 
 .timeline .item .year {
   font-family: "Roboto Mono", monospace;
-  font-size: 1.3em;
   font-weight: 700;
+}
+
+.timeline :where(.item .year) {
+  font-size: 1.3em;
   color: var(--zerp-accent);
 }
 
 .timeline .item .label {
-  font-size: 1em;
   margin-top: 4px;
+}
+
+.timeline :where(.item .label) {
+  font-size: 1em;
 }
 
 .key-thought {
@@ -442,9 +489,44 @@ figcaption,
   text-align: center;
 }
 
-.key-thought p {
+.key-thought :where(p) {
   font-size: 1.4em;
   font-weight: 700;
+}
+
+.key-thought > * + * {
+  margin-top: 8px;
+}
+
+/* Consistent affordance line for stepped slides: "↓ deal the next card". */
+.step-hint {
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--zerp-muted);
+  text-align: center;
+}
+
+/* Definition-slide header: big icon, shouty label; follow with a plain or
+   .muted paragraph for the tagline. */
+.concept {
+  text-align: center;
+}
+
+.concept .icon {
+  font-size: 5em;
+  line-height: 1.2;
+}
+
+.concept .label {
+  margin-top: 10px;
+}
+
+.concept :where(.label) {
+  font-size: 2.4em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  color: var(--zerp-accent);
 }
 
 .pill {
@@ -469,6 +551,26 @@ figcaption,
   color: var(--zerp-green-on-tint);
   border: 1px solid var(--zerp-green-solid);
   margin-bottom: 14px;
+}
+
+/* Title-slide recipe: <div class="slide title"> with h1 + h3 + .meta. */
+.slide.title {
+  text-align: center;
+}
+
+.slide.title h1 {
+  font-size: 4em;
+}
+
+.title :where(h3) {
+  font-size: 1.6em;
+  color: var(--zerp-accent);
+}
+
+.slide.title .meta {
+  margin-top: 36px;
+  color: var(--zerp-muted);
+  line-height: 1.7;
 }
 
 .block-label {
@@ -509,6 +611,11 @@ figcaption,
   object-fit: contain;
   background: var(--zerp-surface);
   padding: 6px;
+}
+
+/* Captioned entries in an image row: wrap each img in a figure. */
+.img-row :where(figure) {
+  margin: 0;
 }
 
 .grid-demo {
@@ -578,6 +685,19 @@ figcaption,
 
 .sm {
   font-size: 0.9em;
+}
+
+/* Detail line under a heading or bold statement (safe muted-at-small). */
+.sub {
+  font-size: 1em;
+  font-weight: 700;
+  color: var(--zerp-muted);
+}
+
+/* Width-capped centered block; margin-inline keeps the vertical rhythm. */
+.narrow {
+  max-width: 720px;
+  margin-inline: auto;
 }
 
 .mono {
@@ -673,6 +793,52 @@ figcaption,
 
 .tint-teal {
   background: var(--zerp-teal-tint);
+}
+
+/* Border emphasis for surface components (.card, .key-thought, .timeline
+   .item, .steps cells): recolors the existing border by meaning. */
+.edge-blue {
+  border-color: var(--zerp-blue);
+}
+
+.edge-green {
+  border-color: var(--zerp-green);
+}
+
+.edge-orange {
+  border-color: var(--zerp-orange);
+}
+
+.edge-purple {
+  border-color: var(--zerp-purple);
+}
+
+.edge-red {
+  border-color: var(--zerp-red);
+}
+
+.edge-amber {
+  border-color: var(--zerp-amber);
+}
+
+.edge-teal {
+  border-color: var(--zerp-teal);
+}
+
+.edge-accent {
+  border-color: var(--zerp-accent);
+}
+
+.edge-ok {
+  border-color: var(--zerp-ok);
+}
+
+.edge-warn {
+  border-color: var(--zerp-warn);
+}
+
+.edge-danger {
+  border-color: var(--zerp-danger);
 }
 
 /* Colored emphasis inside a matching tint auto-pairs with the on-tint role. */

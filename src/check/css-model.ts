@@ -26,13 +26,23 @@ function isSupportedSelector(selector: string): boolean {
   if (selector === ":root" || selector === "html") {
     return true;
   }
-  return !/[[\]+~:]/.test(selector);
+  // :where(...) is matchable and carries zero specificity; strip the groups
+  // before testing for otherwise-unsupported syntax.
+  const withoutWhere = selector.replace(/:where\([^()]*\)/g, "");
+  return !/[[\]+~:]/.test(withoutWhere);
 }
 
-function specificityOf(selectorNode: csstree.CssNode): [number, number, number] {
+function specificityOf(selector: string): [number, number, number] {
+  // :where(...) contributes zero specificity; the supported subset has no
+  // nested parens, so string-stripping the groups is exact.
+  const stripped = selector.replace(/:where\([^()]*\)/g, "").trim();
   let ids = 0;
   let classes = 0;
   let types = 0;
+  if (!stripped) {
+    return [ids, classes, types];
+  }
+  const selectorNode = csstree.parse(stripped, { context: "selector" });
   csstree.walk(selectorNode, (node) => {
     if (node.type === "IdSelector") {
       ids += 1;
@@ -107,7 +117,7 @@ export function parseStylesheets(sheets: StyleSheetInput[]): CssModel {
           }
           rules.push({
             selector,
-            specificity: specificityOf(selectorNode),
+            specificity: specificityOf(selector),
             order: order++,
             declarations,
           });

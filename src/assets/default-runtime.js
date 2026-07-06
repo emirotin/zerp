@@ -44,12 +44,66 @@
     show(current - 1);
   }
 
+  // Declarative reveals: [data-step="N"] appears once the slide's step
+  // counter reaches N; [data-until-step="N"] disappears at N. Custom slide
+  // scripts keep working — slide-next/slide-prev events fire regardless.
+  const stepCounters = new WeakMap();
+
+  function stepTargets(slide) {
+    return Array.from(slide.querySelectorAll("[data-step], [data-until-step]"));
+  }
+
+  function stepAttr(el, name) {
+    const value = Number.parseInt(el.getAttribute(name) ?? "", 10);
+    return Number.isInteger(value) && value > 0 ? value : null;
+  }
+
+  function maxStep(slide) {
+    let max = 0;
+    for (const el of stepTargets(slide)) {
+      max = Math.max(max, stepAttr(el, "data-step") ?? 0, stepAttr(el, "data-until-step") ?? 0);
+    }
+    return max;
+  }
+
+  function applySteps(slide) {
+    const count = stepCounters.get(slide) ?? 0;
+    for (const el of stepTargets(slide)) {
+      const at = stepAttr(el, "data-step");
+      if (at !== null) {
+        el.classList.toggle("revealed", count >= at);
+      }
+      const until = stepAttr(el, "data-until-step");
+      if (until !== null) {
+        el.classList.toggle("step-done", count >= until);
+      }
+    }
+  }
+
   function stepForward() {
-    slides[current]?.dispatchEvent(new Event("slide-next"));
+    const slide = slides[current];
+    if (!slide) {
+      return;
+    }
+    const count = stepCounters.get(slide) ?? 0;
+    if (count < maxStep(slide)) {
+      stepCounters.set(slide, count + 1);
+      applySteps(slide);
+    }
+    slide.dispatchEvent(new Event("slide-next"));
   }
 
   function stepBackward() {
-    slides[current]?.dispatchEvent(new Event("slide-prev"));
+    const slide = slides[current];
+    if (!slide) {
+      return;
+    }
+    const count = stepCounters.get(slide) ?? 0;
+    if (count > 0) {
+      stepCounters.set(slide, count - 1);
+      applySteps(slide);
+    }
+    slide.dispatchEvent(new Event("slide-prev"));
   }
 
   window.next = next;

@@ -8,7 +8,7 @@ declare module "css-tree" {
     block?: { children: { forEach(callback: (node: CssNode) => void): void } } | null;
     children?: { forEach(callback: (node: CssNode) => void): void } | null;
   }
-  export function parse(css: string): CssNode;
+  export function parse(css: string, options?: { context?: string }): CssNode;
   export function generate(node: CssNode): string;
   export function walk(
     node: CssNode,

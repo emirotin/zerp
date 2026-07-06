@@ -81,6 +81,26 @@ test("later background shorthand resets earlier background-color longhand", () =
   assert.equal(toHex(result.color), "#ff0000");
 });
 
+test(":where() soft defaults lose to utility classes", () => {
+  const orderedCss = `
+.slide :where(h3) { color: #111111; }
+.slide :where(p) { font-size: 1.25em; }
+.xl { font-size: 1.6em; }
+.accent { color: #58a6ff; }
+`;
+  const model = parseStylesheets([{ css: orderedCss, origin: "framework" }]);
+  const { document } = parseHTML(
+    '<html><body><div class="slide"><h3 class="accent" id="h">t</h3><p class="xl" id="p">x</p><p id="plain">y</p></div></body></html>',
+  );
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+  assert.equal(
+    resolver.resolveVars(resolver.computedFor(document.querySelector("#h")).color),
+    "#58a6ff",
+  );
+  assert.equal(resolver.computedFor(document.querySelector("#p")).fontSizePx, 25.6);
+  assert.equal(resolver.computedFor(document.querySelector("#plain")).fontSizePx, 20);
+});
+
 test("later background-color longhand overrides earlier background shorthand", () => {
   const orderedCss = `${css}
 .a { background: #ff0000; }
