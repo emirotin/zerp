@@ -7,6 +7,7 @@
 - Put slides in `slides/**/*.html` and/or `slides/**/*.md`; files are ordered lexicographically (`00-`, `10-`, `20-` prefixes).
 - Assets live under `slides/` too; use relative paths (`./images/foo.jpg`) — they are rewritten at build time.
 - Each `.html` file contains one or more `<div class="slide">` blocks. Each `.md` file is auto-wrapped; separate multiple slides with `---` on its own line.
+- The page `<title>` is derived from the first slide's highest-level heading (h1 before h2, regardless of order); style/script-only files contribute no slides and are skipped. Override with the `title` build option; falls back to the deck folder name.
 - Never hand-edit the generated `index.html`.
 
 ## Slide numbering

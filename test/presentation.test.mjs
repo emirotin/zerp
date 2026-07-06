@@ -59,3 +59,39 @@ test("fonts are bundled inline and no external requests remain", async () => {
   assert.ok(html.length > 200_000, "inlined fonts present");
   assert.ok(html.length < 2_000_000, "bundle stays lean");
 });
+
+test("deck title comes from the first slide's highest-level heading", async () => {
+  // 00-styles.html is style-only (no slide div) — skipped; in 01-content.html
+  // the h2 outranks the h3 that appears first in document order.
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/titled-deck" });
+  assert.match(html, /<title>The Real Deck Title<\/title>/);
+});
+
+test("deck title falls back to the h1 of a markdown first slide", async () => {
+  const html = await buildPresentationHtml({ rootDir });
+  assert.match(html, /<title>Hello<\/title>/);
+});
+
+test("explicit title option overrides the derived title", async () => {
+  const html = await buildPresentationHtml({ rootDir, title: "Custom" });
+  assert.match(html, /<title>Custom<\/title>/);
+});
+
+test("deck title falls back to the folder name when the first slide has no heading", async () => {
+  const { mkdtemp, mkdir, rm, writeFile } = await import("node:fs/promises");
+  const { tmpdir } = await import("node:os");
+  const pathMod = await import("node:path");
+  const dir = await mkdtemp(pathMod.join(tmpdir(), "zerp-untitled-"));
+  await mkdir(pathMod.join(dir, "slides"));
+  await writeFile(
+    pathMod.join(dir, "slides", "00-only.html"),
+    '<div class="slide"><p>No heading here.</p></div>\n',
+    "utf8",
+  );
+  try {
+    const html = await buildPresentationHtml({ rootDir: dir });
+    assert.ok(html.includes(`<title>${pathMod.basename(dir)}</title>`));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

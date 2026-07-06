@@ -1,6 +1,8 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { parseHTML } from "linkedom";
+
 import { fontFaceCss } from "./fonts.js";
 import { renderMarkdownSlides } from "./markdown.js";
 
@@ -162,6 +164,29 @@ export async function composeSlidesHtml(rootDir: string): Promise<string> {
   );
 }
 
+interface HeadingQueryable {
+  querySelector(selector: string): { textContent: string | null } | null;
+}
+
+// Deck title: the highest-level heading of the first slide. Style- or
+// script-only files contribute no slide divs, so they are skipped naturally.
+function deriveDeckTitle(slidesHtml: string): string | null {
+  const { document } = parseHTML(`<body>${slidesHtml}</body>`) as unknown as {
+    document: { querySelector(selector: string): HeadingQueryable | null };
+  };
+  const firstSlide = document.querySelector(".slide");
+  if (!firstSlide) {
+    return null;
+  }
+  for (const level of ["h1", "h2", "h3", "h4", "h5", "h6"]) {
+    const text = firstSlide.querySelector(level)?.textContent?.replace(/\s+/g, " ").trim();
+    if (text) {
+      return text;
+    }
+  }
+  return null;
+}
+
 const THEME_SWITCH_HTML = `    <div class="theme-switch" id="theme-switch">
       <button class="theme-trigger" aria-label="Theme">◐</button>
       <div class="theme-options" hidden>
@@ -177,7 +202,6 @@ const NAV_HTML = `    <div class="nav">
     </div>`;
 
 export async function buildPresentationHtml(options: BuildOptions): Promise<string> {
-  const title = options.title ?? path.basename(path.resolve(options.rootDir));
   const lang = options.lang ?? "en";
   const theme = options.theme ?? "system";
   const [slidesHtml, defaultStyles, defaultRuntime, fontCss] = await Promise.all([
@@ -186,6 +210,8 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     readAsset("./assets/default-runtime.js"),
     fontFaceCss(),
   ]);
+  const title =
+    options.title ?? deriveDeckTitle(slidesHtml) ?? path.basename(path.resolve(options.rootDir));
 
   return `<!doctype html>
 <html lang="${escapeHtml(lang)}" data-zerp-theme="${theme}" data-zerp-default-theme="${theme}">
