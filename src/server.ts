@@ -26,18 +26,27 @@ const SSE_PING_INTERVAL_MS = 25_000;
 // Injected by the dev server only — built decks never contain this. On a
 // change event the client flags the reload in sessionStorage so the runtime
 // can restore the active slide's step counter (the hash restores the slide).
-const RELOAD_CLIENT = [
-  '<script data-zerp="live-reload">',
-  "      (() => {",
-  '        new EventSource("/__zerp/events").addEventListener("reload", () => {',
-  "          try {",
-  '            sessionStorage.setItem("zerp-live-reload", "1");',
-  "          } catch {}",
-  "          location.reload();",
-  "        });",
-  "      })();",
-  "    </script>",
-].join("\n");
+const RELOAD_CLIENT = `<script data-zerp="live-reload">
+      (() => {
+        const source = new EventSource("/__zerp/events");
+        const reload = () => {
+          try {
+            sessionStorage.setItem("zerp-live-reload", "1");
+          } catch {}
+          location.reload();
+        };
+        source.addEventListener("reload", reload);
+        // A re-open after the initial connect means the server was
+        // restarted (e.g. a framework rebuild) — pick up the new bundle.
+        let connected = false;
+        source.addEventListener("open", () => {
+          if (connected) {
+            reload();
+          }
+          connected = true;
+        });
+      })();
+    </script>`;
 
 function getContentType(filePath: string): string {
   return CONTENT_TYPES.get(path.extname(filePath).toLowerCase()) ?? "application/octet-stream";

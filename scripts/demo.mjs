@@ -1,42 +1,18 @@
 import { spawn } from "node:child_process";
 import { existsSync, statSync, watch } from "node:fs";
-import { readFile } from "node:fs/promises";
-import { createServer } from "node:http";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
 
-// Each page build runs in a short-lived child process. Re-importing in
-// this process cannot work: a cache-busting query only refreshes the top
-// module, while its imports (fonts.js, markdown.js) stay pinned to
-// whatever dist/ contained at the first request.
-function buildHtmlFresh(deckDir) {
-  const entry = pathToFileURL(path.resolve("dist/presentation.js")).href;
-  const script = [
-    `const mod = await import(${JSON.stringify(entry)});`,
-    `const html = await mod.buildPresentationHtml({ rootDir: ${JSON.stringify(deckDir)} });`,
-    "process.stdout.write(html);",
-  ].join("\n");
-  return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["--input-type=module", "-e", script], {
-      stdio: ["ignore", "pipe", "inherit"],
-    });
-    const chunks = [];
-    child.stdout.on("data", (chunk) => chunks.push(chunk));
-    child.on("error", reject);
-    child.on("exit", (code) => {
-      if (code === 0) {
-        resolve(Buffer.concat(chunks).toString("utf8"));
-      } else {
-        reject(new Error(`deck build exited with code ${code}`));
-      }
-    });
-  });
-}
+// Framework-development inner loop: serve an example deck through the real
+// `zerp serve` (which owns live reload), watch src/, and on change rebuild
+// dist/ and respawn the server. A fresh process is the only reliable way to
+// pick up a rebuilt dist — the ESM module cache pins imports for the life of
+// a process. Browsers notice the restart via the reload client's SSE
+// reconnect and refresh themselves, stepped slides preserved.
 
 const name = process.argv[2];
 
 if (!name) {
-  console.error("Usage: pnpm demo <example-name>");
+  console.error("Usage: pnpm demo <example-name> [port]");
   process.exit(1);
 }
 
@@ -52,99 +28,39 @@ if (!existsSync(rootDir) || !statSync(rootDir).isDirectory()) {
   process.exit(1);
 }
 
-const slidesDir = path.join(rootDir, "slides");
-if (!existsSync(slidesDir) || !statSync(slidesDir).isDirectory()) {
+if (!existsSync(path.join(rootDir, "slides"))) {
   console.error(`No slides/ directory in examples/${name}`);
   process.exit(1);
 }
 
-const CONTENT_TYPES = {
-  ".css": "text/css; charset=utf-8",
-  ".gif": "image/gif",
-  ".html": "text/html; charset=utf-8",
-  ".jpeg": "image/jpeg",
-  ".jpg": "image/jpeg",
-  ".js": "text/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8",
-  ".png": "image/png",
-  ".svg": "image/svg+xml",
-  ".webp": "image/webp",
-};
+const parsedPort = Number.parseInt(process.argv[3] ?? "", 10);
+const port = Number.isInteger(parsedPort) ? parsedPort : 8000;
 
-// Sets the same sessionStorage flag as the zerp serve reload client, so the
-// runtime replays stepped slides after the reload (see default-runtime.js).
-const RELOAD_SNIPPET =
-  '<script>new EventSource("/_zerp/reload").onmessage=()=>{try{sessionStorage.setItem("zerp-live-reload","1")}catch{}location.reload()}</script>';
+let server = null;
+let restarting = false;
 
-const sseClients = new Set();
+function startServer() {
+  restarting = false;
+  server = spawn(process.execPath, ["dist/cli.js", "serve", rootDir, String(port)], {
+    stdio: "inherit",
+  });
+}
 
-const server = createServer(async (req, res) => {
-  const url = new URL(req.url ?? "/", "http://localhost");
-  const pathname = decodeURIComponent(url.pathname);
-
-  if (pathname === "/_zerp/reload") {
-    res.writeHead(200, {
-      "content-type": "text/event-stream",
-      "cache-control": "no-cache",
-      connection: "keep-alive",
-    });
-    res.write(":\n\n");
-    sseClients.add(res);
-    req.on("close", () => sseClients.delete(res));
+function restartServer() {
+  if (!server || server.exitCode !== null) {
+    startServer();
     return;
   }
-
-  try {
-    if (pathname === "/" || pathname === "/index.html") {
-      const html = await buildHtmlFresh(rootDir);
-      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      res.end(html.replace("</body>", `${RELOAD_SNIPPET}\n</body>`));
-      return;
-    }
-
-    const candidatePath = path.resolve(rootDir, `.${pathname}`);
-    if (!candidatePath.startsWith(rootDir)) {
-      res.writeHead(403);
-      res.end("Forbidden");
-      return;
-    }
-
-    const content = await readFile(candidatePath);
-    const ext = path.extname(candidatePath).toLowerCase();
-    res.writeHead(200, { "content-type": CONTENT_TYPES[ext] ?? "application/octet-stream" });
-    res.end(content);
-  } catch (error) {
-    const status = error.code === "ENOENT" ? 404 : 500;
-    res.writeHead(status, { "content-type": "text/plain; charset=utf-8" });
-    res.end(status === 404 ? "Not found" : "Internal server error");
+  if (restarting) {
+    return;
   }
-});
-
-function parseInt(str, fallback) {
-  const parsed = str ? Number.parseInt(str) : null;
-  return parsed === null || Number.isNaN(parsed) ? fallback : parsed;
+  restarting = true;
+  server.once("exit", startServer);
+  server.kill();
 }
 
-const host = "127.0.0.1";
-const port = parseInt(process.argv[3], 8000);
-server.listen(port, host, () => {
-  console.log(`Serving examples/${name} at http://${host}:${port} (live reload active)`);
-});
-
-function broadcastReload() {
-  for (const client of sseClients) {
-    client.write("data: reload\n\n");
-  }
-}
-
-let reloadTimer;
-watch(slidesDir, { recursive: true }, () => {
-  clearTimeout(reloadTimer);
-  reloadTimer = setTimeout(broadcastReload, 100);
-});
-
-// Framework changes rebuild dist, then reload. Builds are serialized; a
-// change arriving mid-build queues exactly one follow-up build.
+// Builds are serialized; a change arriving mid-build queues exactly one
+// follow-up build.
 let building = false;
 let buildQueued = false;
 
@@ -155,14 +71,14 @@ function rebuildFramework() {
   }
   building = true;
   console.log("Framework change detected - rebuilding dist/ ...");
-  const build = spawn("node", ["scripts/build.mjs"], { stdio: "inherit" });
+  const build = spawn(process.execPath, ["scripts/build.mjs"], { stdio: "inherit" });
   build.on("exit", (code) => {
     building = false;
     if (code === 0) {
-      console.log("Rebuilt - reloading clients.");
-      broadcastReload();
+      console.log("Rebuilt - restarting the server; browsers reload on reconnect.");
+      restartServer();
     } else {
-      console.error("Build failed - clients keep the previous bundle.");
+      console.error("Build failed - keeping the previous server.");
     }
     if (buildQueued) {
       buildQueued = false;
@@ -179,3 +95,5 @@ if (existsSync(srcDir)) {
     buildTimer = setTimeout(rebuildFramework, 300);
   });
 }
+
+startServer();
