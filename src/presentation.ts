@@ -59,18 +59,48 @@ function rewriteRelativeUrls(html: string, relativeSlidePath: string): string {
   );
 }
 
-function injectSlideSrc(html: string, relativeSlidePath: string): string {
-  const srcPath = path.posix.join("slides", relativeSlidePath.replaceAll(path.sep, "/"));
+function isSlideDivAttrs(attrs: string): boolean {
+  const classMatch = attrs.match(/\bclass\s*=\s*(["'])([^"']*)\1/i);
+  return classMatch !== null && /(?:^|\s)slide(?:\s|$)/.test(classMatch[2] ?? "");
+}
+
+function annotateSlideDivs(
+  html: string,
+  extraAttrs: (attrs: string, ordinal: number) => string,
+): string {
+  let ordinal = 0;
   return html.replace(/<div\b([^>]*)>/gi, (match, attrs: string) => {
-    const classMatch = attrs.match(/\bclass\s*=\s*(["'])([^"']*)\1/i);
-    if (!classMatch || !/(?:^|\s)slide(?:\s|$)/.test(classMatch[2] ?? "")) {
+    if (!isSlideDivAttrs(attrs)) {
       return match;
     }
-    if (/\bdata-zerp-src\s*=/i.test(attrs)) {
-      return match;
-    }
-    return `<div${attrs} data-zerp-src="${escapeHtml(srcPath)}">`;
+    ordinal += 1;
+    const extra = extraAttrs(attrs, ordinal);
+    return extra ? `<div${attrs}${extra}>` : match;
   });
+}
+
+function countSlideDivs(html: string): number {
+  let count = 0;
+  for (const match of html.matchAll(/<div\b([^>]*)>/gi)) {
+    if (isSlideDivAttrs(match[1] ?? "")) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
+// Source tracing: every slide div gets data-zerp-src (source file),
+// data-zerp-src-slide ("i/n" ordinal within that file), and — at composition
+// time — data-zerp-index (1-based deck position). Tooling (check, slides,
+// runtime badge) reads these instead of re-deriving the mapping.
+function injectSlideSrc(fileHtml: string, relativeSlidePath: string): string {
+  const srcPath = path.posix.join("slides", relativeSlidePath.replaceAll(path.sep, "/"));
+  const slidesInFile = countSlideDivs(fileHtml);
+  return annotateSlideDivs(fileHtml, (attrs, ordinal) =>
+    /\bdata-zerp-src\s*=/i.test(attrs)
+      ? ""
+      : ` data-zerp-src="${escapeHtml(srcPath)}" data-zerp-src-slide="${ordinal}/${slidesInFile}"`,
+  );
 }
 
 function readAsset(assetPath: string): Promise<string> {
@@ -112,32 +142,36 @@ export async function listSlides(rootDir: string): Promise<SlideFile[]> {
   return collectSlideFiles(slidesDir);
 }
 
+export async function composeSlidesHtml(rootDir: string): Promise<string> {
+  const slideFiles = await listSlides(rootDir);
+  if (slideFiles.length === 0) {
+    throw new Error(`No slide files found in ${path.join(rootDir, "slides")}`);
+  }
+
+  const fileHtmlParts = await Promise.all(
+    slideFiles.map(async ({ absolutePath, relativePath }) => {
+      const content = await readFile(absolutePath, "utf8");
+      const parts = absolutePath.endsWith(".md") ? renderMarkdownSlides(content) : [content];
+      const fileHtml = parts.map((html) => rewriteRelativeUrls(html, relativePath)).join("\n");
+      return injectSlideSrc(fileHtml, relativePath);
+    }),
+  );
+
+  return annotateSlideDivs(fileHtmlParts.join("\n"), (attrs, ordinal) =>
+    /\bdata-zerp-index\s*=/i.test(attrs) ? "" : ` data-zerp-index="${ordinal}"`,
+  );
+}
+
 export async function buildPresentationHtml(options: BuildOptions): Promise<string> {
   const title = options.title ?? path.basename(path.resolve(options.rootDir));
   const lang = options.lang ?? "en";
   const theme = options.theme ?? "system";
-  const slideFiles = await listSlides(options.rootDir);
-  const [defaultStyles, defaultRuntime, fontCss] = await Promise.all([
+  const [slidesHtml, defaultStyles, defaultRuntime, fontCss] = await Promise.all([
+    composeSlidesHtml(options.rootDir),
     readAsset("./assets/default-styles.css"),
     readAsset("./assets/default-runtime.js"),
     fontFaceCss(),
   ]);
-
-  if (slideFiles.length === 0) {
-    throw new Error(`No slide files found in ${path.join(options.rootDir, "slides")}`);
-  }
-
-  const slideHtmlParts = (
-    await Promise.all(
-      slideFiles.map(async ({ absolutePath, relativePath }) => {
-        const content = await readFile(absolutePath, "utf8");
-        const parts = absolutePath.endsWith(".md") ? renderMarkdownSlides(content) : [content];
-        return parts.map((html) =>
-          injectSlideSrc(rewriteRelativeUrls(html, relativePath), relativePath),
-        );
-      }),
-    )
-  ).flat();
 
   const themeSwitchHtml = [
     '    <div class="theme-switch" id="theme-switch">',
@@ -172,7 +206,7 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     "    </style>",
     "  </head>",
     "  <body>",
-    slideHtmlParts.join("\n"),
+    slidesHtml,
     '    <div class="progress" id="progress"></div>',
     '    <div class="counter" id="counter"></div>',
     themeSwitchHtml,
