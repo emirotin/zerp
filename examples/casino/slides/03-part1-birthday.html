@@ -5,24 +5,25 @@
   <h2>Birthday paradox</h2>
   <p class="xl center">Do any two people in this room share a birthday?</p>
   <p class="center">Not the year, just the day and month. Who thinks there is a match?</p>
-  <div class="stat-row">
+  <div class="stat-row" data-step="1">
     <div class="stat">
-      <div class="value orange">23</div>
-      <div class="label">people</div>
-      <p class="orange">50.7%</p>
+      <div class="value orange">50.7%</div>
+      <div class="label">23 people</div>
     </div>
     <div class="stat">
-      <div class="value green">30</div>
-      <div class="label">people</div>
-      <p class="green">70.6%</p>
+      <div class="value green">70.6%</div>
+      <div class="label">30 people</div>
     </div>
     <div class="stat">
-      <div class="value purple">50</div>
-      <div class="label">people</div>
-      <p class="purple">97%</p>
+      <div class="value purple">97%</div>
+      <div class="label">50 people</div>
     </div>
   </div>
-  <p class="center">Let's test it. Who was born in January? Say the day...</p>
+  <p class="center" data-step="2">Let's test it. Who was born in January? Say the day...</p>
+  <p class="step-hint" data-until-step="2">
+    <span class="swap" data-until-step="1">↓ reveal the odds</span>
+    <span class="swap" data-step="1">↓ test it live</span>
+  </p>
 </div>
 
 <!-- Slide 2: Explanation -->
