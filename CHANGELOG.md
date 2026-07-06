@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0
+
+- `zerp serve` live-reloads the browser on any change under `slides/` (sources and assets) — dependency-free SSE push with an mtime watcher. The page returns to the same slide via the URL hash and replays the steps of every slide you had stepped through; scripted slides re-run their `slide-next` sequences, so demos stay in sync. Built decks contain no reload client.
+- The reload client also refreshes on SSE reconnect, so a restarted server — e.g. after a framework rebuild — is picked up automatically.
+- `pnpm demo` is now a thin wrapper over the real `zerp serve`: it watches `src/`, rebuilds `dist/`, and respawns the server. One live-reload implementation instead of two, and the demo loop gets step preservation for free.
+- The page `<title>` is derived from the first slide's highest-level heading (h1 before h2, regardless of document order); style- or script-only leading files are skipped. The `title` build option overrides; the deck folder name remains the fallback.
+- Internal: the regex-based composition pipeline's quirks are pinned in tests and analyzed in `docs/composition-fidelity.md`; static string assembly moved from array joins to template literals (byte-identical output).
+
 ## 0.3.2
 
 - Slide numbering is first-class: "slide N" means the 1-based deck position everywhere — runtime counter, URL hash, `zerp check`, and the new tooling below. File prefixes only order files.
