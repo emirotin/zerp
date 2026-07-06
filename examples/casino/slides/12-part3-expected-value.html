@@ -5,73 +5,21 @@
   <h2>Expected value</h2>
   <p class="center">A $100 bet on red. What happens <em>on average</em>?</p>
 
-  <div
-    id="ev-steps"
-    class="card mono"
-    style="max-width: 650px; margin-inline: auto; line-height: 2.2"
-  ></div>
+  <div class="card mono narrow lg" style="line-height: 2.2">
+    <div><span class="green">P(red)</span> = 18/37</div>
+    <div data-step="1"><span class="red">P(not red)</span> = 19/37</div>
+    <div data-step="2" style="margin-top: 8px">
+      E = <span class="green">(18/37)</span> × (+100) + <span class="red">(19/37)</span> × (−100)
+    </div>
+    <div data-step="3">E = (1800 − 1900) / 37</div>
+    <div data-step="4">E = <span class="red" style="font-weight: 900">−100/37 ≈ −$2.70</span></div>
+  </div>
 
-  <div id="ev-result" class="center" style="margin-top: 16px" hidden>
-    <div class="key-thought" style="border-color: var(--zerp-red)">
+  <div class="center" data-step="4">
+    <div class="key-thought edge-red">
       <p class="red">On average, you lose <span class="mono">$2.70</span> on every $100 bet</p>
-      <p style="font-size: 1em; margin-top: 8px">
-        House edge = <span class="orange mono">1/37 ≈ 2.7%</span>
-      </p>
+      <p class="sub">House edge = <span class="orange mono">1/37 ≈ 2.7%</span></p>
     </div>
   </div>
-  <p id="ev-hint" class="caption" style="margin-top: 10px">↓ next step</p>
-
-  <script>
-    (function () {
-      var slide = document.currentScript.closest(".slide");
-      var step = 0;
-      var maxStep = 4;
-      var lines = [
-        { html: '<span style="color: var(--zerp-green)">P(red)</span> = 18/37', step: 0 },
-        { html: '<span style="color: var(--zerp-red)">P(not red)</span> = 19/37', step: 1 },
-        { html: "", step: 2 },
-        {
-          html: 'E = <span style="color: var(--zerp-green)">(18/37)</span> × (+100) + <span style="color: var(--zerp-red)">(19/37)</span> × (−100)',
-          step: 2,
-        },
-        { html: "E = (1800 − 1900) / 37", step: 3 },
-        {
-          html: 'E = <span style="color: var(--zerp-red); font-weight: 900">−100/37 ≈ −$2.70</span>',
-          step: 4,
-        },
-      ];
-
-      function render() {
-        var html = "";
-        for (var i = 0; i < lines.length; i++) {
-          if (step >= lines[i].step) {
-            html +=
-              "<div" +
-              (lines[i].html === "" ? ' style="height: 8px"' : "") +
-              ">" +
-              lines[i].html +
-              "</div>";
-          }
-        }
-        slide.querySelector("#ev-steps").innerHTML = html;
-        slide.querySelector("#ev-result").hidden = step < maxStep;
-        slide.querySelector("#ev-hint").hidden = step >= maxStep;
-      }
-
-      slide.addEventListener("slide-next", function () {
-        if (step < maxStep) {
-          step++;
-          render();
-        }
-      });
-      slide.addEventListener("slide-prev", function () {
-        if (step > 0) {
-          step--;
-          render();
-        }
-      });
-
-      render();
-    })();
-  </script>
+  <p class="step-hint" data-until-step="4">↓ next step</p>
 </div>

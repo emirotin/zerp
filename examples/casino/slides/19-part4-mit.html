@@ -17,29 +17,23 @@
   </p>
   <p class="center">Solution: <span class="green">team play</span>.</p>
   <div class="flow">
-    <div class="card center" style="border-color: var(--zerp-accent); min-width: 200px">
+    <div class="card center edge-accent" style="min-width: 200px">
       <p class="xl">👀</p>
-      <p class="accent" style="margin-top: 4px">Spotters</p>
-      <p style="font-size: 1em; margin-top: 4px">
-        Sit at different tables.<br />Minimum bets.<br />Keep the count.
-      </p>
+      <p class="accent">Spotters</p>
+      <p class="sub">Sit at different tables.<br />Minimum bets.<br />Keep the count.</p>
     </div>
-    <div class="card center" style="border-color: var(--zerp-orange); min-width: 200px">
+    <div class="card center edge-orange" style="min-width: 200px">
       <p class="xl">📡</p>
-      <p class="orange" style="margin-top: 4px">Signal</p>
-      <p style="font-size: 1em; margin-top: 4px">
-        Takes off glasses.<br />Places chips<br />in a certain way.
-      </p>
+      <p class="orange">Signal</p>
+      <p class="sub">Takes off glasses.<br />Places chips<br />in a certain way.</p>
     </div>
-    <div class="card center" style="border-color: var(--zerp-green); min-width: 200px">
+    <div class="card center edge-green" style="min-width: 200px">
       <p class="xl">🎰</p>
-      <p class="green" style="margin-top: 4px">Big player</p>
-      <p style="font-size: 1em; margin-top: 4px">
-        Sits down.<br />Makes big bets.<br />Looks like a tourist.
-      </p>
+      <p class="green">Big player</p>
+      <p class="sub">Sits down.<br />Makes big bets.<br />Looks like a tourist.</p>
     </div>
   </div>
-  <p class="center" style="margin-top: 8px">
+  <p class="center">
     Over a few years: <span class="green">millions of dollars</span>. The book "Bringing Down the
     House." The film "21."
   </p>
@@ -51,43 +45,17 @@
   <div class="interactive-badge">🎯 VOTE</div>
   <h2>Why is a team more effective than a solo player?</h2>
   <p class="xl center">There are two reasons. Can anyone name them?</p>
-  <div id="team-answers" class="row" style="gap: 40px; margin-top: 30px" hidden>
-    <div class="card center" style="border-color: var(--zerp-accent); max-width: 300px">
-      <div class="accent xl" style="margin-bottom: 8px">×5</div>
+  <div class="row" style="gap: 40px" data-step="1">
+    <div class="card center edge-accent" style="max-width: 300px">
+      <div class="accent xl">×5</div>
       <p class="accent">More tables</p>
-      <p style="font-size: 1em; margin-top: 6px">
-        5 spotters = 5 tables = 5 times more favorable moments
-      </p>
+      <p class="sub">5 spotters = 5 tables = 5 times more favorable moments</p>
     </div>
-    <div class="card center" style="border-color: var(--zerp-green); max-width: 300px">
-      <div class="xl" style="margin-bottom: 8px">🎭</div>
+    <div class="card center edge-green" style="max-width: 300px">
+      <div class="xl">🎭</div>
       <p class="green">Cover</p>
-      <p style="font-size: 1em; margin-top: 6px">
-        No obvious "small → small → HUGE" pattern at one table
-      </p>
+      <p class="sub">No obvious "small → small → HUGE" pattern at one table</p>
     </div>
   </div>
-  <p id="team-hint" class="caption" style="margin-top: 16px">↓ show answer</p>
-  <script>
-    (function () {
-      var slide = document.currentScript.closest(".slide");
-      var revealed = false;
-      var answers = slide.querySelector("#team-answers");
-      var hint = slide.querySelector("#team-hint");
-      slide.addEventListener("slide-next", function () {
-        if (!revealed) {
-          revealed = true;
-          answers.hidden = false;
-          hint.hidden = true;
-        }
-      });
-      slide.addEventListener("slide-prev", function () {
-        if (revealed) {
-          revealed = false;
-          answers.hidden = true;
-          hint.hidden = false;
-        }
-      });
-    })();
-  </script>
+  <p class="step-hint" data-until-step="1">↓ show answer</p>
 </div>

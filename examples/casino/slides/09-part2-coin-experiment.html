@@ -10,56 +10,23 @@
     </div>
     <div class="stat">
       <div class="label" style="margin-bottom: 4px">Heads</div>
-      <div id="coin-heads" class="value" style="color: var(--zerp-orange)">0</div>
+      <div id="coin-heads" class="value orange">0</div>
     </div>
     <div class="stat">
       <div class="label" style="margin-bottom: 4px">Share of heads</div>
-      <div id="coin-pct" class="value" style="color: var(--zerp-green)">—</div>
+      <div id="coin-pct" class="value green">—</div>
     </div>
   </div>
-  <div
-    id="coin-bar-wrap"
-    style="
-      background: var(--zerp-surface);
-      border: 2px solid var(--zerp-border);
-      border-radius: 10px;
-      height: 48px;
-      width: 100%;
-      max-width: 700px;
-      margin: 12px auto;
-      position: relative;
-      overflow: hidden;
-      align-self: center;
-    "
-  >
-    <div
-      id="coin-bar"
-      style="
-        height: 100%;
-        background: var(--zerp-orange-solid);
-        width: 0%;
-        transition: width 0.3s;
-        border-radius: 8px;
-      "
-    ></div>
-    <div
-      style="
-        position: absolute;
-        left: 50%;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: var(--zerp-green-solid);
-        transform: translateX(-50%);
-      "
-    ></div>
+  <div id="coin-bar-wrap" class="coin-bar-wrap narrow">
+    <div id="coin-bar" class="coin-bar"></div>
+    <div class="coin-target"></div>
   </div>
   <p class="caption">Green line = 50%</p>
   <div id="coin-last" class="row" style="gap: 4px; margin: 8px 0; min-height: 36px"></div>
-  <p id="coin-hint" class="caption" style="margin-top: 6px">
+  <p id="coin-hint" class="step-hint">
     ↓ flip × 1 &nbsp;&nbsp;|&nbsp;&nbsp; press several times to see the pattern
   </p>
-  <p id="coin-conclusion" class="green center" style="margin-top: 6px; visibility: hidden">
+  <p id="coin-conclusion" class="green center" style="visibility: hidden">
     The more flips you make, the closer you get to 50%. That is the law of large numbers.
   </p>
 
@@ -92,14 +59,9 @@
 
         var lastHtml = "";
         for (var i = 0; i < lastResults.length; i++) {
-          var c = lastResults[i] ? "var(--zerp-orange-solid)" : "var(--zerp-blue-solid)";
+          var side = lastResults[i] ? "heads" : "tails";
           var t = lastResults[i] ? "H" : "T";
-          lastHtml +=
-            '<span style="display: inline-flex; width: 30px; height: 30px; border-radius: 50%; background: ' +
-            c +
-            '; color: var(--zerp-on-solid); font-weight: 900; font-size: 0.75em; align-items: center; justify-content: center; font-family: Roboto Mono, monospace">' +
-            t +
-            "</span>";
+          lastHtml += '<span class="chip ' + side + '">' + t + "</span>";
         }
         slide.querySelector("#coin-last").innerHTML = lastHtml;
 
@@ -141,9 +103,9 @@
       <p>The more trials you have, the <span class="accent">more accurate the prediction</span>.</p>
     </div>
     <div>
-      <div class="key-thought" style="border-color: var(--zerp-red)">
+      <div class="key-thought edge-red">
         <p class="red">This is the casino's main weapon.</p>
-        <p style="font-size: 1em; margin-top: 8px">
+        <p class="sub">
           The casino does not win every single round. It plays
           <span class="accent">thousands of rounds every day</span>. The law of large numbers turns
           a tiny edge into guaranteed profit.
@@ -152,3 +114,49 @@
     </div>
   </div>
 </div>
+
+<style>
+  .coin-bar-wrap {
+    background: var(--zerp-surface);
+    border: 2px solid var(--zerp-border);
+    border-radius: 10px;
+    height: 48px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+  .coin-bar {
+    height: 100%;
+    background: var(--zerp-orange-solid);
+    width: 0%;
+    transition: width 0.3s;
+    border-radius: 8px;
+  }
+  .coin-target {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--zerp-green-solid);
+    transform: translateX(-50%);
+  }
+  .chip {
+    display: inline-flex;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: var(--zerp-on-solid);
+    font-weight: 900;
+    font-size: 0.75em;
+    align-items: center;
+    justify-content: center;
+    font-family: "Roboto Mono", monospace;
+  }
+  .chip.heads {
+    background: var(--zerp-orange-solid);
+  }
+  .chip.tails {
+    background: var(--zerp-blue-solid);
+  }
+</style>

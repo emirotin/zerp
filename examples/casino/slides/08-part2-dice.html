@@ -6,90 +6,67 @@
   <p class="center">
     Total combinations: 6 × 6 = <span class="accent">36</span>. How many give a sum of 7?
   </p>
-  <div id="dice-grid" style="margin: 16px 0"></div>
-  <div id="dice-status" class="lg center" style="font-weight: 700">
-    Press ↓ to highlight combinations that sum to 7
+  <div class="grid-demo dice-grid">
+    <div class="cell hdr"></div>
+    <div class="cell hdr">🎲1</div>
+    <div class="cell hdr">🎲2</div>
+    <div class="cell hdr">🎲3</div>
+    <div class="cell hdr">🎲4</div>
+    <div class="cell hdr">🎲5</div>
+    <div class="cell hdr">🎲6</div>
+    <div class="cell hdr">🎲1</div>
+    <div class="cell">2</div>
+    <div class="cell">3</div>
+    <div class="cell">4</div>
+    <div class="cell">5</div>
+    <div class="cell">6</div>
+    <div class="cell" data-step="1">7</div>
+    <div class="cell hdr">🎲2</div>
+    <div class="cell">3</div>
+    <div class="cell">4</div>
+    <div class="cell">5</div>
+    <div class="cell">6</div>
+    <div class="cell" data-step="1">7</div>
+    <div class="cell">8</div>
+    <div class="cell hdr">🎲3</div>
+    <div class="cell">4</div>
+    <div class="cell">5</div>
+    <div class="cell">6</div>
+    <div class="cell" data-step="1">7</div>
+    <div class="cell">8</div>
+    <div class="cell">9</div>
+    <div class="cell hdr">🎲4</div>
+    <div class="cell">5</div>
+    <div class="cell">6</div>
+    <div class="cell" data-step="1">7</div>
+    <div class="cell">8</div>
+    <div class="cell">9</div>
+    <div class="cell">10</div>
+    <div class="cell hdr">🎲5</div>
+    <div class="cell">6</div>
+    <div class="cell" data-step="1">7</div>
+    <div class="cell">8</div>
+    <div class="cell">9</div>
+    <div class="cell">10</div>
+    <div class="cell">11</div>
+    <div class="cell hdr">🎲6</div>
+    <div class="cell" data-step="1">7</div>
+    <div class="cell">8</div>
+    <div class="cell">9</div>
+    <div class="cell">10</div>
+    <div class="cell">11</div>
+    <div class="cell">12</div>
   </div>
-  <div id="dice-result" class="center" style="margin-top: 12px; visibility: hidden">
+  <div class="lg center" style="font-weight: 700">
+    <span class="swap" data-until-step="1">Press ↓ to highlight combinations that sum to 7</span>
+    <span class="swap" data-step="1">
+      <span class="green">6 combinations give a sum of 7</span>: (1,6) (2,5) (3,4) (4,3) (5,2) (6,1)
+    </span>
+  </div>
+  <div class="center" data-step="1">
     <p class="green xl">P(sum = 7) = 6/36 = <span class="mono">1/6 ≈ 16.7%</span></p>
-    <p class="orange" style="margin-top: 6px">
-      Seven is the most common sum. But two (1+1) is only 1/36 ≈ 2.8%
-    </p>
+    <p class="orange">Seven is the most common sum. But two (1+1) is only 1/36 ≈ 2.8%</p>
   </div>
-
-  <script>
-    (function () {
-      var slide = document.currentScript.closest(".slide");
-      var grid = slide.querySelector("#dice-grid");
-      var step = 0;
-
-      function render() {
-        var html =
-          '<div style="display: grid; grid-template-columns: 40px repeat(6, 48px); gap: 3px; justify-content: center; align-items: center">';
-        html += "<div></div>";
-        for (var j = 1; j <= 6; j++) {
-          html +=
-            '<div style="text-align: center; font-weight: 700; color: var(--zerp-accent); font-size: 1.1em; font-family: Roboto Mono, monospace">🎲' +
-            j +
-            "</div>";
-        }
-        for (var i = 1; i <= 6; i++) {
-          html +=
-            '<div style="text-align: center; font-weight: 700; color: var(--zerp-accent); font-size: 1.1em; font-family: Roboto Mono, monospace">🎲' +
-            i +
-            "</div>";
-          for (var j = 1; j <= 6; j++) {
-            var sum = i + j;
-            var isSeven = sum === 7;
-            var bg = step >= 1 && isSeven ? "var(--zerp-green-solid)" : "var(--zerp-surface)";
-            var border = step >= 1 && isSeven ? "var(--zerp-green-solid)" : "var(--zerp-border)";
-            var color = step >= 1 && isSeven ? "var(--zerp-on-solid)" : "var(--zerp-text)";
-            var weight = step >= 1 && isSeven ? "900" : "400";
-            html +=
-              '<div style="width: 48px; height: 48px; background: ' +
-              bg +
-              "; border: 2px solid " +
-              border +
-              "; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.05em; color: " +
-              color +
-              "; font-weight: " +
-              weight +
-              '; font-family: Roboto Mono, monospace">' +
-              sum +
-              "</div>";
-          }
-        }
-        html += "</div>";
-        grid.innerHTML = html;
-
-        var status = slide.querySelector("#dice-status");
-        var result = slide.querySelector("#dice-result");
-        if (step >= 1) {
-          status.innerHTML =
-            '<span style="color: var(--zerp-green)">6 combinations give a sum of 7</span>: (1,6) (2,5) (3,4) (4,3) (5,2) (6,1)';
-          result.style.visibility = "visible";
-        } else {
-          status.innerHTML = "Press ↓ to highlight combinations that sum to 7";
-          result.style.visibility = "hidden";
-        }
-      }
-
-      slide.addEventListener("slide-next", function () {
-        if (step < 1) {
-          step++;
-          render();
-        }
-      });
-      slide.addEventListener("slide-prev", function () {
-        if (step > 0) {
-          step--;
-          render();
-        }
-      });
-
-      render();
-    })();
-  </script>
 </div>
 
 <!-- Slide 2: Full probability table -->
@@ -165,3 +142,27 @@
     </p>
   </div>
 </div>
+
+<style>
+  .dice-grid .cell {
+    font-family: "Roboto Mono", monospace;
+    font-weight: 400;
+    color: var(--zerp-text);
+  }
+  .dice-grid .hdr {
+    border: none;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: var(--zerp-accent);
+  }
+  /* Sum-7 cells are always visible; step one highlights them in place. */
+  .dice-grid [data-step] {
+    visibility: visible;
+  }
+  .dice-grid [data-step].revealed {
+    background: var(--zerp-green-solid);
+    border-color: var(--zerp-green-solid);
+    color: var(--zerp-on-solid);
+    font-weight: 900;
+  }
+</style>

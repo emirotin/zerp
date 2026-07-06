@@ -12,7 +12,7 @@
     </div>
     <div class="stat">
       <div class="label" style="margin-bottom: 4px">Cards dealt</div>
-      <div id="hilo-dealt" class="value" style="color: var(--zerp-muted)">0 / 15</div>
+      <div id="hilo-dealt" class="value muted">0 / 15</div>
     </div>
   </div>
 
@@ -20,14 +20,14 @@
 
   <div id="hilo-current" class="center xl" style="min-height: 44px; margin: 8px 0"></div>
 
-  <div id="hilo-verdict" class="center" style="margin-top: 8px" hidden>
-    <div class="key-thought" style="border-color: var(--zerp-green)">
+  <div class="center" data-step="15">
+    <div class="key-thought edge-green">
       <p class="green">
         Count is +5. The deck has lots of big cards left, so this is a favorable betting moment.
       </p>
     </div>
   </div>
-  <p id="hilo-hint" class="caption" style="margin-top: 6px">↓ deal the next card</p>
+  <p class="step-hint" data-until-step="15">↓ deal the next card</p>
 
   <script>
     (function () {
@@ -51,12 +51,12 @@
       ];
       var step = 0;
 
-      function cardColor(suit) {
-        return suit === "♥" || suit === "♦" ? "var(--zerp-red)" : "var(--zerp-text)";
+      function suitClass(suit) {
+        return suit === "♥" || suit === "♦" ? "suit-red" : "";
       }
 
-      function valColor(v) {
-        return v > 0 ? "var(--zerp-green)" : v < 0 ? "var(--zerp-red)" : "var(--zerp-muted)";
+      function valClass(v) {
+        return v > 0 ? "green" : v < 0 ? "red" : "muted";
       }
 
       function valText(v) {
@@ -70,63 +70,42 @@
           count += sequence[i].val;
           var c = sequence[i];
           var isCurrent = i === step - 1;
-          var border = isCurrent ? "var(--zerp-orange-solid)" : "var(--zerp-border)";
-          var bg = isCurrent ? "var(--zerp-orange-tint)" : "var(--zerp-surface)";
-          cardsHtml +=
-            '<div style="background: ' +
-            bg +
-            "; border: 2px solid " +
-            border +
-            '; border-radius: 8px; padding: 6px 14px; min-width: 70px; text-align: center">';
-          cardsHtml +=
-            '<div style="font-size: 1.82em; font-weight: 700; color: ' +
-            cardColor(c.suit) +
-            '; font-family: Roboto Mono, monospace">' +
-            c.card +
-            c.suit +
-            "</div>";
-          cardsHtml +=
-            '<div style="font-size: 1.32em; font-weight: 700; color: ' +
-            valColor(c.val) +
-            '">' +
-            valText(c.val) +
-            "</div>";
+          cardsHtml += '<div class="hilo-card' + (isCurrent ? " current" : "") + '">';
+          cardsHtml += '<div class="rank ' + suitClass(c.suit) + '">' + c.card + c.suit + "</div>";
+          cardsHtml += '<div class="delta ' + valClass(c.val) + '">' + valText(c.val) + "</div>";
           cardsHtml += "</div>";
         }
         slide.querySelector("#hilo-cards").innerHTML = cardsHtml;
 
-        var countColor =
-          count > 0 ? "var(--zerp-green)" : count < 0 ? "var(--zerp-red)" : "var(--zerp-accent)";
+        var countClass = count > 0 ? "green" : count < 0 ? "red" : "accent";
         var countSign = count > 0 ? "+" : "";
-        slide.querySelector("#hilo-count").textContent = countSign + count;
-        slide.querySelector("#hilo-count").style.color = countColor;
+        var countEl = slide.querySelector("#hilo-count");
+        countEl.textContent = countSign + count;
+        countEl.className = "value " + countClass;
         slide.querySelector("#hilo-dealt").textContent = step + " / " + sequence.length;
 
         var currentEl = slide.querySelector("#hilo-current");
         if (step > 0 && step <= sequence.length) {
           var last = sequence[step - 1];
           currentEl.innerHTML =
-            '<span style="color: ' +
-            cardColor(last.suit) +
-            '; font-weight: 700">' +
+            '<span class="mono ' +
+            (suitClass(last.suit) || "") +
+            '" style="font-weight: 700">' +
             last.card +
             last.suit +
-            '</span> → <span style="color: ' +
-            valColor(last.val) +
-            '; font-weight: 700">' +
+            '</span> → <span class="' +
+            valClass(last.val) +
+            '">' +
             valText(last.val) +
-            '</span> → count = <span style="color: ' +
-            countColor +
-            '; font-weight: 900">' +
+            '</span> → count = <span class="' +
+            countClass +
+            '" style="font-weight: 900">' +
             countSign +
             count +
             "</span>";
         } else {
           currentEl.innerHTML = "";
         }
-
-        slide.querySelector("#hilo-verdict").hidden = step < sequence.length;
-        slide.querySelector("#hilo-hint").hidden = step >= sequence.length;
       }
 
       slide.addEventListener("slide-next", function () {
@@ -146,3 +125,29 @@
     })();
   </script>
 </div>
+
+<style>
+  .hilo-card {
+    background: var(--zerp-surface);
+    border: 2px solid var(--zerp-border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    min-width: 70px;
+    text-align: center;
+  }
+  .hilo-card.current {
+    background: var(--zerp-orange-tint);
+    border-color: var(--zerp-orange-solid);
+  }
+  .hilo-card .rank {
+    font-size: 1.82em;
+    font-weight: 700;
+    font-family: "Roboto Mono", monospace;
+  }
+  .suit-red {
+    color: var(--zerp-red);
+  }
+  .hilo-card .delta {
+    font-size: 1.32em;
+  }
+</style>
