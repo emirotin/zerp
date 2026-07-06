@@ -267,17 +267,25 @@
 
   show((Number.parseInt(location.hash.slice(1), 10) || 1) - 1);
 
-  // After a live reload, replay the active slide's steps (dispatching
-  // slide-next each time, so scripted slides re-run their sequences too).
+  // After a live reload, replay EVERY stepped slide — not just the active
+  // one — so a save mid-rehearsal doesn't collapse slides already walked
+  // through. slide-next is dispatched per step so scripted slides re-run
+  // their sequences too.
   try {
     if (sessionStorage.getItem(LIVE_RELOAD_FLAG)) {
       sessionStorage.removeItem(LIVE_RELOAD_FLAG);
-      const saved = Number.parseInt(
-        sessionStorage.getItem("zerp-step:" + String(current)) ?? "",
-        10,
-      );
-      for (let i = 0; i < saved; i++) {
-        stepForward();
+      for (let i = 0; i < slides.length; i++) {
+        const saved = Number.parseInt(sessionStorage.getItem("zerp-step:" + String(i)) ?? "", 10);
+        if (!Number.isInteger(saved) || saved <= 0) {
+          continue;
+        }
+        const slide = slides[i];
+        const limit = Math.min(saved, maxStep(slide));
+        for (let k = 0; k < limit; k++) {
+          slide.dispatchEvent(new Event("slide-next"));
+        }
+        stepCounters.set(slide, limit);
+        applySteps(slide);
       }
     }
   } catch {

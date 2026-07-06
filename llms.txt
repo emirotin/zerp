@@ -90,7 +90,7 @@ zerp check .
 
 Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp build` prints the same summary.
 
-`zerp serve` live-reloads the browser on any change under `slides/` — the page returns to the same slide (URL hash) and replays the active slide's steps. Built decks contain no reload client.
+`zerp serve` live-reloads the browser on any change under `slides/` — the page returns to the same slide (URL hash) and replays the steps of every slide you had stepped through. Built decks contain no reload client.
 
 ## Interaction model
 
