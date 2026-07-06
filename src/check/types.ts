@@ -5,6 +5,7 @@ export interface Finding {
   theme: CheckTheme;
   slideIndex: number;
   slideSrc: string | null;
+  slideSrcSlide: string | null;
   snippet: string;
   message: string;
   suggestion: string | null;

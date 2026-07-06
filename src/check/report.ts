@@ -47,7 +47,9 @@ export function formatReport(report: CheckReport, options: { summaryOnly?: boole
     if (!first) {
       continue;
     }
-    const src = first.slideSrc ? ` (${first.slideSrc})` : "";
+    const [ordinal = "1", ofFile = "1"] = (first.slideSrcSlide ?? "").split("/");
+    const inFile = Number(ofFile) > 1 ? ` · ${ordinal}/${ofFile} in file` : "";
+    const src = first.slideSrc ? ` (${first.slideSrc}${inFile})` : "";
     lines.push(`slide ${first.slideIndex}${src} [${first.theme}]`);
     for (const finding of group) {
       lines.push(`  ${ICONS[finding.severity]} "${finding.snippet}" — ${finding.message}`);

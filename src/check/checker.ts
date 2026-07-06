@@ -147,6 +147,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
     for (let slideIndex = 0; slideIndex < slideNodes.length; slideIndex++) {
       const slide = slideNodes[slideIndex] as DomElement;
       const slideSrc = slide.getAttribute("data-zerp-src");
+      const slideSrcSlide = slide.getAttribute("data-zerp-src-slide");
       walkText(slide, (text, parentEl) => {
         if (evaluated.has(parentEl)) {
           return;
@@ -163,6 +164,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
             theme,
             slideIndex: slideIndex + 1,
             slideSrc,
+            slideSrcSlide,
             snippet,
             message,
             suggestion,
@@ -243,6 +245,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
           theme,
           slideIndex: slideIndex + 1,
           slideSrc,
+          slideSrcSlide,
           snippet: elementLabel(el),
           message: `surface ${toHex(ownBg.color)} blends into ${toHex(behindBg.color)} behind it (Δ${Math.round(dist)})`,
           suggestion: "use a stronger tint, or add a visible border or shadow",
