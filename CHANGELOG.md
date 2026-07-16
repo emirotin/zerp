@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.5.0
 
 - Composition now discovers real slide elements with `htmlparser2` source offsets and wraps each one in a framework-owned `[data-zerp-slide]` frame. Authored `.slide` bytes and inline-script asset rewriting remain intact; script-looking markup is no longer annotated, and nested slide roots fail clearly.
 - Slide visibility is controlled by the frame's `data-zerp-slide-active` attribute. The inner `.slide` is a full-size layout surface, so custom `display: grid`/`block`/`flex` roots cannot make inactive slides enter page flow or hide the active slide.
