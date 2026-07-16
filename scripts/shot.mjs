@@ -56,6 +56,121 @@ function findChrome() {
   process.exit(1);
 }
 
+function killProcessGroup(child) {
+  if (!child.pid) {
+    return;
+  }
+  try {
+    process.kill(-child.pid, "SIGKILL");
+  } catch {
+    try {
+      child.kill("SIGKILL");
+    } catch {
+      // already gone
+    }
+  }
+}
+
+const CALIBRATION_HTML = `<!doctype html>
+<html>
+  <head></head>
+  <body>
+    <script>
+      document.documentElement.setAttribute(
+        "data-zerp-shot-viewport",
+        window.innerWidth + "x" + window.innerHeight,
+      );
+    </script>
+  </body>
+</html>`;
+
+/**
+ * Headless Chrome's --window-size sets the outer window bounds, not the
+ * layout viewport: window.innerWidth/innerHeight (and therefore any vh/vw
+ * or 100%-of-viewport layout) can come out smaller than requested, by a
+ * chrome-version- and platform-dependent amount. Measure the actual offset
+ * against a blank page and compensate --window-size, rather than trusting
+ * the requested --size, so shots render the deck the way it truly looks at
+ * that size.
+ */
+async function measureViewportOffset(chrome, width, height) {
+  const profile = mkdtempSync(path.join(tmpdir(), "zerp-shot-calibrate-"));
+  const calibrationPath = path.join(tmpdir(), `zerp-shot-calibrate-${process.pid}.html`);
+  writeFileSync(calibrationPath, CALIBRATION_HTML, "utf8");
+  const child = spawn(
+    chrome,
+    [
+      "--headless=new",
+      "--disable-gpu",
+      "--hide-scrollbars",
+      "--no-first-run",
+      "--no-default-browser-check",
+      "--disable-sync",
+      "--disable-extensions",
+      "--disable-component-update",
+      "--virtual-time-budget=4000",
+      `--window-size=${width},${height}`,
+      "--force-device-scale-factor=1",
+      `--user-data-dir=${profile}`,
+      "--dump-dom",
+      `file://${calibrationPath}`,
+    ],
+    { detached: true, stdio: ["ignore", "pipe", "pipe"] },
+  );
+  let stdout = "";
+  child.stdout.setEncoding("utf8");
+  child.stdout.on("data", (chunk) => {
+    stdout += chunk;
+  });
+  try {
+    await new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error("Chrome viewport calibration timed out"));
+      }, 20_000);
+      let settled = false;
+      const finish = (error) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      };
+      child.once("error", (error) => finish(error));
+      // Chrome can hang while shutting down after --dump-dom; the marker
+      // attribute is enough to finish, so do not wait for a clean exit.
+      child.stdout.on("data", () => {
+        if (/data-zerp-shot-viewport="/.test(stdout)) {
+          finish();
+        }
+      });
+      child.once("close", (code, signal) => {
+        if (code === 0) {
+          finish();
+        } else {
+          finish(new Error(`Chrome viewport calibration failed (${code ?? signal})`));
+        }
+      });
+    });
+  } finally {
+    killProcessGroup(child);
+    rmSync(profile, { force: true, recursive: true });
+    rmSync(calibrationPath, { force: true });
+  }
+  const match = stdout.match(/data-zerp-shot-viewport="(\d+)x(\d+)"/);
+  if (!match) {
+    throw new Error("Chrome did not report a viewport calibration result");
+  }
+  return {
+    dx: width - Number.parseInt(match[1], 10),
+    dy: height - Number.parseInt(match[2], 10),
+  };
+}
+
 const { values, positionals } = parseArgs({
   args: process.argv.slice(2),
   allowPositionals: true,
@@ -98,6 +213,9 @@ if (!sizeMatch) {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const chrome = findChrome();
+const requestedWidth = Number.parseInt(sizeMatch[1], 10);
+const requestedHeight = Number.parseInt(sizeMatch[2], 10);
+const { dx, dy } = await measureViewportOffset(chrome, requestedWidth, requestedHeight);
 const outDir = path.resolve(values.out);
 mkdirSync(outDir, { recursive: true });
 const deckName = path.basename(deckDir);
@@ -155,7 +273,7 @@ try {
                 "--host-resolver-rules=MAP fonts.googleapis.com 127.0.0.1, MAP fonts.gstatic.com 127.0.0.1",
               ]
             : []),
-          `--window-size=${sizeMatch[1]},${sizeMatch[2]}`,
+          `--window-size=${requestedWidth + dx},${requestedHeight + dy}`,
           `--force-device-scale-factor=${values.scale}`,
           "--virtual-time-budget=4000",
           `--user-data-dir=${profile}`,
@@ -181,15 +299,7 @@ try {
           }
         }
       }
-      try {
-        process.kill(-child.pid, "SIGKILL");
-      } catch {
-        try {
-          child.kill("SIGKILL");
-        } catch {
-          // already gone
-        }
-      }
+      killProcessGroup(child);
       rmSync(profile, { force: true, recursive: true });
       if (!ok) {
         console.error(`Chrome failed for slide ${slide} (${theme}):`);
