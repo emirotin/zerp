@@ -258,7 +258,7 @@ async function measureViewportOffset(
   width: number,
   height: number,
 ): Promise<{ dx: number; dy: number }> {
-  const cacheKey = `${chrome} ${width}x${height}`;
+  const cacheKey = `${chrome}::${width}x${height}`;
   const cached = viewportOffsetCache.get(cacheKey);
   if (cached) {
     return cached;
