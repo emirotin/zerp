@@ -1,17 +1,18 @@
-// Pins the current behavior of the regex-based composition pipeline — both
-// its load-bearing quirks and its known bugs — so that any refactor (see
-// docs/composition-fidelity.md) changes them consciously, not by accident.
-// A test failing here after a composition change means: read the doc, decide
-// whether the new behavior is the intended fix, then update the pin.
+// Pins the source-fidelity guarantees of the composition pipeline. The probe
+// deck deliberately contains markup that previously confused the regex pass.
+// Keep these cases close to the parser so a future refactor cannot silently
+// reintroduce the old display/annotation failures.
 //
-// The probe deck is written to a temp dir at runtime: it contains
-// deliberately unusual markup (unquoted attributes, '>' inside an attribute
-// value) that a formatter would "fix" if it lived on disk as a fixture.
+// The probe deck is written to a temp dir at runtime: it contains deliberately
+// unusual markup (unquoted attributes, '>' inside an attribute value) that a
+// formatter would "fix" if it lived on disk as a fixture.
 import assert from "node:assert/strict";
 import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
+
+import { parseHTML } from "linkedom";
 
 import { composeSlidesHtml } from "../dist/presentation.js";
 
@@ -55,32 +56,51 @@ after(async () => {
 
 test("guarantee: relative asset paths inside inline scripts are rewritten", () => {
   // Built decks are single files at the deck root; script-fetched assets need
-  // the same slides/-prefix rewrite as attributes. A DOM-based rewriter would
-  // skip script bodies and break offline demos — keep this working.
+  // the same slides/-prefix rewrite as attributes. Keep this narrow rewrite
+  // even though the parser correctly ignores script markup as HTML.
   assert.match(html, /img\.src="slides\/images\/from-script\.png"/);
 });
 
-test("known bug: slide-div markup inside a script string gets annotated and skews counts", () => {
-  // The author's JS string is rewritten…
-  assert.match(html, /var tpl = '<div class="slide" data-zerp-src=/);
-  // …and counted: the file has 3 real DOM slides (the unquoted one is missed,
-  // see below) but reports 4, so data-zerp-index drifts from the runtime
-  // counter for every later slide.
+test("real slide markup is annotated while slide-looking script text is untouched", () => {
+  assert.match(html, /var tpl = '<div class="slide">from a string<\/div>';/);
+  assert.doesNotMatch(html, /var tpl = '<div class="slide" data-zerp/);
   assert.match(html, /data-zerp-src-slide="4\/4" data-zerp-index="4">\s*<style>/);
 });
 
-test("known bug: a '>' inside an attribute value derails the annotation", () => {
-  // The attrs regex stops at the first '>', so the injected attributes land
-  // inside the title value and the markup is mangled.
-  assert.match(html, /title="a {2}data-zerp-src=/);
+test("a '>' inside an attribute value does not derail annotation", () => {
+  assert.match(html, /class="slide" title="a > b" data-zerp-src=/);
+  assert.doesNotMatch(html, /title="a {2}data-zerp-src=/);
 });
 
-test("known bug: unquoted class attributes are never annotated", () => {
-  // querySelectorAll(".slide") sees this slide; the annotation regex does not.
-  assert.match(html, /<div class=slide>/);
-  assert.doesNotMatch(html, /class=slide data-zerp/);
+test("unquoted class attributes are annotated without normalizing authored bytes", () => {
+  assert.match(html, /<div class=slide data-zerp-src="slides\/00-quirks\.html"/);
+});
+
+test("each real slide gets one framework frame", () => {
+  const { document } = parseHTML(`<body>${html}</body>`);
+  const frames = document.querySelectorAll("[data-zerp-slide]");
+  assert.equal(frames.length, 4);
+  for (let index = 0; index < frames.length; index++) {
+    const frame = frames[index];
+    assert.ok(frame.querySelector(".slide"), `frame ${index + 1} has an inner slide`);
+  }
 });
 
 test("documented gap: url() references in style blocks are not rewritten", () => {
   assert.match(html, /url\("\.\/images\/from-css\.png"\)/);
+});
+
+test("nested slide roots fail with an actionable composition error", async () => {
+  const nestedRoot = await mkdtemp(path.join(tmpdir(), "zerp-nested-"));
+  await mkdir(path.join(nestedRoot, "slides"));
+  await writeFile(
+    path.join(nestedRoot, "slides", "00-nested.html"),
+    '<div class="slide"><div class="slide">nested</div></div>',
+    "utf8",
+  );
+  try {
+    await assert.rejects(() => composeSlidesHtml(nestedRoot), /Nested \.slide elements/);
+  } finally {
+    await rm(nestedRoot, { recursive: true, force: true });
+  }
 });

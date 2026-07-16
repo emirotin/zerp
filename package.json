@@ -61,6 +61,7 @@
     "@fontsource/roboto-mono": "^5.2.9",
     "apca-w3": "^0.1.9",
     "css-tree": "^3.2.1",
+    "htmlparser2": "^10.1.0",
     "linkedom": "^0.18.12",
     "marked": "^18.0.5"
   },

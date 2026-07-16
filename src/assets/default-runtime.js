@@ -1,7 +1,8 @@
 (() => {
-  const slides = Array.from(document.querySelectorAll(".slide"));
+  const frames = Array.from(document.querySelectorAll("[data-zerp-slide]"));
+  const slides = frames.map((frame) => frame.querySelector(".slide"));
   let current = 0;
-  const total = slides.length;
+  const total = frames.length;
   const counter = document.getElementById("counter");
   const progress = document.getElementById("progress");
   const navPrev = document.getElementById("nav-prev");
@@ -40,13 +41,19 @@
 
   function show(index) {
     current = clamp(index);
-    for (const slide of slides) {
-      slide.classList.remove("active");
+    for (const [frameIndex, frame] of frames.entries()) {
+      frame.removeAttribute("data-zerp-slide-active");
+      const slide = slides[frameIndex];
+      if (slide) {
+        slide.classList.remove("active");
+      }
     }
+    const activeFrame = frames[current];
     const active = slides[current];
-    if (!active) {
+    if (!activeFrame || !active) {
       return;
     }
+    activeFrame.setAttribute("data-zerp-slide-active", "");
     active.classList.add("active");
     updateSourceBadge();
     if (counter) {

@@ -19,7 +19,7 @@ test("slides carry their source path and chrome markup is present", async () => 
   const html = await buildPresentationHtml({ rootDir });
   assert.match(
     html,
-    /<div class="slide" data-zerp-src="slides\/00-ok\.md" data-zerp-src-slide="1\/1" data-zerp-index="1">/,
+    /<div data-zerp-slide>\s*<div class="slide" data-zerp-src="slides\/00-ok\.md" data-zerp-src-slide="1\/1" data-zerp-index="1">/,
   );
   assert.match(html, /id="theme-switch"/);
   assert.match(html, /data-theme-choice="system"/);
@@ -29,19 +29,19 @@ test("multi-slide files get in-file ordinals and global deck positions", async (
   const html = await buildPresentationHtml({ rootDir: "test/fixtures/multi-deck" });
   assert.match(
     html,
-    /data-zerp-src="slides\/00-two\.html" data-zerp-src-slide="1\/2" data-zerp-index="1"/,
+    /<div data-zerp-slide>\s*<div class="slide" data-zerp-src="slides\/00-two\.html" data-zerp-src-slide="1\/2" data-zerp-index="1"/,
   );
   assert.match(
     html,
-    /data-zerp-src="slides\/00-two\.html" data-zerp-src-slide="2\/2" data-zerp-index="2"/,
+    /<div data-zerp-slide>\s*<div class="slide" data-zerp-src="slides\/00-two\.html" data-zerp-src-slide="2\/2" data-zerp-index="2"/,
   );
   assert.match(
     html,
-    /data-zerp-src="slides\/01-more\.md" data-zerp-src-slide="1\/2" data-zerp-index="3"/,
+    /<div data-zerp-slide>\s*<div class="slide" data-zerp-src="slides\/01-more\.md" data-zerp-src-slide="1\/2" data-zerp-index="3"/,
   );
   assert.match(
     html,
-    /data-zerp-src="slides\/01-more\.md" data-zerp-src-slide="2\/2" data-zerp-index="4"/,
+    /<div data-zerp-slide>\s*<div class="slide" data-zerp-src="slides\/01-more\.md" data-zerp-src-slide="2\/2" data-zerp-index="4"/,
   );
 });
 

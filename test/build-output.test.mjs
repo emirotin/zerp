@@ -8,6 +8,10 @@ test("built default stylesheet = generated tokens + token-free base styles", asy
   assert.match(css, /\.card \{/);
   assert.match(css, /\.stat-row \{/);
   assert.match(css, /\[hidden\] \{[^}]*display: none !important/);
+  assert.match(css, /\[data-zerp-slide\] \{[^}]*display: none/);
+  assert.match(css, /\[data-zerp-slide\]\[data-zerp-slide-active\] \{[^}]*display: flex/);
+  assert.match(css, /\.slide \{[^}]*display: flex/);
+  assert.doesNotMatch(css, /\.slide\.active\s*\{[^}]*display/);
   const afterTokens = css.split("/* base styles */")[1];
   assert.ok(afterTokens, "base styles marker present");
   assert.doesNotMatch(afterTokens, /#[0-9a-fA-F]{3,8}\b/, "no raw hex outside generated tokens");

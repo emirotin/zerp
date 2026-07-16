@@ -1,6 +1,7 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { parseDocument } from "htmlparser2";
 import { parseHTML } from "linkedom";
 
 import { fontFaceCss } from "./fonts.js";
@@ -61,48 +62,115 @@ function rewriteRelativeUrls(html: string, relativeSlidePath: string): string {
   );
 }
 
-function isSlideDivAttrs(attrs: string): boolean {
-  const classMatch = attrs.match(/\bclass\s*=\s*(["'])([^"']*)\1/i);
-  return classMatch !== null && /(?:^|\s)slide(?:\s|$)/.test(classMatch[2] ?? "");
+interface SourceEdit {
+  index: number;
+  text: string;
 }
 
-function annotateSlideDivs(
-  html: string,
-  extraAttrs: (attrs: string, ordinal: number) => string,
-): string {
-  let ordinal = 0;
-  return html.replace(/<div\b([^>]*)>/gi, (match, attrs: string) => {
-    if (!isSlideDivAttrs(attrs)) {
-      return match;
+interface ParsedNode {
+  type: string;
+  children?: ParsedNode[];
+}
+
+interface ParsedElement extends ParsedNode {
+  name: string;
+  attribs: Record<string, string>;
+  children: ParsedNode[];
+  startIndex: number | null;
+  endIndex: number | null;
+}
+
+function hasClassToken(value: string | undefined, token: string): boolean {
+  return value?.split(/\s+/).includes(token) ?? false;
+}
+
+function collectSlideElements(
+  nodes: ParsedNode[],
+  sourcePath: string,
+  slides: ParsedElement[],
+  parentSlide: ParsedElement | null = null,
+): void {
+  for (const node of nodes) {
+    if (node.type !== "tag" && node.type !== "script" && node.type !== "style") {
+      continue;
     }
-    ordinal += 1;
-    const extra = extraAttrs(attrs, ordinal);
-    return extra ? `<div${attrs}${extra}>` : match;
-  });
+    const element = node as ParsedElement;
+    const isSlide = element.name === "div" && hasClassToken(element.attribs.class, "slide");
+    if (isSlide) {
+      if (parentSlide) {
+        throw new Error(`Nested .slide elements are not supported in ${sourcePath}`);
+      }
+      slides.push(element);
+    }
+    collectSlideElements(element.children, sourcePath, slides, isSlide ? element : parentSlide);
+  }
 }
 
-function countSlideDivs(html: string): number {
-  let count = 0;
-  for (const match of html.matchAll(/<div\b([^>]*)>/gi)) {
-    if (isSlideDivAttrs(match[1] ?? "")) {
-      count += 1;
+function openingTagInsertIndex(html: string, startIndex: number): number {
+  let quote: '"' | "'" | null = null;
+  for (let index = startIndex; index < html.length; index++) {
+    const character = html[index];
+    if (quote) {
+      if (character === quote) {
+        quote = null;
+      }
+      continue;
+    }
+    if (character === '"' || character === "'") {
+      quote = character;
+    } else if (character === ">") {
+      return html[index - 1] === "/" ? index - 1 : index;
     }
   }
-  return count;
+  throw new Error(`Unterminated slide opening tag at offset ${startIndex}`);
 }
 
-// Source tracing: every slide div gets data-zerp-src (source file),
-// data-zerp-src-slide ("i/n" ordinal within that file), and — at composition
-// time — data-zerp-index (1-based deck position). Tooling (check, slides,
-// runtime badge) reads these instead of re-deriving the mapping.
-function injectSlideSrc(fileHtml: string, relativeSlidePath: string): string {
+function applySourceEdits(source: string, edits: SourceEdit[]): string {
+  let output = source;
+  for (const edit of [...edits].sort((left, right) => right.index - left.index)) {
+    output = `${output.slice(0, edit.index)}${edit.text}${output.slice(edit.index)}`;
+  }
+  return output;
+}
+
+// Source tracing: every real slide div gets data-zerp-src (source file),
+// data-zerp-src-slide ("i/n" ordinal within that file), and data-zerp-index
+// (1-based deck position). Each slide is wrapped in a framework-owned frame;
+// the runtime toggles the frame's active attribute while authored CSS remains
+// free to choose the inner slide's layout display value.
+function wrapSlides(
+  fileHtml: string,
+  relativeSlidePath: string,
+  deckIndexOffset: number,
+): { html: string; slideCount: number } {
   const srcPath = path.posix.join("slides", relativeSlidePath.replaceAll(path.sep, "/"));
-  const slidesInFile = countSlideDivs(fileHtml);
-  return annotateSlideDivs(fileHtml, (attrs, ordinal) =>
-    /\bdata-zerp-src\s*=/i.test(attrs)
-      ? ""
-      : ` data-zerp-src="${escapeHtml(srcPath)}" data-zerp-src-slide="${ordinal}/${slidesInFile}"`,
-  );
+  const document = parseDocument(fileHtml, { withStartIndices: true, withEndIndices: true });
+  const slides: ParsedElement[] = [];
+  collectSlideElements(document.children, relativeSlidePath, slides);
+  const edits: SourceEdit[] = [];
+
+  for (const [index, slide] of slides.entries()) {
+    if (slide.startIndex === null || slide.endIndex === null) {
+      throw new Error(`Could not locate the complete .slide element in ${relativeSlidePath}`);
+    }
+    const attrs: string[] = [];
+    if (slide.attribs["data-zerp-src"] === undefined) {
+      attrs.push(` data-zerp-src="${escapeHtml(srcPath)}"`);
+    }
+    if (slide.attribs["data-zerp-src-slide"] === undefined) {
+      attrs.push(` data-zerp-src-slide="${index + 1}/${slides.length}"`);
+    }
+    if (slide.attribs["data-zerp-index"] === undefined) {
+      attrs.push(` data-zerp-index="${deckIndexOffset + index + 1}"`);
+    }
+    edits.push(
+      { index: slide.startIndex, text: "<div data-zerp-slide>\n" },
+      { index: openingTagInsertIndex(fileHtml, slide.startIndex), text: attrs.join("") },
+      { index: slide.endIndex + 1, text: "\n</div>" },
+    );
+  }
+
+  return { html: applySourceEdits(fileHtml, edits), slideCount: slides.length };
 }
 
 function readAsset(assetPath: string): Promise<string> {
@@ -150,18 +218,18 @@ export async function composeSlidesHtml(rootDir: string): Promise<string> {
     throw new Error(`No slide files found in ${path.join(rootDir, "slides")}`);
   }
 
-  const fileHtmlParts = await Promise.all(
-    slideFiles.map(async ({ absolutePath, relativePath }) => {
-      const content = await readFile(absolutePath, "utf8");
-      const parts = absolutePath.endsWith(".md") ? renderMarkdownSlides(content) : [content];
-      const fileHtml = parts.map((html) => rewriteRelativeUrls(html, relativePath)).join("\n");
-      return injectSlideSrc(fileHtml, relativePath);
-    }),
-  );
+  const fileHtmlParts: string[] = [];
+  let deckIndexOffset = 0;
+  for (const { absolutePath, relativePath } of slideFiles) {
+    const content = await readFile(absolutePath, "utf8");
+    const parts = absolutePath.endsWith(".md") ? renderMarkdownSlides(content) : [content];
+    const fileHtml = parts.map((html) => rewriteRelativeUrls(html, relativePath)).join("\n");
+    const wrapped = wrapSlides(fileHtml, relativePath, deckIndexOffset);
+    fileHtmlParts.push(wrapped.html);
+    deckIndexOffset += wrapped.slideCount;
+  }
 
-  return annotateSlideDivs(fileHtmlParts.join("\n"), (attrs, ordinal) =>
-    /\bdata-zerp-index\s*=/i.test(attrs) ? "" : ` data-zerp-index="${ordinal}"`,
-  );
+  return fileHtmlParts.join("\n");
 }
 
 interface HeadingQueryable {

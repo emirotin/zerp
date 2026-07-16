@@ -1,39 +1,75 @@
-# Composition fidelity: why the build pipeline edits HTML with regexes
+# Composition fidelity
 
-Status: analysis recorded 2026-07-07. No migration scheduled — the known bugs are pinned in `test/composition-quirks.test.mjs`.
+Status: the location-preserving composition pipeline and slide-frame isolation
+are implemented. The regression cases live in
+`test/composition-quirks.test.mjs`; the browser contract is exercised by
+`zerp verify` when Chrome or Chromium is available.
 
-## The question
+## Why two HTML dependencies?
 
-`linkedom` and `css-tree` are production dependencies (the checker parses the composed document and models its CSS; `zerp slides` parses too). Yet the composition path — `rewriteRelativeUrls()` and the slide-annotation pass in `src/presentation.ts` — manipulates authored HTML with regexes. Why?
+`htmlparser2` and `linkedom` have deliberately different jobs:
 
-## Why it is this way
+- `htmlparser2` is used by the write-side composition path. It exposes source
+  offsets, so zerp can find real slide elements and splice only the generated
+  wrapper and tracing attributes into the original bytes.
+- `linkedom` remains used by the read-only DOM consumers: `zerp check`,
+  `zerp slides`, and title derivation. Those consumers need selectors,
+  `textContent`, parent relationships, and DOM matching, not source offsets.
 
-1. **History.** Composition is 0.1-era; the parsers arrived in 0.2.0 for the _read-only_ checker. The write path was never revisited.
+Replacing `linkedom` is a separate refactor and is not a consequence of adding
+`htmlparser2`.
 
-2. **Byte fidelity is the design goal.** The builder is a concatenator: authored HTML ships byte-identical, plus a handful of injected attributes. A parse→serialize round-trip normalizes quoting, entities, whitespace, and attribute order, and error-corrects unusual-but-intentional markup. The deck contract ("raw HTML passthrough", hand-authored slides, diffable output) treats fidelity as a feature.
+## Why composition edits source with offsets
 
-3. **One regex behavior is load-bearing by accident.** The URL-rewrite regex matches `src = "..."` _inside inline `<script>` bodies_ and rewrites script-referenced asset paths (`./images/x.png` → `slides/images/x.png`). Built decks are single files at the deck root, so script-fetched assets genuinely need this rewrite. A naive DOM-based rewriter would skip script text and silently break offline demos.
+The builder is a concatenator: authored HTML should remain byte-identical
+except for the small set of generated changes. A parse→serialize round-trip
+would normalize quoting, entities, whitespace, and attribute order, and could
+error-correct unusual-but-intentional markup.
 
-## Known bugs (all pinned in `test/composition-quirks.test.mjs`)
+One URL rewrite is intentionally still a narrow text pass. Relative `src`,
+`href`, and `poster` attributes are rewritten for the single-file build, and
+the existing `src = "..."` behavior inside inline scripts is preserved because
+interactive slides use it to fetch local assets. Style-block `url(...)`
+references remain a documented gap; slide styles should use tokens and asset
+URLs in HTML attributes where possible.
 
-The probe deck is generated at runtime inside the test — its deliberately unusual markup (unquoted attributes, `>` in an attribute value) would be normalized by the formatter if it lived on disk.
+## The composition contract
 
-- **Script strings are annotated.** A JS string containing `<div class="slide">` gets the `data-zerp-*` attributes injected _into the string_, corrupting the author's code — and it is _counted_, so `data-zerp-src-slide` totals and `data-zerp-index` drift from what the runtime counter shows (the runtime counts DOM nodes; the regex counts text).
-- **`>` inside an attribute value derails annotation.** `<div class="slide" title="a > b">`: the `[^>]*` attrs capture stops at the first `>`, so the injected attributes land inside the `title` value and the tag is mangled.
-- **Unquoted class attributes are invisible to the regex.** `<div class=slide>` is a slide to `querySelectorAll(".slide")` (runtime, checker, `zerp slides`) but not to the annotation regex — the two notions of "slide" can disagree.
-- **Documented gap, not a bug:** `url(...)` references inside `<style>` blocks are not rewritten, while URL _attributes_ are. Slide styles are expected to use tokens, not images.
+Each real `.slide` element is wrapped in a framework-owned frame:
 
-None of these currently affect the example decks or known real decks (`zerp check` clean, counts correct), but the first two sit directly under the slide-numbering features.
+```html
+<div data-zerp-slide data-zerp-slide-active>
+  <div
+    class="slide"
+    data-zerp-src="slides/10-intro.html"
+    data-zerp-src-slide="1/2"
+    data-zerp-index="3"
+  >
+    ...authored content...
+  </div>
+</div>
+```
 
-## Recommended fix shape (when it matters)
+The frame owns visibility. The inner `.slide` owns the authored layout and is
+given the full frame width and height by the base styles. The runtime toggles
+`data-zerp-slide-active` on frames and retains the `.active` class on the inner
+slide for compatibility with slide scripts and existing selectors. The
+framework does not use `.slide.active` to control display anymore, so a deck
+can safely choose `display: grid`, `display: block`, or another layout on its
+slide root.
 
-**Not** parse→serialize — that fixes matching correctness but destroys byte fidelity and drops the script-src rewrite.
+The `data-zerp-*` frame attributes are reserved framework state. A deck should
+style the inner `.slide` and its descendants, not the frame's display rules.
+Nested `.slide` roots are rejected during composition because they make the
+frame-to-slide mapping ambiguous.
 
-Instead: **location-preserving parse + offset surgery.**
+## What the tests protect
 
-- Parse with a parser that exposes source offsets (`htmlparser2` `startIndex`/`endIndex`, or parse5 `sourceCodeLocation`; linkedom does not expose offsets).
-- Use the real tree to _find_ slide-div open tags and URL attributes; apply edits by splicing the original string at exact offsets. Authored bytes stay untouched everywhere else; script bodies are excluded from annotation by construction.
-- Make the script-internal URL rewrite an explicit, narrow pass over script text (or an authoring rule), instead of an accident of the attribute regex.
-- Guardrail: a byte-diff regression harness that builds the example decks (and a large real deck) before/after the refactor; the only expected diffs are the deliberate fixes above.
-
-Signatures (`rewriteRelativeUrls`, the annotation pass, `composeSlidesHtml`) can stay unchanged; this is contained to `src/presentation.ts` plus updated pins in `test/composition-quirks.test.mjs`.
+- HTML-looking text inside scripts is not mistaken for a slide.
+- `>` inside a quoted attribute and unquoted class attributes remain valid and
+  retain their authored spelling.
+- Script asset URL rewriting continues to work.
+- Every real slide has exactly one frame, stable source metadata, and a global
+  deck index.
+- A custom inner root using `display: grid` does not make inactive slides enter
+  layout or hide the active slide.
