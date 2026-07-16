@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Composition now discovers real slide elements with `htmlparser2` source offsets and wraps each one in a framework-owned `[data-zerp-slide]` frame. Authored `.slide` bytes and inline-script asset rewriting remain intact; script-looking markup is no longer annotated, and nested slide roots fail clearly.
+- Slide visibility is controlled by the frame's `data-zerp-slide-active` attribute. The inner `.slide` is a full-size layout surface, so custom `display: grid`/`block`/`flex` roots cannot make inactive slides enter page flow or hide the active slide.
+- Added `zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--json]` for headless-browser frame, viewport, overflow, and browser-error checks.
+
 ## 0.4.0
 
 - `zerp serve` live-reloads the browser on any change under `slides/` (sources and assets) — dependency-free SSE push with an mtime watcher. The page returns to the same slide via the URL hash and replays the steps of every slide you had stepped through; scripted slides re-run their `slide-next` sequences, so demos stay in sync. Built decks contain no reload client.

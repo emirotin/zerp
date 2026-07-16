@@ -48,6 +48,7 @@ pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default the
 pnpm exec zerp build --theme light        # write ./index.html (light default)
 pnpm exec zerp check                      # APCA contrast + font-size report (both themes)
 pnpm exec zerp slides                     # deck position → source file mapping (--json for tooling)
+pnpm exec zerp verify                     # headless-browser frame/layout check (both themes, 1280x720; --json for tooling)
 ```
 
 ## Tooling
@@ -65,6 +66,7 @@ pnpm lint
 pnpm lint:fix
 pnpm format
 pnpm format:check
+pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chromium)
 ```
 
 `husky` runs `lint-staged` and a build check before each commit. `dist/` is not checked into git; it is built on demand and included in the npm package via `prepublishOnly`.
@@ -77,10 +79,12 @@ pnpm format:check
 - Each `.html` file can contain one or more `<div class="slide">` blocks.
 - `.md` files are also supported. Each Markdown file is automatically wrapped in `<div class="slide">` at build time — no manual wrapper needed. Use `---` on its own line to separate multiple slides within a single `.md` file.
 - Raw HTML inside Markdown files passes through unchanged, so you can embed interactive `<script>` blocks, custom `<div>` layouts, or `<style>` elements alongside Markdown content.
+- At build time, every real `.slide` is placed inside a framework-owned `<div data-zerp-slide>`. The frame controls visibility; the inner `.slide` is the full-size layout surface, so custom roots may use `display: grid` or another layout safely. Do not style the reserved frame attributes.
 - The framework default CSS and browser runtime are stored as separate source assets and inlined into generated HTML during `serve` and `build`.
 - Colors come from design tokens (`var(--zerp-*)`) generated from the Harmony palette; decks render in dark and light themes. Do not hardcode colors.
 - The page title comes from the first slide's top heading (override via the `title` build option; folder name as fallback).
 - Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
+- Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium and checks that exactly one full-size slide frame is active and visible without page overflow.
 - "Slide N" means the 1-based deck position (what the on-screen counter shows) — file prefixes only order files. `zerp slides` prints the position → file mapping; pressing `s` in a running deck shows the active slide's source.
 
 ## Library API

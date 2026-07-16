@@ -15,7 +15,8 @@
 **"Slide N" always means the 1-based deck position** — the number the runtime counter shows to presenter and audience. File name prefixes only order files; a file may contain several slides, so a prefix is NOT a slide number. The runtime counter, the URL hash (`#N`), `zerp check` findings, and `zerp slides` all use deck positions.
 
 - Before editing "slide N", run `zerp slides .` (add `--json` for tooling): it prints each slide's position, source file, in-file ordinal, and title. Confirm the target by its heading.
-- Every composed slide div carries source-tracing attributes: `data-zerp-src` (source file), `data-zerp-src-slide` (`i/n` within that file), `data-zerp-index` (deck position).
+- Every composed inner `.slide` carries source-tracing attributes: `data-zerp-src` (source file), `data-zerp-src-slide` (`i/n` within that file), `data-zerp-index` (deck position). It is wrapped in a framework-owned `<div data-zerp-slide>` frame; the frame owns visibility and the inner `.slide` owns layout.
+- Treat `data-zerp-slide`, `data-zerp-slide-active`, and their display rules as reserved framework state. Put custom layout rules on `.slide` or a class on the inner root, not on the frame.
 - In a running deck, press `s` to toggle a source badge showing the active slide's position and source file.
 
 ## Design system — colors
@@ -87,9 +88,11 @@ After authoring or editing slides, ALWAYS run:
 
 ```bash
 zerp check .
+zerp verify . --theme both --size 1280x720
+# add --json when an agent or script needs the per-slide report
 ```
 
-Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp build` prints the same summary.
+Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
 
 `zerp serve` live-reloads the browser on any change under `slides/` — the page returns to the same slide (URL hash) and replays the steps of every slide you had stepped through. Built decks contain no reload client.
 
@@ -161,6 +164,7 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 2. If a layout truly needs custom CSS, put a `<style>` inside the slide file, use ONLY `var(--zerp-*)` tokens, keep text at 1em+.
 3. A `<style>` block is document-global. For deck-wide styles the convention is a style-only file sorted first (e.g. `slides/00-styles.html` containing just a `<style>` — it contributes no slide).
 4. Re-run `zerp check` — custom CSS is checked too (`:where()` is understood). Selectors it cannot verify are listed as skipped; keep them simple (tag/class selectors).
+5. If the layout changes, run `zerp verify . --theme both --size 1280x720` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
 
 ## What to avoid
 
@@ -168,9 +172,10 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 - No hardcoded colors anywhere (including inline styles and scripts). Sole exemption: colors of depicted real-world objects (a playing card's white face, a roulette pocket's black) may stay literal — they represent the object and must not flip with the theme.
 - No text below 1em; no `--zerp-faint` for text; no `.sm .muted` combos.
 - No `<div class="slide">` wrappers inside Markdown files (added automatically).
+- Do not override the framework-owned `[data-zerp-slide]` visibility rules or author those `data-zerp-*` attributes yourself.
 - Do not recreate navigation; do not edit generated `index.html`.
 
 ## Validation commands
 
 Inside the zerp repo: `pnpm build && pnpm test && pnpm lint && pnpm format:check`.
-In a consumer deck: `zerp check .` then `zerp serve .` / `zerp build .`.
+In a consumer deck: `zerp check .`, `zerp verify .`, then `zerp serve .` / `zerp build .`.

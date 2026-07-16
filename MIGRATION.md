@@ -1,3 +1,27 @@
+# Migrating from a pre-frame zerp build
+
+The next build contract wraps every real inner `.slide` in a generated
+`<div data-zerp-slide>`. The frame owns visibility; the inner `.slide` remains
+the authored full-size layout root and still receives `.active` for existing
+slide scripts.
+
+Most decks need no source changes. If a deck copied or overrode framework
+visibility rules, remove rules such as `.slide { display: none }` and
+`.slide.active { display: flex }`. Custom layout rules such as `.slide.grid-root
+{ display: grid }` now belong on the inner root and are safe. Do not style or
+author the reserved `data-zerp-slide` / `data-zerp-slide-active` state.
+
+Run both static and browser validation after upgrading:
+
+```bash
+zerp check .
+zerp verify . --theme both --size 1280x720
+```
+
+The browser check requires Chrome or Chromium. `htmlparser2` is a direct
+composition dependency; `linkedom` remains because the checker, title
+derivation, and `zerp slides` use its DOM APIs.
+
 # Migrating a deck from zerp 0.2.0 to 0.3.0
 
 0.3.0 is additive except for one deliberate behavior change: utility classes now reliably override component defaults (component soft defaults are declared via `:where()`). No markup changes are required, but review these:
