@@ -9,9 +9,20 @@
  * --focus outlines matching elements in magenta; --scale renders at a
  * higher device pixel ratio for close inspection of small elements;
  * --no-web-fonts blackholes Google Fonts (fast + offline-safe layout shots).
+ *
+ * Drives Chrome over the DevTools Protocol (Emulation.setDeviceMetricsOverride)
+ * rather than the --window-size/--screenshot CLI flags: headless Chrome's
+ * --window-size sets the outer window bounds, and vh/%-based layout vs.
+ * position:fixed elements resolve against two different, disagreeing
+ * viewport notions derived from it — no single size or post-crop
+ * reconciles both (a deck's fixed-position nav chrome and its vh-sized
+ * slide frame would land in different places). CDP's device metrics
+ * override sets one real viewport that every subsystem agrees on, so
+ * captures are pixel-exact to --size with nothing to compensate.
+ *
  * Shots are capped at 15s per page — a hung network fetch degrades to
  * fallback rendering instead of hanging the harness. Chrome itself is
- * killed as soon as the PNG is stable: headless Chrome can hang on
+ * killed as soon as the shot is captured: headless Chrome can hang on
  * shutdown for minutes, so the harness never waits for a clean exit.
  *
  * Writes <out>/<deck>-s<N>-<theme>.png. Requires Google Chrome or Chromium
@@ -23,6 +34,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -71,32 +83,125 @@ function killProcessGroup(child) {
   }
 }
 
-const CALIBRATION_HTML = `<!doctype html>
-<html>
-  <head></head>
-  <body>
-    <script>
-      document.documentElement.setAttribute(
-        "data-zerp-shot-viewport",
-        window.innerWidth + "x" + window.innerHeight,
-      );
-    </script>
-  </body>
-</html>`;
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Headless Chrome's --window-size sets the outer window bounds, not the
- * layout viewport: window.innerWidth/innerHeight (and therefore any vh/vw
- * or 100%-of-viewport layout) can come out smaller than requested, by a
- * chrome-version- and platform-dependent amount. Measure the actual offset
- * against a blank page and compensate --window-size, rather than trusting
- * the requested --size, so shots render the deck the way it truly looks at
- * that size.
+ * Minimal DevTools Protocol client over Node's built-in WebSocket: tracks
+ * request ids to resolve responses, dispatches events to waiters, and
+ * fails every pending request the moment the connection drops instead of
+ * leaving them hanging forever.
  */
-async function measureViewportOffset(chrome, width, height) {
-  const profile = mkdtempSync(path.join(tmpdir(), "zerp-shot-calibrate-"));
-  const calibrationPath = path.join(tmpdir(), `zerp-shot-calibrate-${process.pid}.html`);
-  writeFileSync(calibrationPath, CALIBRATION_HTML, "utf8");
+function createCdpClient(ws) {
+  let nextId = 1;
+  const pending = new Map();
+  const eventListeners = new Set();
+
+  const rejectAllPending = (error) => {
+    for (const { reject } of pending.values()) {
+      reject(error);
+    }
+    pending.clear();
+  };
+  ws.addEventListener("close", () => rejectAllPending(new Error("DevTools connection closed")));
+  ws.addEventListener("error", () => rejectAllPending(new Error("DevTools connection error")));
+  ws.addEventListener("message", (event) => {
+    const message = JSON.parse(event.data);
+    if (message.id !== undefined) {
+      const waiter = pending.get(message.id);
+      if (!waiter) {
+        return;
+      }
+      pending.delete(message.id);
+      if (message.error) {
+        waiter.reject(new Error(`CDP error (${message.error.code}): ${message.error.message}`));
+      } else {
+        waiter.resolve(message.result);
+      }
+      return;
+    }
+    if (message.method) {
+      for (const listener of eventListeners) {
+        listener(message);
+      }
+    }
+  });
+
+  return {
+    send(method, params = {}, sessionId) {
+      const id = nextId++;
+      const payload = sessionId ? { id, method, params, sessionId } : { id, method, params };
+      return new Promise((resolve, reject) => {
+        pending.set(id, { resolve, reject });
+        ws.send(JSON.stringify(payload));
+      });
+    },
+    // Resolves with the next matching event, or null if timeoutMs elapses
+    // first — callers proceed either way, capturing whatever has rendered.
+    waitForEvent(method, sessionId, timeoutMs) {
+      return new Promise((resolve) => {
+        let done = false;
+        const timer = setTimeout(() => {
+          if (done) {
+            return;
+          }
+          done = true;
+          eventListeners.delete(listener);
+          resolve(null);
+        }, timeoutMs);
+        const listener = (message) => {
+          if (done || message.method !== method) {
+            return;
+          }
+          if (sessionId && message.sessionId !== sessionId) {
+            return;
+          }
+          done = true;
+          clearTimeout(timer);
+          eventListeners.delete(listener);
+          resolve(message);
+        };
+        eventListeners.add(listener);
+      });
+    },
+  };
+}
+
+async function connectWebSocket(url, timeoutMs) {
+  const ws = new WebSocket(url);
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      ws.close();
+      reject(new Error("DevTools WebSocket connection timed out"));
+    }, timeoutMs);
+    ws.addEventListener(
+      "open",
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
+    ws.addEventListener(
+      "error",
+      () => {
+        clearTimeout(timer);
+        reject(new Error("DevTools WebSocket connection failed"));
+      },
+      { once: true },
+    );
+  });
+  return ws;
+}
+
+/**
+ * Launch headless Chrome with a DevTools port and connect to it. Chrome
+ * writes the assigned port and browser endpoint path into its profile dir
+ * shortly after starting (--remote-debugging-port=0 picks a free port);
+ * poll for that file rather than parsing stderr.
+ */
+async function launchChrome(chrome, extraArgs) {
+  const profile = mkdtempSync(path.join(tmpdir(), "zerp-shot-"));
+  const portFile = path.join(profile, "DevToolsActivePort");
   const child = spawn(
     chrome,
     [
@@ -108,67 +213,57 @@ async function measureViewportOffset(chrome, width, height) {
       "--disable-sync",
       "--disable-extensions",
       "--disable-component-update",
-      "--virtual-time-budget=4000",
-      `--window-size=${width},${height}`,
-      "--force-device-scale-factor=1",
+      "--remote-debugging-port=0",
       `--user-data-dir=${profile}`,
-      "--dump-dom",
-      `file://${calibrationPath}`,
+      ...extraArgs,
+      "about:blank",
     ],
-    { detached: true, stdio: ["ignore", "pipe", "pipe"] },
+    { detached: true, stdio: ["ignore", "ignore", "pipe"] },
   );
-  let stdout = "";
-  child.stdout.setEncoding("utf8");
-  child.stdout.on("data", (chunk) => {
-    stdout += chunk;
+  let stderr = "";
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk;
   });
-  try {
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error("Chrome viewport calibration timed out"));
-      }, 20_000);
-      let settled = false;
-      const finish = (error) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        clearTimeout(timer);
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      };
-      child.once("error", (error) => finish(error));
-      // Chrome can hang while shutting down after --dump-dom; the marker
-      // attribute is enough to finish, so do not wait for a clean exit.
-      child.stdout.on("data", () => {
-        if (/data-zerp-shot-viewport="/.test(stdout)) {
-          finish();
-        }
-      });
-      child.once("close", (code, signal) => {
-        if (code === 0) {
-          finish();
-        } else {
-          finish(new Error(`Chrome viewport calibration failed (${code ?? signal})`));
-        }
-      });
-    });
-  } finally {
+  const deadline = Date.now() + 10_000;
+  while (!existsSync(portFile) && Date.now() < deadline) {
+    await sleep(50);
+  }
+  if (!existsSync(portFile)) {
     killProcessGroup(child);
     rmSync(profile, { force: true, recursive: true });
-    rmSync(calibrationPath, { force: true });
+    throw new Error(`Chrome never opened a DevTools port:\n${stderr}`);
   }
-  const match = stdout.match(/data-zerp-shot-viewport="(\d+)x(\d+)"/);
-  if (!match) {
-    throw new Error("Chrome did not report a viewport calibration result");
-  }
-  return {
-    dx: width - Number.parseInt(match[1], 10),
-    dy: height - Number.parseInt(match[2], 10),
-  };
+  const [port, wsPath] = readFileSync(portFile, "utf8").trim().split("\n");
+  const ws = await connectWebSocket(`ws://127.0.0.1:${port}${wsPath}`, 10_000);
+  return { child, profile, ws, cdp: createCdpClient(ws) };
+}
+
+/**
+ * Open a fresh page target, force its viewport to exactly width x height
+ * before navigating (so nothing ever renders against the wrong size, even
+ * transiently), load url, and capture a PNG at that same size.
+ */
+async function captureScreenshot(cdp, { url, width, height, scale, timeoutMs }) {
+  const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" });
+  const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
+  await cdp.send("Page.enable", {}, sessionId);
+  await cdp.send(
+    "Emulation.setDeviceMetricsOverride",
+    { width, height, deviceScaleFactor: scale, mobile: false },
+    sessionId,
+  );
+  const loaded = cdp.waitForEvent("Page.loadEventFired", sessionId, timeoutMs);
+  await cdp.send("Page.navigate", { url }, sessionId);
+  await loaded;
+  // Let reveal/theme-switch transitions and any deferred script settle.
+  await sleep(500);
+  const { data } = await cdp.send(
+    "Page.captureScreenshot",
+    { format: "png", captureBeyondViewport: false },
+    sessionId,
+  );
+  await cdp.send("Target.closeTarget", { targetId });
+  return Buffer.from(data, "base64");
 }
 
 const { values, positionals } = parseArgs({
@@ -209,13 +304,15 @@ if (!sizeMatch) {
   console.error(`Invalid --size: ${values.size} (expected WxH)`);
   process.exit(1);
 }
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const scaleValue = Number.parseFloat(values.scale);
+if (!(scaleValue > 0)) {
+  console.error(`Invalid --scale: ${values.scale}`);
+  process.exit(1);
+}
 
 const chrome = findChrome();
 const requestedWidth = Number.parseInt(sizeMatch[1], 10);
 const requestedHeight = Number.parseInt(sizeMatch[2], 10);
-const { dx, dy } = await measureViewportOffset(chrome, requestedWidth, requestedHeight);
 const outDir = path.resolve(values.out);
 mkdirSync(outDir, { recursive: true });
 const deckName = path.basename(deckDir);
@@ -249,63 +346,43 @@ try {
 
     for (const slide of slides) {
       const outPath = path.join(outDir, `${deckName}-s${slide}-${theme}.png`);
-      const profile = mkdtempSync(path.join(tmpdir(), "zerp-shot-"));
       rmSync(outPath, { force: true });
-      // Chrome writes the PNG quickly but can hang on shutdown for minutes
-      // (observed with headless 149 on macOS). Don't wait for exit: poll for
-      // a stable PNG, then kill the whole process group.
-      const child = spawn(
-        chrome,
-        [
-          "--headless=new",
-          "--disable-gpu",
-          "--hide-scrollbars",
-          "--no-first-run",
-          "--no-default-browser-check",
-          "--disable-sync",
-          "--disable-extensions",
-          "--disable-component-update",
-          // Hard cap: a wedged subresource (e.g. throttled webfont fetch)
-          // must not hang the shot; Chrome captures whatever has rendered.
-          "--timeout=15000",
-          ...(values["no-web-fonts"]
-            ? [
-                "--host-resolver-rules=MAP fonts.googleapis.com 127.0.0.1, MAP fonts.gstatic.com 127.0.0.1",
-              ]
-            : []),
-          `--window-size=${requestedWidth + dx},${requestedHeight + dy}`,
-          `--force-device-scale-factor=${values.scale}`,
-          "--virtual-time-budget=4000",
-          `--user-data-dir=${profile}`,
-          `--screenshot=${outPath}`,
-          `file://${tempHtml}#${slide}`,
-        ],
-        { stdio: ["ignore", "ignore", "pipe"], detached: true },
-      );
-      let stderr = "";
-      child.stderr.on("data", (chunk) => {
-        stderr += chunk;
-      });
-      const deadline = Date.now() + 25000;
-      let ok = false;
-      while (Date.now() < deadline) {
-        await sleep(300);
-        if (existsSync(outPath)) {
-          const size = statSync(outPath).size;
-          await sleep(400);
-          if (existsSync(outPath) && statSync(outPath).size === size && size > 0) {
-            ok = true;
-            break;
-          }
+      const extraArgs = values["no-web-fonts"]
+        ? [
+            "--host-resolver-rules=MAP fonts.googleapis.com 127.0.0.1, MAP fonts.gstatic.com 127.0.0.1",
+          ]
+        : [];
+      // Chrome can hang on shutdown for minutes (observed with headless 149
+      // on macOS), so launch/capture/kill happen in the same try/finally —
+      // cleanup always runs even if a step above throws or times out.
+      const { child, profile, ws, cdp } = await launchChrome(chrome, extraArgs);
+      let png;
+      let captureError;
+      try {
+        png = await captureScreenshot(cdp, {
+          url: `file://${tempHtml}#${slide}`,
+          width: requestedWidth,
+          height: requestedHeight,
+          scale: scaleValue,
+          timeoutMs: 15_000,
+        });
+      } catch (error) {
+        captureError = error;
+      } finally {
+        try {
+          ws.close();
+        } catch {
+          // already gone
         }
+        killProcessGroup(child);
+        rmSync(profile, { force: true, recursive: true });
       }
-      killProcessGroup(child);
-      rmSync(profile, { force: true, recursive: true });
-      if (!ok) {
+      if (captureError) {
         console.error(`Chrome failed for slide ${slide} (${theme}):`);
-        console.error(stderr);
+        console.error(captureError.stack ?? String(captureError));
         process.exit(1);
       }
+      writeFileSync(outPath, png);
       shots.push(outPath);
       console.log(outPath);
     }
