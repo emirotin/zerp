@@ -7,6 +7,7 @@ import { formatReport, reportHasFailures } from "./check/report.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
 import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
+import { verifyPresentation, type VerifyTheme } from "./verify.js";
 
 const THEME_NAMES = new Set(["dark", "light", "system"]);
 
@@ -16,6 +17,7 @@ function printUsage(): void {
   zerp build [deck-dir] [--theme dark|light|system]
   zerp check [deck-dir] [--strict]
   zerp slides [deck-dir] [--json]
+  zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--json]
 
 A deck directory must contain slides/.
 `);
@@ -31,6 +33,30 @@ function parseTheme(raw: string | undefined): ThemeName {
   return raw as ThemeName;
 }
 
+function parseVerifyThemes(raw: string | undefined): VerifyTheme[] {
+  if (raw === undefined || raw === "both") {
+    return ["dark", "light"];
+  }
+  if (raw === "dark" || raw === "light") {
+    return [raw];
+  }
+  throw new Error(`Invalid verification theme: ${raw} (expected dark, light, or both)`);
+}
+
+function parseVerifySize(raw: string | undefined): { width: number; height: number } {
+  const value = raw ?? "1280x720";
+  const match = value.match(/^(\d+)x(\d+)$/);
+  if (!match) {
+    throw new Error(`Invalid verification size: ${value} (expected WxH)`);
+  }
+  const width = Number.parseInt(match[1] ?? "", 10);
+  const height = Number.parseInt(match[2] ?? "", 10);
+  if (width < 1 || height < 1) {
+    throw new Error(`Invalid verification size: ${value} (expected positive WxH)`);
+  }
+  return { width, height };
+}
+
 async function main(): Promise<void> {
   const { values, positionals } = parseArgs({
     args: process.argv.slice(2),
@@ -39,6 +65,7 @@ async function main(): Promise<void> {
       theme: { type: "string" },
       strict: { type: "boolean", default: false },
       json: { type: "boolean", default: false },
+      size: { type: "string" },
     },
   });
   const [command, firstArg, secondArg] = positionals;
@@ -84,6 +111,38 @@ async function main(): Promise<void> {
     process.stdout.write(
       values.json ? `${JSON.stringify(slides, null, 2)}\n` : formatSlideList(slides),
     );
+    return;
+  }
+
+  if (command === "verify") {
+    const rootDir = path.resolve(firstArg ?? ".");
+    const themes = parseVerifyThemes(values.theme);
+    const { width, height } = parseVerifySize(values.size);
+    const reports = [];
+    let failed = false;
+    for (const theme of themes) {
+      const report = await verifyPresentation({ rootDir, theme, width, height });
+      reports.push(report);
+      if (values.json) {
+        failed ||= report.failures.length > 0;
+        continue;
+      }
+      process.stdout.write(
+        `zerp verify — ${theme} · ${report.slideCount} slides · ${width}×${height}\n`,
+      );
+      if (report.failures.length === 0) {
+        process.stdout.write("all slide frames valid ✓\n");
+        continue;
+      }
+      failed = true;
+      for (const failure of report.failures) {
+        process.stdout.write(`  ✗ ${failure}\n`);
+      }
+    }
+    if (values.json) {
+      process.stdout.write(`${JSON.stringify(reports, null, 2)}\n`);
+    }
+    process.exitCode = failed ? 1 : 0;
     return;
   }
 

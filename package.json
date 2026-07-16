@@ -51,6 +51,7 @@
     "prepare": "husky",
     "prepublishOnly": "pnpm build",
     "test": "pnpm build && node --test test/*.test.mjs",
+    "test:browser": "ZERP_RUN_BROWSER_TEST=1 node --test test/verify.test.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts test .zed",

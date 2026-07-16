@@ -52,3 +52,9 @@ test("invalid theme is rejected", () => {
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Invalid theme/);
 });
+
+test("invalid verify size is rejected before launching a browser", () => {
+  const result = runCli(["verify", "test/fixtures/clean-deck", "--size", "wide"]);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Invalid verification size/);
+});
