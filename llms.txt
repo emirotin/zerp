@@ -2,6 +2,48 @@
 
 `@emirotin/zerp` is a zero-config presentation framework. Slides are authored in HTML, Markdown, or a mix. The deck source of truth is `slides/`.
 
+## Scope for agents
+
+This is the complete authoring guide for a downstream presentation project using the public `@emirotin/zerp` interface.
+
+- The deck owns its package manifest, authored files under `slides/`, and deck-local assets. Use the documented deck contract, classes, tokens, and CLI; do not depend on implementation details.
+- Add `@emirotin/zerp` as a development dependency with the project's package manager: `pnpm add -D @emirotin/zerp`, `npm install -D @emirotin/zerp`, `yarn add -D @emirotin/zerp`, or `bun add -d @emirotin/zerp`.
+- Run the installed `zerp` binary through the project's package manager, rather than a global or one-off download. This guide writes that runner as `zerp`; use `pnpm exec zerp`, `npm exec -- zerp`, `yarn exec zerp`, or `bun run zerp`.
+- Author slide sources and assets, never the generated `index.html`. Do not recreate navigation or default presentation behavior in the deck.
+- Inspect the worktree before editing, preserve unrelated changes, and validate the resulting deck before handoff.
+
+## Agent authoring loop
+
+1. Discover the deck before referring to a slide by number: run `zerp slides . --json` and confirm the source file, in-file ordinal, and heading.
+2. Edit only the relevant `slides/**/*.html`, `slides/**/*.md`, or assets under `slides/`. Prefer built-in classes, Markdown for text-first slides, and HTML for layout-heavy or interactive slides.
+3. Run `zerp check .` after every authoring change and fix every error and warning. Run `zerp verify . --theme both --size 1280x720` after layout or interaction changes.
+4. Use `zerp serve .` for live inspection; use the consuming project's browser or screenshot tooling, when available, for close visual inspection. Check both dark and light themes.
+5. Run `zerp build . --theme system` for the handoff artifact. Never hand-edit the generated `index.html`.
+
+## Consuming the framework
+
+The public deck contract requires a `slides/` directory. A project that manages its local `zerp` dependency typically looks like:
+
+```text
+my-deck/
+  package.json
+  slides/
+    00-title.md
+    10-content.html
+    images/
+      cover.jpg
+```
+
+The main commands from the deck directory are:
+
+```bash
+zerp slides . --json
+zerp check .
+zerp verify . --theme both --size 1280x720
+zerp serve .
+zerp build . --theme system
+```
+
 ## Deck contract
 
 - Put slides in `slides/**/*.html` and/or `slides/**/*.md`; files are ordered lexicographically (`00-`, `10-`, `20-` prefixes).
@@ -177,5 +219,4 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 
 ## Validation commands
 
-Inside the zerp repo: `pnpm build && pnpm test && pnpm lint && pnpm format:check`.
 In a consumer deck: `zerp check .`, `zerp verify .`, then `zerp serve .` / `zerp build .`.

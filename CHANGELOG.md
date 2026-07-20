@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+- Clarified the maintainer/downstream instruction boundary: `AGENTS.md` is framework-only, while the published `llms.txt` is a self-contained guide to the public deck interface.
+- Downstream instructions now support local `zerp` execution through pnpm, npm, Yarn, or Bun; removed the obsolete local-path installation guidance and repository-maintainer commands.
+- Package tarballs no longer include maintainer-only `AGENTS.md` or `CLAUDE.md`.
+
 ## 0.5.0
 
 - Composition now discovers real slide elements with `htmlparser2` source offsets and wraps each one in a framework-owned `[data-zerp-slide]` frame. Authored `.slide` bytes and inline-script asset rewriting remain intact; script-looking markup is no longer annotated, and nested slide roots fail clearly.
