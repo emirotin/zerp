@@ -12,6 +12,7 @@ export interface Finding {
 }
 export interface CheckReport {
   slideCount: number;
+  themes: CheckTheme[];
   findings: Finding[];
   skippedSelectors: string[];
 }

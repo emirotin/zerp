@@ -20,7 +20,8 @@ export function reportHasFailures(report: CheckReport, strict: boolean): boolean
 
 export function formatReport(report: CheckReport, options: { summaryOnly?: boolean } = {}): string {
   const lines: string[] = [];
-  const summary = `zerp check — ${report.slideCount} slides · ${countBy(report, "dark")} · ${countBy(report, "light")}`;
+  const themeSummary = report.themes.map((theme) => countBy(report, theme)).join(" · ");
+  const summary = `zerp check — ${report.slideCount} slides · ${themeSummary}`;
   if (options.summaryOnly) {
     lines.push(summary);
     if (report.findings.length > 0) {

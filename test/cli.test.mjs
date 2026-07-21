@@ -19,6 +19,45 @@ test("zerp check passes on the clean deck", () => {
   assert.match(result.stdout, /all clear/);
 });
 
+test("zerp check --json emits a machine-readable report with sourced errors", () => {
+  const result = runCli(["check", "test/fixtures/broken-deck", "--json"]);
+  assert.equal(result.status, 1);
+  const report = JSON.parse(result.stdout);
+  assert.deepEqual(report.themes, ["dark", "light"]);
+  const errors = report.findings.filter((f) => f.severity === "error");
+  assert.ok(errors.length > 0, "broken deck reports errors");
+  assert.ok(
+    errors.every((f) => typeof f.slideSrc === "string"),
+    "error findings carry their source file",
+  );
+  assert.equal(errors[0].slideSrc, "slides/00-bad.html");
+});
+
+test("zerp check --json on a clean deck has no error findings and exits 0", () => {
+  const result = runCli(["check", "test/fixtures/clean-deck", "--json"]);
+  assert.equal(result.status, 0);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.findings.filter((f) => f.severity === "error").length, 0);
+});
+
+test("zerp check --theme dark scopes the report to one theme", () => {
+  const result = runCli(["check", "test/fixtures/broken-deck", "--theme", "dark", "--json"]);
+  assert.equal(result.status, 1);
+  const report = JSON.parse(result.stdout);
+  assert.deepEqual(report.themes, ["dark"]);
+  assert.ok(report.findings.length > 0, "broken deck still produces findings");
+  assert.ok(
+    report.findings.every((f) => f.theme === "dark"),
+    "only dark findings when --theme dark",
+  );
+});
+
+test("zerp check rejects an invalid theme", () => {
+  const result = runCli(["check", "test/fixtures/broken-deck", "--theme", "sepia"]);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Invalid check theme/);
+});
+
 test("zerp build prints wrote-path and check summary", () => {
   const result = runCli(["build", "test/fixtures/clean-deck", "--theme", "dark"]);
   assert.equal(result.status, 0);

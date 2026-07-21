@@ -50,15 +50,38 @@ const findingAt = (overrides) => ({
 });
 
 test("report shows the in-file ordinal for multi-slide files", () => {
-  const out = formatReport({ slideCount: 42, findings: [findingAt({})], skippedSelectors: [] });
+  const out = formatReport({
+    slideCount: 42,
+    themes: ["dark", "light"],
+    findings: [findingAt({})],
+    skippedSelectors: [],
+  });
   assert.match(out, /slide 30 \(slides\/28-attention\.html · 2\/2 in file\) \[dark\]/);
 });
 
 test("report omits the ordinal for single-slide files", () => {
   const out = formatReport({
     slideCount: 1,
+    themes: ["dark", "light"],
     findings: [findingAt({ slideSrcSlide: "1/1" })],
     skippedSelectors: [],
   });
   assert.match(out, /slide 30 \(slides\/28-attention\.html\) \[dark\]/);
+});
+
+test("checkPresentation restricts findings to the requested themes", async () => {
+  const report = await checkPresentation({
+    rootDir: "test/fixtures/broken-deck",
+    themes: ["light"],
+  });
+  assert.deepEqual(report.themes, ["light"]);
+  assert.ok(report.findings.length > 0, "broken deck still produces findings");
+  assert.ok(
+    report.findings.every((f) => f.theme === "light"),
+    "only light findings when themes is [light]",
+  );
+  // The summary line names only the scoped theme, not both.
+  const text = formatReport(report);
+  assert.match(text, /light: \d+ errors/);
+  assert.doesNotMatch(text, /dark: \d+ errors/);
 });

@@ -11,6 +11,7 @@ import type { CheckReport, CheckTheme, DomElement, Finding } from "./types.js";
 
 export interface CheckOptions {
   rootDir: string;
+  themes?: CheckTheme[];
 }
 
 interface ThemeContrastData {
@@ -139,8 +140,9 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
   const slideNodes = document.querySelectorAll(".slide");
   const tokenContrast = await loadTokenContrast();
   const findings: Finding[] = [];
+  const themes = options.themes ?? THEMES;
 
-  for (const theme of THEMES) {
+  for (const theme of themes) {
     const resolver = new StyleResolver(model, model.themeVars[theme]);
     const evaluated = new Set<DomElement>();
     const surfaceEvaluated = new Set<DomElement>();
@@ -254,5 +256,10 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
     }
   }
 
-  return { slideCount: slideNodes.length, findings, skippedSelectors: model.skippedSelectors };
+  return {
+    slideCount: slideNodes.length,
+    themes,
+    findings,
+    skippedSelectors: model.skippedSelectors,
+  };
 }

@@ -4,6 +4,7 @@ import { parseArgs } from "node:util";
 
 import { checkPresentation } from "./check/checker.js";
 import { formatReport, reportHasFailures } from "./check/report.js";
+import type { CheckTheme } from "./check/types.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
 import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
@@ -15,7 +16,7 @@ function printUsage(): void {
   process.stderr.write(`Usage:
   zerp serve [deck-dir] [port] [--theme dark|light|system]
   zerp build [deck-dir] [--theme dark|light|system]
-  zerp check [deck-dir] [--strict]
+  zerp check [deck-dir] [--theme dark|light|both] [--strict] [--json]
   zerp slides [deck-dir] [--json]
   zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--json]
 
@@ -41,6 +42,16 @@ function parseVerifyThemes(raw: string | undefined): VerifyTheme[] {
     return [raw];
   }
   throw new Error(`Invalid verification theme: ${raw} (expected dark, light, or both)`);
+}
+
+function parseCheckThemes(raw: string | undefined): CheckTheme[] {
+  if (raw === undefined || raw === "both") {
+    return ["dark", "light"];
+  }
+  if (raw === "dark" || raw === "light") {
+    return [raw];
+  }
+  throw new Error(`Invalid check theme: ${raw} (expected dark, light, or both)`);
 }
 
 function parseVerifySize(raw: string | undefined): { width: number; height: number } {
@@ -99,8 +110,11 @@ async function main(): Promise<void> {
 
   if (command === "check") {
     const rootDir = path.resolve(firstArg ?? ".");
-    const report = await checkPresentation({ rootDir });
-    process.stdout.write(formatReport(report));
+    const themes = parseCheckThemes(values.theme);
+    const report = await checkPresentation({ rootDir, themes });
+    process.stdout.write(
+      values.json ? `${JSON.stringify(report, null, 2)}\n` : formatReport(report),
+    );
     process.exitCode = reportHasFailures(report, values.strict ?? false) ? 1 : 0;
     return;
   }
