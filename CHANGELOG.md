@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 (unreleased)
+## 0.6.0
 
 - Built decks are print-ready: a `@media print` block paginates one slide per page in deck order. Presentation chrome (nav, counter, progress, theme switch, source badge) is hidden, steps print in their final state (`data-step` shown, `data-until-step` gone), and backgrounds print (`print-color-adjust: exact`). In Chromium's print context each frame's inherited `100vh` resolves to one page, so pagination is size- and theme-agnostic — print at a page size equal to the presentation viewport (e.g. 1280×720 CSS px → 960×540 pt). The declarative step-hiding rules are scoped to `@media screen` so they do not fight the printed final state; `zerp check` is unaffected (it already skips at-rule contents).
 - The base `.slide` aligns content with `justify-content: safe center` instead of `center`. Behavior change under overflow: an overflowing slide now spills below the frame and clips bottom-only, where before it clipped at both ends and hid the top of the overflow. Non-overflowing slides are unchanged, and engines without `safe` support fall back to plain `center`.
