@@ -86,6 +86,14 @@ test(
           [1, 1, 2, true],
         ],
       );
+      // Each slide carries its source attribution, mirroring zerp check.
+      assert.deepEqual(
+        report.slides.map((slide) => slide.src),
+        ["slides/00-grid-root.html", "slides/01-plain.md"],
+      );
+      for (const slide of report.slides) {
+        assert.equal(slide.srcSlide, "1/1");
+      }
     }
   },
 );

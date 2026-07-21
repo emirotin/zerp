@@ -16,6 +16,8 @@ export interface VerifyOptions {
 
 export interface SlideVerification {
   index: number;
+  src: string | null;
+  srcSlide: string | null;
   activeCount: number;
   visibleCount: number;
   activeIndex: number | null;
@@ -124,6 +126,8 @@ window.addEventListener("unhandledrejection", function (event) {
     var rect = activeFrame ? activeFrame.getBoundingClientRect() : null;
     checks.push({
       index: index + 1,
+      src: activeSlide ? activeSlide.getAttribute("data-zerp-src") : null,
+      srcSlide: activeSlide ? activeSlide.getAttribute("data-zerp-src-slide") : null,
       activeCount: active.length,
       visibleCount: visible.length,
       activeIndex: activeFrame ? frames.indexOf(activeFrame) + 1 : null,
@@ -329,23 +333,26 @@ function validateProbe(result: ProbeResult): string[] {
     );
   }
   result.slides.forEach((slide) => {
+    // Prefix each failure with the source file when known, mirroring zerp
+    // check's file attribution so a failure maps straight to the file to edit.
+    const label = slide.src ? `slide ${slide.index} (${slide.src})` : `slide ${slide.index}`;
     if (slide.activeCount !== 1) {
-      failures.push(`slide ${slide.index}: expected one active frame, got ${slide.activeCount}`);
+      failures.push(`${label}: expected one active frame, got ${slide.activeCount}`);
     }
     if (slide.visibleCount !== 1) {
-      failures.push(`slide ${slide.index}: expected one visible frame, got ${slide.visibleCount}`);
+      failures.push(`${label}: expected one visible frame, got ${slide.visibleCount}`);
     }
     if (slide.activeIndex !== slide.index) {
-      failures.push(`slide ${slide.index}: active frame is ${slide.activeIndex ?? "missing"}`);
+      failures.push(`${label}: active frame is ${slide.activeIndex ?? "missing"}`);
     }
     if (slide.bodyHeight > slide.viewportHeight + 1) {
-      failures.push(`slide ${slide.index}: body height is ${slide.bodyHeight}px`);
+      failures.push(`${label}: body height is ${slide.bodyHeight}px`);
     }
     if (slide.activeDisplay === "none") {
-      failures.push(`slide ${slide.index}: active inner slide is display:none`);
+      failures.push(`${label}: active inner slide is display:none`);
     }
     if (!slide.activeClass) {
-      failures.push(`slide ${slide.index}: active inner slide is missing the active class`);
+      failures.push(`${label}: active inner slide is missing the active class`);
     }
     const rectFailureMessage = rectFailure(
       slide.activeRect,
@@ -353,7 +360,7 @@ function validateProbe(result: ProbeResult): string[] {
       slide.viewportHeight,
     );
     if (rectFailureMessage) {
-      failures.push(`slide ${slide.index}: ${rectFailureMessage}`);
+      failures.push(`${label}: ${rectFailureMessage}`);
     }
   });
   return failures;
