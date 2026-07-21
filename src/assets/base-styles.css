@@ -78,7 +78,12 @@ hr {
   min-height: 0;
   padding: 50px 70px;
   flex-direction: column;
-  justify-content: center;
+  /* "safe" so an overflowing slide spills below the frame only: verify's
+     body.scrollHeight then measures the full overflow magnitude and print
+     clips bottom-only. Plain "center" would push the top half of the overflow
+     above the frame edge where it is clipped and invisible. Engines without
+     "safe" support degrade to plain center (the status quo). */
+  justify-content: safe center;
   position: relative;
 }
 
@@ -101,23 +106,32 @@ hr {
    elements and .step-done on [data-until-step] elements as ↓/↑ advance the
    slide's step counter. Space is reserved (visibility, not display) so
    stepping never reflows a centered slide. Restyle [data-step].revealed in
-   deck CSS for highlight-type steps instead of appear-type steps. */
-[data-step]:not(.revealed) {
-  visibility: hidden;
-}
+   deck CSS for highlight-type steps instead of appear-type steps.
 
-[data-until-step].step-done {
-  visibility: hidden;
-}
+   Scoped to @media screen so they simply do not exist in print: there,
+   [data-step] content prints in its final revealed state without specificity
+   fights, and the print block at the end of this file owns [data-until-step]'s
+   final (absent) state. css-model.ts skips every rule nested in an at-rule and
+   these attribute selectors were already unsupported there, so the scoping is
+   inert for zerp check. */
+@media screen {
+  [data-step]:not(.revealed) {
+    visibility: hidden;
+  }
 
-/* Swap-type steps exchange same-sized content in place (a label, a glyph):
-   collapse instead of reserving, so the counterpart can take the slot. */
-[data-step].swap:not(.revealed) {
-  display: none;
-}
+  [data-until-step].step-done {
+    visibility: hidden;
+  }
 
-[data-until-step].swap.step-done {
-  display: none;
+  /* Swap-type steps exchange same-sized content in place (a label, a glyph):
+     collapse instead of reserving, so the counterpart can take the slot. */
+  [data-step].swap:not(.revealed) {
+    display: none;
+  }
+
+  [data-until-step].swap.step-done {
+    display: none;
+  }
 }
 
 .slide h1 {
@@ -1078,4 +1092,55 @@ figcaption,
 .theme-switch .theme-options button.selected {
   background: var(--zerp-blue-tint);
   color: var(--zerp-blue-on-tint);
+}
+
+/* ---- print: one page per slide (Chromium print backend) ---- */
+@media print {
+  html,
+  body {
+    width: auto;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Every frame becomes one page box. In Chromium's print context vh
+     resolves against the page area, so 100vh (inherited from the base
+     frame rule) = one page at any print size. overflow:hidden clips
+     slide overflow instead of letting it perturb pagination. */
+  [data-zerp-slide] {
+    display: flex;
+    break-after: page;
+    break-inside: avoid;
+    overflow: hidden;
+  }
+
+  /* No trailing blank page after the last slide. */
+  [data-zerp-slide]:not(:has(~ [data-zerp-slide])) {
+    break-after: auto;
+  }
+
+  /* Presentation chrome has no meaning on paper. */
+  .nav,
+  .counter,
+  .theme-switch,
+  .progress,
+  .source-badge {
+    display: none !important;
+  }
+
+  /* Steps print in their final state: [data-step] content is visible
+     (its screen-only hiding rules do not apply in print); "until"
+     content is gone — swap variants collapse, others reserve space. */
+  [data-until-step] {
+    visibility: hidden;
+  }
+
+  [data-until-step].swap {
+    display: none;
+  }
+
+  :root {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
 }
