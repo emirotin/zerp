@@ -46,7 +46,7 @@ Commands:
 pnpm exec zerp serve                      # serve the current deck on http://localhost:8000 (live-reloads on save)
 pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default theme
 pnpm exec zerp build --theme light        # write ./index.html (light default)
-pnpm exec zerp check                      # APCA contrast + font-size report (both themes)
+pnpm exec zerp check                      # APCA contrast + font-size report (both themes; --theme dark|light|both, --json for tooling)
 pnpm exec zerp slides                     # deck position → source file mapping (--json for tooling)
 pnpm exec zerp verify                     # headless-browser frame/layout check (both themes, 1280x720; --json for tooling)
 ```
@@ -86,6 +86,37 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 - Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
 - Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium and checks that exactly one full-size slide frame is active and visible without page overflow.
 - "Slide N" means the 1-based deck position (what the on-screen counter shows) — file prefixes only order files. `zerp slides` prints the position → file mapping; pressing `s` in a running deck shows the active slide's source.
+
+## Printing and PDF export
+
+A built deck is print-ready as-is. Printing (browser print dialog, or a headless
+print backend) produces **one page per slide** in deck order: presentation chrome
+(nav, counter, progress bar, theme switch, source badge) is hidden, and steps are
+rendered in their final state — every `data-step` reveal shown, every
+`data-until-step` element gone.
+
+Print with a **page size equal to the presentation viewport** and backgrounds
+enabled. One slide fills exactly one page at any page size, in either theme.
+Content that overflows a slide is clipped at the bottom of the page rather than
+spilling onto a second page, so keep slides within the frame (the same as on
+screen — `zerp check`/`zerp verify` catch overflow).
+
+Example: render a deck to PDF at 1280×720 with Playwright:
+
+```python
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page.goto("file:///abs/path/to/index.html")
+    page.pdf(path="deck.pdf", width="1280px", height="720px", print_background=True)
+    browser.close()
+```
+
+The explicit `width`/`height` already describe the page — do **not** also pass
+`landscape=True`, because Chromium swaps the two dimensions when `landscape` is
+set and you get a portrait page.
 
 ## Library API
 

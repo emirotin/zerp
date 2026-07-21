@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (unreleased)
+
+- Built decks are print-ready: a `@media print` block paginates one slide per page in deck order. Presentation chrome (nav, counter, progress, theme switch, source badge) is hidden, steps print in their final state (`data-step` shown, `data-until-step` gone), and backgrounds print (`print-color-adjust: exact`). In Chromium's print context each frame's inherited `100vh` resolves to one page, so pagination is size- and theme-agnostic — print at a page size equal to the presentation viewport (e.g. 1280×720 CSS px → 960×540 pt). The declarative step-hiding rules are scoped to `@media screen` so they do not fight the printed final state; `zerp check` is unaffected (it already skips at-rule contents).
+- The base `.slide` aligns content with `justify-content: safe center` instead of `center`. Behavior change under overflow: an overflowing slide now spills below the frame and clips bottom-only, where before it clipped at both ends and hid the top of the overflow. Non-overflowing slides are unchanged, and engines without `safe` support fall back to plain `center`.
+- `zerp check` gains `--json` (prints the report as JSON instead of the grouped text) and `--theme dark|light|both` (default both). `CheckReport` now carries a `themes` field naming the checked scope; `--strict` still composes with `--json`, and invalid themes are rejected with a clear error like `zerp verify`.
+- `zerp verify` per-slide results carry `src` and `srcSlide` (the active slide's source file and in-file ordinal), included in `--json`. Human-readable per-slide failures are prefixed with the source file, e.g. `slide 3 (slides/10-intro.html): body height is 812px`, mirroring `zerp check`'s file attribution.
+
 ## 0.5.1
 
 - Clarified the maintainer/downstream instruction boundary: `AGENTS.md` is framework-only, while the published `llms.txt` is a self-contained guide to the public deck interface.

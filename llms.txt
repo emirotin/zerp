@@ -124,6 +124,15 @@ Prefer Markdown for text-first slides; HTML for layout-heavy or interactive slid
 - Decks are theme-neutral: tokens adapt to dark/light automatically. The presenter picks the default via `zerp build --theme dark|light|system` (default: `system`); viewers can override with the ◐ switch or the `t` key (persisted in localStorage).
 - Because both themes ship, anything you author must work in both — that is why hardcoded colors are forbidden.
 
+## Printing and PDF export
+
+Built decks are print-ready. The same `index.html` paginates for print with no extra flags or per-deck setup.
+
+- Printing emits **one page per slide, in deck order**. Presentation chrome (nav, counter, progress bar, theme switch, source badge) is never printed.
+- Steps print in their **final state**: `data-step` content is present, `data-until-step` content is absent. A printed deck shows every reveal.
+- Print with a **page size equal to the presentation viewport** (e.g. 1280×720 CSS px) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
+- **Page capacity is physical**: content that overflows a slide is clipped at the bottom of the page, not reflowed onto a second page. Fix overflow the same way as on screen (trim content, or top-align with `.slide.top`); `zerp check` and `zerp verify` still gate it.
+
 ## Validation loop (required)
 
 After authoring or editing slides, ALWAYS run:
@@ -131,7 +140,8 @@ After authoring or editing slides, ALWAYS run:
 ```bash
 zerp check .
 zerp verify . --theme both --size 1280x720
-# add --json when an agent or script needs the per-slide report
+# add --json to check or verify for a machine-readable report (verify's per-slide
+# entries include the source file); --theme dark|light|both narrows either command
 ```
 
 Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.

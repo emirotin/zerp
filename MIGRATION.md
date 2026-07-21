@@ -1,3 +1,18 @@
+# Migrating a deck from zerp 0.5 to 0.6
+
+Nothing in a deck needs to change. 0.6 is additive: built decks are now
+print-ready (one page per slide, chrome hidden, steps in their final state).
+Print at a page size equal to the presentation viewport (e.g. 1280×720 CSS px)
+with backgrounds enabled.
+
+The one deliberate rendering change is where an _overflowing_ slide clips. The
+base `.slide` now uses `justify-content: safe center` instead of `center`, so a
+slide whose content exceeds the frame clips at the bottom only, instead of at
+both ends (which previously hid the top of the overflow). Slides that fit the
+frame are unchanged. The remedy for overflow is the same as before — trim
+content or top-align with `.slide.top`, then re-run `zerp check .` and
+`zerp verify . --theme both --size 1280x720`.
+
 # Migrating from a pre-frame zerp build
 
 The next build contract wraps every real inner `.slide` in a generated
