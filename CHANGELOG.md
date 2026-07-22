@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.1 (unreleased)
+## 0.6.1
 
 - **`zerp verify` now measures slides with the real fonts.** The probe previously ran synchronously during page parse, before the inlined `@font-face` fonts activated, so every slide was measured with fallback metrics — font-dependent overflow (typically a few extra wrapped lines) passed verification and only showed up as clipped content when presenting or printing. The probe now waits for `document.fonts.ready` plus a paint settle before measuring, and reports `fontsActive` in the results so the wait is observable.
 - `zerp verify` drives Chrome over a live DevTools-protocol session (`--remote-debugging-pipe`, still zero dependencies) instead of one-shot `--dump-dom`. The dump serialized the DOM around the load event, which is fundamentally incompatible with waiting on fonts (async results race the dump; `--timeout` never fires with `--user-data-dir`; `--virtual-time-budget` is ignored by new headless). The live session evaluates the probe after load with `awaitPromise`, sets the layout viewport exactly via device-metrics emulation (retiring the `--window-size` calibration pass), runs faster (~1.2s), and also works with Chrome-for-Testing builds, whose `--dump-dom` is broken.
