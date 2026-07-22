@@ -42,12 +42,27 @@ test(
     );
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
     const [report] = JSON.parse(result.stdout);
+    // The probe waits for the inlined fonts before measuring; fontsActive
+    // proves the wait happened instead of assuming it.
+    assert.equal(report.fontsActive, true);
     for (const slide of report.slides) {
       assert.equal(slide.viewportWidth, 1280);
       assert.equal(slide.viewportHeight, 720);
     }
   },
 );
+
+test("verify measures after fonts settle over a live CDP session", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile("dist/verify.js", "utf8");
+  // Guard the two load-bearing transport properties: the probe must wait for
+  // font activation (font-dependent overflow was invisible without it), and
+  // the viewport must come from device-metrics emulation, not --window-size
+  // calibration against a one-shot DOM dump.
+  assert.match(source, /document\.fonts\.ready/);
+  assert.match(source, /Emulation\.setDeviceMetricsOverride/);
+  assert.match(source, /--remote-debugging-pipe/);
+});
 
 test(
   "zerp verify catches wrapper visibility and custom root display regressions",

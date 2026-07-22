@@ -1,7 +1,7 @@
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { existsSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import type { Readable, Writable } from "node:stream";
 
 import { buildPresentationHtml } from "./presentation.js";
 
@@ -32,6 +32,7 @@ export interface SlideVerification {
 export interface VerifyReport {
   theme: VerifyTheme;
   slideCount: number;
+  fontsActive: boolean;
   slides: SlideVerification[];
   browserErrors: string[];
   failures: string[];
@@ -41,6 +42,7 @@ interface ProbeResult {
   frameCount: number;
   slideCount: number;
   innerSlideCount: number;
+  fontsActive: boolean;
   slides: SlideVerification[];
   browserErrors: string[];
 }
@@ -54,7 +56,8 @@ const CHROME_CANDIDATES = [
   "chromium-browser",
 ].filter((candidate): candidate is string => Boolean(candidate));
 let verificationSequence = 0;
-const viewportOffsetCache = new Map<string, { dx: number; dy: number }>();
+
+const VERIFICATION_TIMEOUT_MS = 20_000;
 
 function findChrome(): string {
   for (const candidate of CHROME_CANDIDATES) {
@@ -84,8 +87,9 @@ function killProcess(child: ChildProcess): void {
   }
 }
 
-function instrumentHtml(html: string): string {
-  const collector = `<script>
+// Installed at document start so resource and script errors are collected
+// from the first byte of the deck, before any slide markup runs.
+const COLLECTOR_SOURCE = `
 window.__zerpVerifyErrors = [];
 window.addEventListener("error", function (event) {
   var target = event.target;
@@ -95,18 +99,18 @@ window.addEventListener("error", function (event) {
 window.addEventListener("unhandledrejection", function (event) {
   window.__zerpVerifyErrors.push(String(event.reason || "unhandled rejection"));
 });
-</script>`;
-  const probe = `<script>
-(function () {
-  var writeResult = function (result) {
-    var bytes = new TextEncoder().encode(JSON.stringify(result));
-    var binary = "";
-    for (var byte of bytes) {
-      binary += String.fromCharCode(byte);
-    }
-    document.documentElement.setAttribute("data-zerp-verify-result", btoa(binary));
-  };
-  try {
+`;
+
+// Evaluated after the load event with awaitPromise, so the measurements are
+// taken when the page is genuinely ready rather than whenever a DOM dump
+// happens to be serialized. Fonts are inlined as lazily-activated @font-face
+// rules; measuring before they activate would use fallback metrics and miss
+// font-dependent overflow, so the probe waits for the font set and a paint
+// to settle first.
+const PROBE_EXPRESSION = `(async function () {
+  await document.fonts.ready;
+  await new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
+  var fontsActive = document.fonts.check("1em Montserrat");
   var frames = Array.from(document.querySelectorAll("[data-zerp-slide]"));
   var checks = [];
   for (var index = 0; index < frames.length; index++) {
@@ -139,29 +143,54 @@ window.addEventListener("unhandledrejection", function (event) {
       activeRect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null
     });
   }
-  var result = {
+  return {
     frameCount: frames.length,
     slideCount: document.querySelectorAll(".slide").length,
     innerSlideCount: frames.filter(function (frame) { return frame.querySelector(".slide") !== null; }).length,
+    fontsActive: fontsActive,
     slides: checks,
-    browserErrors: window.__zerpVerifyErrors
+    browserErrors: window.__zerpVerifyErrors || []
   };
-  writeResult(result);
-  } catch (error) {
-    writeResult({ frameCount: 0, slideCount: 0, innerSlideCount: 0, slides: [], browserErrors: [String(error)] });
-  }
-})();
-</script>`;
-  return html.replace("</head>", `${collector}</head>`).replace("</body>", `${probe}</body>`);
+})()`;
+
+interface CdpResponse {
+  id?: number;
+  method?: string;
+  sessionId?: string;
+  params?: Record<string, unknown>;
+  result?: Record<string, unknown>;
+  error?: { message?: string };
 }
 
-async function dumpDom(
+interface PendingCommand {
+  resolve: (result: Record<string, unknown>) => void;
+  reject: (error: Error) => void;
+}
+
+interface EventWaiter {
+  method: string;
+  sessionId: string | undefined;
+  resolve: () => void;
+}
+
+/**
+ * Drive Chrome over the DevTools protocol on --remote-debugging-pipe
+ * (\0-delimited JSON on fds 3/4 — no network, no dependencies).
+ *
+ * The previous transport, one-shot `--dump-dom`, serializes the DOM around
+ * the load event: a probe that awaits fonts either races the dump (the
+ * result attribute misses small pages) or, with --timeout, never dumps at
+ * all when --user-data-dir is passed. It is also broken outright in
+ * Chrome-for-Testing builds. A live protocol session sidesteps the whole
+ * class: navigate, wait for load, evaluate the probe with awaitPromise, and
+ * read the returned value.
+ */
+async function runProbe(
   chrome: string,
   htmlPath: string,
   width: number,
   height: number,
-): Promise<string> {
-  const profile = mkdtempSync(path.join(tmpdir(), "zerp-verify-"));
+): Promise<ProbeResult> {
   const child = spawn(
     chrome,
     [
@@ -173,128 +202,158 @@ async function dumpDom(
       "--disable-sync",
       "--disable-extensions",
       "--disable-component-update",
-      "--virtual-time-budget=5000",
-      `--window-size=${width},${height}`,
-      "--force-device-scale-factor=1",
-      `--user-data-dir=${profile}`,
-      "--dump-dom",
-      `file://${htmlPath}#1`,
+      "--remote-debugging-pipe",
+      "about:blank",
     ],
-    { detached: true, stdio: ["ignore", "pipe", "pipe"] },
+    { detached: true, stdio: ["ignore", "pipe", "pipe", "pipe", "pipe"] },
   );
-  let stdout = "";
-  let stderr = "";
-  child.stdout?.setEncoding("utf8");
-  child.stderr?.setEncoding("utf8");
-  child.stdout?.on("data", (chunk: string) => {
-    stdout += chunk;
+  const toChrome = child.stdio[3] as Writable;
+  const fromChrome = child.stdio[4] as Readable;
+
+  const pending = new Map<number, PendingCommand>();
+  const eventWaiters: EventWaiter[] = [];
+  let nextId = 1;
+  let failure: Error | null = null;
+
+  const failAll = (error: Error): void => {
+    failure ??= error;
+    for (const command of pending.values()) {
+      command.reject(error);
+    }
+    pending.clear();
+  };
+
+  let buffer = "";
+  fromChrome.setEncoding("utf8");
+  fromChrome.on("data", (chunk: string) => {
+    buffer += chunk;
+    let boundary = buffer.indexOf("\0");
+    while (boundary !== -1) {
+      const raw = buffer.slice(0, boundary);
+      buffer = buffer.slice(boundary + 1);
+      boundary = buffer.indexOf("\0");
+      let message: CdpResponse;
+      try {
+        message = JSON.parse(raw) as CdpResponse;
+      } catch {
+        continue;
+      }
+      if (message.id !== undefined) {
+        const command = pending.get(message.id);
+        if (command) {
+          pending.delete(message.id);
+          if (message.error) {
+            command.reject(new Error(message.error.message ?? "CDP command failed"));
+          } else {
+            command.resolve(message.result ?? {});
+          }
+        }
+      } else if (message.method) {
+        for (let index = eventWaiters.length - 1; index >= 0; index--) {
+          const waiter = eventWaiters[index];
+          if (waiter?.method === message.method && waiter.sessionId === message.sessionId) {
+            eventWaiters.splice(index, 1);
+            waiter.resolve();
+          }
+        }
+      }
+    }
   });
-  child.stderr?.on("data", (chunk: string) => {
-    stderr += chunk;
-  });
+  child.once("error", (error) => failAll(error));
+  child.once("close", () => failAll(new Error("Chrome exited before verification finished")));
+
+  const send = (
+    method: string,
+    params: Record<string, unknown> = {},
+    sessionId?: string,
+  ): Promise<Record<string, unknown>> => {
+    if (failure) {
+      return Promise.reject(failure);
+    }
+    const id = nextId++;
+    const promise = new Promise<Record<string, unknown>>((resolve, reject) => {
+      pending.set(id, { resolve, reject });
+    });
+    toChrome.write(`${JSON.stringify({ id, method, params, sessionId })}\0`);
+    return promise;
+  };
+
+  const waitForEvent = (method: string, sessionId?: string): Promise<void> => {
+    if (failure) {
+      return Promise.reject(failure);
+    }
+    return new Promise<void>((resolve) => {
+      eventWaiters.push({ method, sessionId, resolve });
+    });
+  };
+
+  const probe = async (): Promise<ProbeResult> => {
+    // The about:blank tab from the command line can lag the pipe becoming
+    // writable; poll briefly instead of assuming it is already listed.
+    let targetId: string | null = null;
+    for (let attempt = 0; attempt < 40 && !targetId; attempt++) {
+      const targets = (await send("Target.getTargets"))["targetInfos"] as
+        | Array<{ targetId: string; type: string }>
+        | undefined;
+      targetId = targets?.find((target) => target.type === "page")?.targetId ?? null;
+      if (!targetId) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+    }
+    if (!targetId) {
+      throw new Error("Chrome did not expose a page target");
+    }
+    const sessionId = (await send("Target.attachToTarget", { targetId, flatten: true }))[
+      "sessionId"
+    ] as string;
+    await send("Page.enable", {}, sessionId);
+    // An exact layout viewport, unlike --window-size, whose delivered
+    // innerWidth/innerHeight vary by platform and required calibration.
+    await send(
+      "Emulation.setDeviceMetricsOverride",
+      { width, height, deviceScaleFactor: 1, mobile: false },
+      sessionId,
+    );
+    await send("Page.addScriptToEvaluateOnNewDocument", { source: COLLECTOR_SOURCE }, sessionId);
+    const loaded = waitForEvent("Page.loadEventFired", sessionId);
+    await send("Page.navigate", { url: `file://${htmlPath}#1` }, sessionId);
+    await loaded;
+    const evaluation = await send(
+      "Runtime.evaluate",
+      { expression: PROBE_EXPRESSION, awaitPromise: true, returnByValue: true },
+      sessionId,
+    );
+    const exception = evaluation["exceptionDetails"] as
+      | { text?: string; exception?: { description?: string } }
+      | undefined;
+    if (exception) {
+      throw new Error(
+        `verification probe failed: ${exception.exception?.description ?? exception.text ?? "unknown error"}`,
+      );
+    }
+    return (evaluation["result"] as { value: ProbeResult }).value;
+  };
 
   try {
-    return await new Promise<string>((resolve, reject) => {
+    return await new Promise<ProbeResult>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        killProcess(child);
+        failAll(new Error("Chrome verification timed out"));
         reject(new Error("Chrome verification timed out"));
-      }, 20_000);
-      let settled = false;
-      const finish = (error?: Error): void => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        clearTimeout(timeout);
-        if (error) {
+      }, VERIFICATION_TIMEOUT_MS);
+      probe().then(
+        (result) => {
+          clearTimeout(timeout);
+          resolve(result);
+        },
+        (error: Error) => {
+          clearTimeout(timeout);
           reject(error);
-        } else {
-          resolve(stdout);
-        }
-      };
-      child.once("error", (error) => finish(error));
-      child.stdout?.on("data", () => {
-        // Chrome can hang while shutting down after --dump-dom. Any probe
-        // marker (the full verification result or the viewport calibration
-        // marker) is enough to finish, so do not wait for a clean browser exit.
-        if (/data-zerp-verify-\w+="/.test(stdout)) {
-          finish();
-        }
-      });
-      child.once("close", (code, signal) => {
-        if (code === 0) {
-          finish();
-        } else {
-          const status = code === null && signal ? `signal ${signal}` : String(code ?? 1);
-          finish(new Error(`Chrome verification failed (${status}): ${stderr.trim()}`));
-        }
-      });
+        },
+      );
     });
   } finally {
     killProcess(child);
-    rmSync(profile, { force: true, recursive: true });
   }
-}
-
-const CALIBRATION_HTML = `<!doctype html>
-<html>
-  <head></head>
-  <body>
-    <script>
-      document.documentElement.setAttribute(
-        "data-zerp-verify-viewport",
-        window.innerWidth + "x" + window.innerHeight,
-      );
-    </script>
-  </body>
-</html>`;
-
-/**
- * Headless Chrome's --window-size sets the outer window bounds, not the
- * layout viewport: the delivered window.innerWidth/innerHeight can be
- * smaller than requested by a chrome-version- and platform-dependent
- * amount. Measure the actual offset against a blank page and compensate,
- * rather than trusting the requested size, so verification runs against
- * the viewport the caller actually asked for.
- */
-async function measureViewportOffset(
-  chrome: string,
-  width: number,
-  height: number,
-): Promise<{ dx: number; dy: number }> {
-  const cacheKey = `${chrome}::${width}x${height}`;
-  const cached = viewportOffsetCache.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-  const calibrationPath = path.join(
-    tmpdir(),
-    `zerp-verify-calibrate-${process.pid}-${verificationSequence++}.html`,
-  );
-  writeFileSync(calibrationPath, CALIBRATION_HTML, "utf8");
-  try {
-    const dom = await dumpDom(chrome, calibrationPath, width, height);
-    const match = dom.match(/data-zerp-verify-viewport="(\d+)x(\d+)"/);
-    if (!match) {
-      throw new Error("Chrome did not report a viewport calibration result");
-    }
-    const offset = {
-      dx: width - Number.parseInt(match[1] ?? "", 10),
-      dy: height - Number.parseInt(match[2] ?? "", 10),
-    };
-    viewportOffsetCache.set(cacheKey, offset);
-    return offset;
-  } finally {
-    rmSync(calibrationPath, { force: true });
-  }
-}
-
-function parseProbeResult(dom: string): ProbeResult {
-  const encoded = dom.match(/data-zerp-verify-result="([^"]+)"/)?.[1];
-  if (!encoded) {
-    throw new Error("Chrome did not return a zerp verification result");
-  }
-  return JSON.parse(Buffer.from(encoded, "base64").toString("utf8")) as ProbeResult;
 }
 
 function rectFailure(
@@ -368,22 +427,20 @@ function validateProbe(result: ProbeResult): string[] {
 
 export async function verifyPresentation(options: VerifyOptions): Promise<VerifyReport> {
   const chrome = findChrome();
-  const { dx, dy } = await measureViewportOffset(chrome, options.width, options.height);
+  // The presentation is written next to the slides so deck-relative asset
+  // URLs resolve; the file is plain (uninstrumented) and removed afterwards.
   const htmlPath = path.join(
     options.rootDir,
     `.zerp-verify-${process.pid}-${verificationSequence++}.html`,
   );
   try {
-    const html = instrumentHtml(
-      await buildPresentationHtml({ rootDir: options.rootDir, theme: options.theme }),
-    );
+    const html = await buildPresentationHtml({ rootDir: options.rootDir, theme: options.theme });
     writeFileSync(htmlPath, html, "utf8");
-    const result = parseProbeResult(
-      await dumpDom(chrome, htmlPath, options.width + dx, options.height + dy),
-    );
+    const result = await runProbe(chrome, htmlPath, options.width, options.height);
     return {
       theme: options.theme,
       slideCount: result.frameCount,
+      fontsActive: result.fontsActive,
       slides: result.slides,
       browserErrors: result.browserErrors,
       failures: validateProbe(result),
