@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 (unreleased)
+
+- **`zerp verify` now measures slides with the real fonts.** The probe previously ran synchronously during page parse, before the inlined `@font-face` fonts activated, so every slide was measured with fallback metrics — font-dependent overflow (typically a few extra wrapped lines) passed verification and only showed up as clipped content when presenting or printing. The probe now waits for `document.fonts.ready` plus a paint settle before measuring, and reports `fontsActive` in the results so the wait is observable.
+- `zerp verify` drives Chrome over a live DevTools-protocol session (`--remote-debugging-pipe`, still zero dependencies) instead of one-shot `--dump-dom`. The dump serialized the DOM around the load event, which is fundamentally incompatible with waiting on fonts (async results race the dump; `--timeout` never fires with `--user-data-dir`; `--virtual-time-budget` is ignored by new headless). The live session evaluates the probe after load with `awaitPromise`, sets the layout viewport exactly via device-metrics emulation (retiring the `--window-size` calibration pass), runs faster (~1.2s), and also works with Chrome-for-Testing builds, whose `--dump-dom` is broken.
+- The temp `.zerp-verify-*.html` written into the deck directory during verification is now the plain built presentation (no injected probe markup); it is still removed afterwards.
+
 ## 0.6.0
 
 - Built decks are print-ready: a `@media print` block paginates one slide per page in deck order. Presentation chrome (nav, counter, progress, theme switch, source badge) is hidden, steps print in their final state (`data-step` shown, `data-until-step` gone), and backgrounds print (`print-color-adjust: exact`). In Chromium's print context each frame's inherited `100vh` resolves to one page, so pagination is size- and theme-agnostic — print at a page size equal to the presentation viewport (e.g. 1280×720 CSS px → 960×540 pt). The declarative step-hiding rules are scoped to `@media screen` so they do not fight the printed final state; `zerp check` is unaffected (it already skips at-rule contents).
