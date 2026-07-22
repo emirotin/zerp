@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.7.0 (unreleased)
+## 0.7.0
 
 - **`zerp verify` now drives the browser through `playwright-core`.** The hand-rolled DevTools-protocol client — Chrome over `--remote-debugging-pipe`, a bespoke CDP message pump, and device-metrics calibration — is replaced by `playwright-core`, a battle-tested browser driver. `playwright-core` bundles no browsers of its own, so the framework keeps its "bring your own browser" property: browsers stay external and optional, and the new dependency is pure JavaScript. The verify contract is unchanged — the same `VerifyReport` shape and failure strings, the same font-aware probe (it still measures after `document.fonts.ready` plus a paint settle and reports `fontsActive`), the same injected browser-error collector, the same exact-viewport measurement, temp-file handling, and 20s timeout.
 - **New `zerp install-browser` command** downloads a managed Chromium for verification, for environments without a system Chrome. It hands off to `playwright-core`'s own installer (its package `bin`) and streams the download progress through, propagating the exit code.
