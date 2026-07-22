@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 (unreleased)
+
+- **`zerp verify` now drives the browser through `playwright-core`.** The hand-rolled DevTools-protocol client — Chrome over `--remote-debugging-pipe`, a bespoke CDP message pump, and device-metrics calibration — is replaced by `playwright-core`, a battle-tested browser driver. `playwright-core` bundles no browsers of its own, so the framework keeps its "bring your own browser" property: browsers stay external and optional, and the new dependency is pure JavaScript. The verify contract is unchanged — the same `VerifyReport` shape and failure strings, the same font-aware probe (it still measures after `document.fonts.ready` plus a paint settle and reports `fontsActive`), the same injected browser-error collector, the same exact-viewport measurement, temp-file handling, and 20s timeout.
+- **New `zerp install-browser` command** downloads a managed Chromium for verification, for environments without a system Chrome. It hands off to `playwright-core`'s own installer (its package `bin`) and streams the download progress through, propagating the exit code.
+- **`zerp verify` browser resolution order:** `CHROME_BIN` (used verbatim, so wrapper scripts keep working) → the `zerp install-browser` managed Chromium → a system Chrome/Chromium. When none is installed, verify explains how to get one.
+
 ## 0.6.1
 
 - **`zerp verify` now measures slides with the real fonts.** The probe previously ran synchronously during page parse, before the inlined `@font-face` fonts activated, so every slide was measured with fallback metrics — font-dependent overflow (typically a few extra wrapped lines) passed verification and only showed up as clipped content when presenting or printing. The probe now waits for `document.fonts.ready` plus a paint settle before measuring, and reports `fontsActive` in the results so the wait is observable.

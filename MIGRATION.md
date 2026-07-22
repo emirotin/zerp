@@ -1,3 +1,18 @@
+# Migrating a deck from zerp 0.6 to 0.7
+
+Nothing in a deck changes. There are no authoring changes, and the `zerp`
+CLI contract is identical — `zerp check`, `zerp verify`, `zerp build`, and
+the `--theme` / `--size` / `--json` flags all behave exactly as before.
+
+The one operational change is inside `zerp verify`: it now drives the
+browser through `playwright-core` instead of a hand-rolled DevTools client.
+`playwright-core` is a new runtime dependency, but it bundles no browser, so
+a browser stays external and optional. Verify resolves one in this order:
+`CHROME_BIN` (used verbatim), then a Chromium downloaded by the new
+`zerp install-browser` command, then a system Chrome/Chromium. If you already
+rely on `CHROME_BIN` or a system Chrome, nothing changes; on a machine with
+neither, run `zerp install-browser` once.
+
 # Migrating a deck from zerp 0.5 to 0.6
 
 Nothing in a deck needs to change. 0.6 is additive: built decks are now
