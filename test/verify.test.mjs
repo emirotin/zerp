@@ -69,16 +69,15 @@ test(
   },
 );
 
-test("verify measures after fonts settle over a live CDP session", async () => {
+test("verify measures after fonts settle over a playwright-core session", async () => {
   const { readFile } = await import("node:fs/promises");
   const source = await readFile("dist/verify.js", "utf8");
   // Guard the two load-bearing transport properties: the probe must wait for
   // font activation (font-dependent overflow was invisible without it), and
-  // the viewport must come from device-metrics emulation, not --window-size
-  // calibration against a one-shot DOM dump.
+  // the transport must be playwright-core — the battle-tested driver that
+  // retired the hand-rolled `--remote-debugging-pipe` CDP client.
   assert.match(source, /document\.fonts\.ready/);
-  assert.match(source, /Emulation\.setDeviceMetricsOverride/);
-  assert.match(source, /--remote-debugging-pipe/);
+  assert.match(source, /playwright-core/);
 });
 
 test(

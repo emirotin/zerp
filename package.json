@@ -62,7 +62,8 @@
     "css-tree": "^3.2.1",
     "htmlparser2": "^10.1.0",
     "linkedom": "^0.18.12",
-    "marked": "^18.0.5"
+    "marked": "^18.0.5",
+    "playwright-core": "^1.61.1"
   },
   "devDependencies": {
     "@evilmartians/harmony": "^1.4.0",

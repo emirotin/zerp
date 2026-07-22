@@ -1,7 +1,8 @@
-import { spawn, spawnSync, type ChildProcess } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { Readable, Writable } from "node:stream";
+
+import { type Browser, chromium } from "playwright-core";
 
 import { buildPresentationHtml } from "./presentation.js";
 
@@ -79,19 +80,12 @@ function findChrome(): string {
   throw new Error("No Chrome/Chromium found. Set CHROME_BIN to a browser binary.");
 }
 
-function killProcess(child: ChildProcess): void {
-  if (!child.pid) {
-    return;
-  }
-  try {
-    process.kill(-child.pid, "SIGKILL");
-  } catch {
-    try {
-      child.kill("SIGKILL");
-    } catch {
-      // The browser already exited.
-    }
-  }
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout>;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(message)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
 
 // Installed at document start so resource and script errors are collected
@@ -108,12 +102,11 @@ window.addEventListener("unhandledrejection", function (event) {
 });
 `;
 
-// Evaluated after the load event with awaitPromise, so the measurements are
-// taken when the page is genuinely ready rather than whenever a DOM dump
-// happens to be serialized. Fonts are inlined as lazily-activated @font-face
-// rules; measuring before they activate would use fallback metrics and miss
-// font-dependent overflow, so the probe waits for the font set and a paint
-// to settle first.
+// Evaluated after the load event, so the measurements are taken when the page
+// is genuinely ready rather than whenever a DOM dump happens to be serialized.
+// Fonts are inlined as lazily-activated @font-face rules; measuring before they
+// activate would use fallback metrics and miss font-dependent overflow, so the
+// probe waits for the font set and a paint to settle first.
 const PROBE_EXPRESSION = `(async function () {
   await document.fonts.ready;
   await new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
@@ -160,206 +153,55 @@ const PROBE_EXPRESSION = `(async function () {
   };
 })()`;
 
-interface CdpResponse {
-  id?: number;
-  method?: string;
-  sessionId?: string;
-  params?: Record<string, unknown>;
-  result?: Record<string, unknown>;
-  error?: { message?: string };
-}
-
-interface PendingCommand {
-  resolve: (result: Record<string, unknown>) => void;
-  reject: (error: Error) => void;
-}
-
-interface EventWaiter {
-  method: string;
-  sessionId: string | undefined;
-  resolve: () => void;
-}
-
 /**
- * Drive Chrome over the DevTools protocol on --remote-debugging-pipe
- * (\0-delimited JSON on fds 3/4 — no network, no dependencies).
+ * Drive Chromium through playwright-core (a battle-tested browser driver with
+ * no bundled browsers of its own).
  *
- * The previous transport, one-shot `--dump-dom`, serializes the DOM around
- * the load event: a probe that awaits fonts either races the dump (the
- * result attribute misses small pages) or, with --timeout, never dumps at
- * all when --user-data-dir is passed. It is also broken outright in
- * Chrome-for-Testing builds. A live protocol session sidesteps the whole
- * class: navigate, wait for load, evaluate the probe with awaitPromise, and
- * read the returned value.
+ * The probe must run *after* fonts activate: the previous one-shot `--dump-dom`
+ * transport serialized the DOM around the load event, which races an async
+ * font wait (the result attribute misses small pages) and is broken outright in
+ * Chrome-for-Testing builds. A live session sidesteps the whole class — set an
+ * exact layout viewport on the context, install the error collector before the
+ * first byte, navigate, wait for load, then evaluate the probe (which awaits
+ * `document.fonts.ready` and a paint) and read the returned value.
  */
 async function runProbe(
-  chrome: string,
+  executablePath: string,
   htmlPath: string,
   width: number,
   height: number,
 ): Promise<ProbeResult> {
-  const child = spawn(
-    chrome,
-    [
-      "--headless=new",
-      "--disable-gpu",
-      "--hide-scrollbars",
-      "--no-first-run",
-      "--no-default-browser-check",
-      "--disable-sync",
-      "--disable-extensions",
-      "--disable-component-update",
-      "--remote-debugging-pipe",
-      "about:blank",
-    ],
-    { detached: true, stdio: ["ignore", "pipe", "pipe", "pipe", "pipe"] },
-  );
-  const toChrome = child.stdio[3] as Writable;
-  const fromChrome = child.stdio[4] as Readable;
-
-  const pending = new Map<number, PendingCommand>();
-  const eventWaiters: EventWaiter[] = [];
-  let nextId = 1;
-  let failure: Error | null = null;
-
-  const failAll = (error: Error): void => {
-    failure ??= error;
-    for (const command of pending.values()) {
-      command.reject(error);
-    }
-    pending.clear();
-  };
-
-  let buffer = "";
-  fromChrome.setEncoding("utf8");
-  fromChrome.on("data", (chunk: string) => {
-    buffer += chunk;
-    let boundary = buffer.indexOf("\0");
-    while (boundary !== -1) {
-      const raw = buffer.slice(0, boundary);
-      buffer = buffer.slice(boundary + 1);
-      boundary = buffer.indexOf("\0");
-      let message: CdpResponse;
-      try {
-        message = JSON.parse(raw) as CdpResponse;
-      } catch {
-        continue;
-      }
-      if (message.id !== undefined) {
-        const command = pending.get(message.id);
-        if (command) {
-          pending.delete(message.id);
-          if (message.error) {
-            command.reject(new Error(message.error.message ?? "CDP command failed"));
-          } else {
-            command.resolve(message.result ?? {});
-          }
-        }
-      } else if (message.method) {
-        for (let index = eventWaiters.length - 1; index >= 0; index--) {
-          const waiter = eventWaiters[index];
-          if (waiter?.method === message.method && waiter.sessionId === message.sessionId) {
-            eventWaiters.splice(index, 1);
-            waiter.resolve();
-          }
-        }
-      }
-    }
+  // playwright-core defaults `chromiumSandbox: false`, so this stays root-safe
+  // without extra flags; the launch is bounded so a wedged browser cannot hang.
+  const launch = chromium.launch({
+    executablePath,
+    headless: true,
+    timeout: VERIFICATION_TIMEOUT_MS,
   });
-  child.once("error", (error) => failAll(error));
-  child.once("close", () => failAll(new Error("Chrome exited before verification finished")));
-
-  const send = (
-    method: string,
-    params: Record<string, unknown> = {},
-    sessionId?: string,
-  ): Promise<Record<string, unknown>> => {
-    if (failure) {
-      return Promise.reject(failure);
-    }
-    const id = nextId++;
-    const promise = new Promise<Record<string, unknown>>((resolve, reject) => {
-      pending.set(id, { resolve, reject });
-    });
-    toChrome.write(`${JSON.stringify({ id, method, params, sessionId })}\0`);
-    return promise;
-  };
-
-  const waitForEvent = (method: string, sessionId?: string): Promise<void> => {
-    if (failure) {
-      return Promise.reject(failure);
-    }
-    return new Promise<void>((resolve) => {
-      eventWaiters.push({ method, sessionId, resolve });
-    });
-  };
-
-  const probe = async (): Promise<ProbeResult> => {
-    // The about:blank tab from the command line can lag the pipe becoming
-    // writable; poll briefly instead of assuming it is already listed.
-    let targetId: string | null = null;
-    for (let attempt = 0; attempt < 40 && !targetId; attempt++) {
-      const targets = (await send("Target.getTargets"))["targetInfos"] as
-        | Array<{ targetId: string; type: string }>
-        | undefined;
-      targetId = targets?.find((target) => target.type === "page")?.targetId ?? null;
-      if (!targetId) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-    }
-    if (!targetId) {
-      throw new Error("Chrome did not expose a page target");
-    }
-    const sessionId = (await send("Target.attachToTarget", { targetId, flatten: true }))[
-      "sessionId"
-    ] as string;
-    await send("Page.enable", {}, sessionId);
-    // An exact layout viewport, unlike --window-size, whose delivered
+  let browser: Browser | undefined;
+  const session = launch.then(async (launched) => {
+    browser = launched;
+    // An exact layout viewport, unlike `--window-size`, whose delivered
     // innerWidth/innerHeight vary by platform and required calibration.
-    await send(
-      "Emulation.setDeviceMetricsOverride",
-      { width, height, deviceScaleFactor: 1, mobile: false },
-      sessionId,
-    );
-    await send("Page.addScriptToEvaluateOnNewDocument", { source: COLLECTOR_SOURCE }, sessionId);
-    const loaded = waitForEvent("Page.loadEventFired", sessionId);
-    await send("Page.navigate", { url: `file://${htmlPath}#1` }, sessionId);
-    await loaded;
-    const evaluation = await send(
-      "Runtime.evaluate",
-      { expression: PROBE_EXPRESSION, awaitPromise: true, returnByValue: true },
-      sessionId,
-    );
-    const exception = evaluation["exceptionDetails"] as
-      | { text?: string; exception?: { description?: string } }
-      | undefined;
-    if (exception) {
-      throw new Error(
-        `verification probe failed: ${exception.exception?.description ?? exception.text ?? "unknown error"}`,
-      );
-    }
-    return (evaluation["result"] as { value: ProbeResult }).value;
-  };
-
-  try {
-    return await new Promise<ProbeResult>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        failAll(new Error("Chrome verification timed out"));
-        reject(new Error("Chrome verification timed out"));
-      }, VERIFICATION_TIMEOUT_MS);
-      probe().then(
-        (result) => {
-          clearTimeout(timeout);
-          resolve(result);
-        },
-        (error: Error) => {
-          clearTimeout(timeout);
-          reject(error);
-        },
-      );
+    const context = await launched.newContext({
+      viewport: { width, height },
+      deviceScaleFactor: 1,
     });
+    const page = await context.newPage();
+    await page.addInitScript(COLLECTOR_SOURCE);
+    await page.goto(`file://${htmlPath}#1`, { waitUntil: "load" });
+    return (await page.evaluate(PROBE_EXPRESSION)) as ProbeResult;
+  });
+  try {
+    return await withTimeout(session, VERIFICATION_TIMEOUT_MS, "Chrome verification timed out");
   } finally {
-    killProcess(child);
+    // Close the browser even if the race above rejected: if launch already
+    // resolved, `browser` holds the handle; if it is still settling, await it
+    // so a late-arriving browser is not leaked.
+    const opened = browser ?? (await launch.catch(() => undefined));
+    if (opened) {
+      await opened.close();
+    }
   }
 }
 
@@ -433,7 +275,7 @@ function validateProbe(result: ProbeResult): string[] {
 }
 
 export async function verifyPresentation(options: VerifyOptions): Promise<VerifyReport> {
-  const chrome = findChrome();
+  const executablePath = findChrome();
   // The presentation is written next to the slides so deck-relative asset
   // URLs resolve; the file is plain (uninstrumented) and removed afterwards.
   const htmlPath = path.join(
@@ -443,7 +285,7 @@ export async function verifyPresentation(options: VerifyOptions): Promise<Verify
   try {
     const html = await buildPresentationHtml({ rootDir: options.rootDir, theme: options.theme });
     writeFileSync(htmlPath, html, "utf8");
-    const result = await runProbe(chrome, htmlPath, options.width, options.height);
+    const result = await runProbe(executablePath, htmlPath, options.width, options.height);
     return {
       theme: options.theme,
       slideCount: result.frameCount,
