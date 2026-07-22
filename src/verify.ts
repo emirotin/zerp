@@ -55,20 +55,46 @@ interface ProbeResult {
   browserErrors: string[];
 }
 
-const CHROME_CANDIDATES = [
-  process.env.CHROME_BIN,
+// System-Chrome fallbacks, tried after CHROME_BIN and playwright's own managed
+// chromium. Each is validated by a `--version` spawn before use.
+const SYSTEM_CHROME_CANDIDATES = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "/Applications/Chromium.app/Contents/MacOS/Chromium",
   "google-chrome",
   "chromium",
   "chromium-browser",
-].filter((candidate): candidate is string => Boolean(candidate));
+];
 let verificationSequence = 0;
 
 const VERIFICATION_TIMEOUT_MS = 20_000;
 
-function findChrome(): string {
-  for (const candidate of CHROME_CANDIDATES) {
+/**
+ * Resolve a Chromium executable for verification, in priority order:
+ *
+ *   1. `CHROME_BIN` — an explicit override used verbatim (wrapper scripts that
+ *      exec a browser with extra flags are supported); the caller asked for
+ *      exactly this binary.
+ *   2. playwright-core's own managed chromium, if `zerp install-browser` (or a
+ *      prior playwright install) has downloaded it. `executablePath()` computes
+ *      a path whether or not it exists — and throws in some builds when nothing
+ *      is installed — so guard it with `existsSync`.
+ *   3. A system-installed Chrome/Chromium, validated by `--version`.
+ *   4. None found — point at `zerp install-browser` or `CHROME_BIN`.
+ */
+function resolveBrowserExecutable(): string {
+  const override = process.env.CHROME_BIN;
+  if (override) {
+    return override;
+  }
+  try {
+    const managed = chromium.executablePath();
+    if (managed && existsSync(managed)) {
+      return managed;
+    }
+  } catch {
+    // playwright-core has no managed browser installed; fall through.
+  }
+  for (const candidate of SYSTEM_CHROME_CANDIDATES) {
     if (candidate.includes("/") && !existsSync(candidate)) {
       continue;
     }
@@ -77,7 +103,9 @@ function findChrome(): string {
       return candidate;
     }
   }
-  throw new Error("No Chrome/Chromium found. Set CHROME_BIN to a browser binary.");
+  throw new Error(
+    "No Chrome/Chromium found. Run `zerp install-browser` or set CHROME_BIN to a browser binary.",
+  );
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
@@ -275,7 +303,7 @@ function validateProbe(result: ProbeResult): string[] {
 }
 
 export async function verifyPresentation(options: VerifyOptions): Promise<VerifyReport> {
-  const executablePath = findChrome();
+  const executablePath = resolveBrowserExecutable();
   // The presentation is written next to the slides so deck-relative asset
   // URLs resolve; the file is plain (uninstrumented) and removed afterwards.
   const htmlPath = path.join(

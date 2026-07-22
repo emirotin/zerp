@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { spawn } from "node:child_process";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
@@ -19,9 +21,37 @@ function printUsage(): void {
   zerp check [deck-dir] [--theme dark|light|both] [--strict] [--json]
   zerp slides [deck-dir] [--json]
   zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--json]
+  zerp install-browser
 
 A deck directory must contain slides/.
 `);
+}
+
+/**
+ * Download the playwright-managed Chromium that `zerp verify` can resolve
+ * without a system browser. playwright-core ships the downloader as its own
+ * CLI (`cli.js`, its package `bin`); locate it from the installed package
+ * directory so this works from a global or local zerp install, then hand off,
+ * streaming its output through and returning its exit code.
+ */
+function installBrowser(): Promise<number> {
+  const require = createRequire(import.meta.url);
+  const cliPath = path.join(
+    path.dirname(require.resolve("playwright-core/package.json")),
+    "cli.js",
+  );
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, [cliPath, "install", "chromium"], {
+      stdio: "inherit",
+    });
+    child.on("error", (error: Error) => {
+      process.stderr.write(`${error.message}\n`);
+      resolve(1);
+    });
+    child.on("exit", (code, signal) => {
+      resolve(code ?? (signal ? 1 : 0));
+    });
+  });
 }
 
 function parseTheme(raw: string | undefined): ThemeName {
@@ -174,6 +204,11 @@ async function main(): Promise<void> {
       );
     }
     process.exitCode = failed ? 1 : 0;
+    return;
+  }
+
+  if (command === "install-browser") {
+    process.exitCode = await installBrowser();
     return;
   }
 
