@@ -8,3 +8,4 @@ test/**/index.html
 shots/
 .zerp-shot*.html
 .zerp-verify-*.html
+*.tgz
