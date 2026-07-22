@@ -45,10 +45,27 @@ test(
     // The probe waits for the inlined fonts before measuring; fontsActive
     // proves the wait happened instead of assuming it.
     assert.equal(report.fontsActive, true);
+    // An explicitly passed --size is recorded as a deliberate choice.
+    assert.deepEqual(report.viewport, { width: 1280, height: 720, defaulted: false });
     for (const slide of report.slides) {
       assert.equal(slide.viewportWidth, 1280);
       assert.equal(slide.viewportHeight, 720);
     }
+  },
+);
+
+test(
+  "zerp verify records whether the checked viewport was the default",
+  { skip: !browserTestsEnabled || !canFindChrome() },
+  () => {
+    const result = spawnSync(
+      process.execPath,
+      ["dist/cli.js", "verify", "test/fixtures/wrapper-deck", "--theme", "dark", "--json"],
+      { encoding: "utf8", timeout: 60_000 },
+    );
+    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+    const [report] = JSON.parse(result.stdout);
+    assert.deepEqual(report.viewport, { width: 1280, height: 720, defaulted: true });
   },
 );
 

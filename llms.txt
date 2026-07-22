@@ -146,6 +146,8 @@ zerp verify . --theme both --size 1280x720
 
 Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
 
+**Verify is viewport-specific.** Overflow and frame geometry are judged against the exact `--size WxH` viewport (default 1280x720) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; verify it with its actual target size. `zerp check` is viewport-independent (static contrast/type analysis, no layout).
+
 `zerp serve` live-reloads the browser on any change under `slides/` — the page returns to the same slide (URL hash) and replays the steps of every slide you had stepped through. Built decks contain no reload client.
 
 ## Interaction model

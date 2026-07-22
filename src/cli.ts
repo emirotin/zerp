@@ -54,7 +54,11 @@ function parseCheckThemes(raw: string | undefined): CheckTheme[] {
   throw new Error(`Invalid check theme: ${raw} (expected dark, light, or both)`);
 }
 
-function parseVerifySize(raw: string | undefined): { width: number; height: number } {
+function parseVerifySize(raw: string | undefined): {
+  width: number;
+  height: number;
+  defaulted: boolean;
+} {
   const value = raw ?? "1280x720";
   const match = value.match(/^(\d+)x(\d+)$/);
   if (!match) {
@@ -65,7 +69,7 @@ function parseVerifySize(raw: string | undefined): { width: number; height: numb
   if (width < 1 || height < 1) {
     throw new Error(`Invalid verification size: ${value} (expected positive WxH)`);
   }
-  return { width, height };
+  return { width, height, defaulted: raw === undefined };
 }
 
 async function main(): Promise<void> {
@@ -131,18 +135,24 @@ async function main(): Promise<void> {
   if (command === "verify") {
     const rootDir = path.resolve(firstArg ?? ".");
     const themes = parseVerifyThemes(values.theme);
-    const { width, height } = parseVerifySize(values.size);
+    const { width, height, defaulted } = parseVerifySize(values.size);
     const reports = [];
     let failed = false;
     for (const theme of themes) {
-      const report = await verifyPresentation({ rootDir, theme, width, height });
+      const report = await verifyPresentation({
+        rootDir,
+        theme,
+        width,
+        height,
+        sizeDefaulted: defaulted,
+      });
       reports.push(report);
       if (values.json) {
         failed ||= report.failures.length > 0;
         continue;
       }
       process.stdout.write(
-        `zerp verify — ${theme} · ${report.slideCount} slides · ${width}×${height}\n`,
+        `zerp verify — ${theme} · ${report.slideCount} slides · ${width}×${height}${defaulted ? " (default size)" : ""}\n`,
       );
       if (report.failures.length === 0) {
         process.stdout.write("all slide frames valid ✓\n");
@@ -155,6 +165,13 @@ async function main(): Promise<void> {
     }
     if (values.json) {
       process.stdout.write(`${JSON.stringify(reports, null, 2)}\n`);
+    } else if (failed) {
+      // Overflow and frame geometry are judged against the exact viewport
+      // above; a deck designed for a different screen is not wrong, it is
+      // being measured against the wrong size.
+      process.stdout.write(
+        `checked at ${width}×${height}${defaulted ? " (the default)" : ""} — pass --size WxH to verify this deck's actual target screen\n`,
+      );
     }
     process.exitCode = failed ? 1 : 0;
     return;

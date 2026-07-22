@@ -12,6 +12,8 @@ export interface VerifyOptions {
   theme: VerifyTheme;
   width: number;
   height: number;
+  /** True when the caller fell back to the default size rather than choosing one. */
+  sizeDefaulted?: boolean;
 }
 
 export interface SlideVerification {
@@ -33,6 +35,11 @@ export interface VerifyReport {
   theme: VerifyTheme;
   slideCount: number;
   fontsActive: boolean;
+  /** The exact viewport the deck was verified against — overflow and frame
+   * geometry are judged relative to this size, so a report is only meaningful
+   * together with it. `defaulted` distinguishes "checked at the default" from
+   * a deliberately chosen size. */
+  viewport: { width: number; height: number; defaulted: boolean };
   slides: SlideVerification[];
   browserErrors: string[];
   failures: string[];
@@ -441,6 +448,11 @@ export async function verifyPresentation(options: VerifyOptions): Promise<Verify
       theme: options.theme,
       slideCount: result.frameCount,
       fontsActive: result.fontsActive,
+      viewport: {
+        width: options.width,
+        height: options.height,
+        defaulted: options.sizeDefaulted ?? false,
+      },
       slides: result.slides,
       browserErrors: result.browserErrors,
       failures: validateProbe(result),

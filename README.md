@@ -84,7 +84,7 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 - Colors come from design tokens (`var(--zerp-*)`) generated from the Harmony palette; decks render in dark and light themes. Do not hardcode colors.
 - The page title comes from the first slide's top heading (override via the `title` build option; folder name as fallback).
 - Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
-- Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium and checks that exactly one full-size slide frame is active and visible without page overflow.
+- Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium and checks that exactly one full-size slide frame is active and visible without page overflow. Overflow is relative to the checked viewport (`--size WxH`, default 1280x720) — verify a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked.
 - "Slide N" means the 1-based deck position (what the on-screen counter shows) — file prefixes only order files. `zerp slides` prints the position → file mapping; pressing `s` in a running deck shows the active slide's source.
 
 ## Printing and PDF export
