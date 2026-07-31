@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The zerp style system</title>
+    <!-- Viewing requires a repo checkout: fonts come from node_modules
+         (pnpm install) and the framework stylesheet from dist (pnpm build).
+         Regenerate the PDF with:
+         chrome --headless --no-pdf-header-footer --virtual-time-budget=5000
+           --print-to-pdf=docs/style-system.pdf docs/style-system.html -->
+    <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/400.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/400-italic.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/600.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/700.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/montserrat/900.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/roboto-mono/400.css" />
+    <link rel="stylesheet" href="../node_modules/@fontsource/roboto-mono/700.css" />
+    <link rel="stylesheet" href="../dist/assets/default-styles.css" />
+    <style>
+      /* ---- document chrome (doc-only; everything else on this page is the
+             framework's own stylesheet doing its normal job) ---- */
+      html,
+      body {
+        height: auto;
+        overflow: auto;
+      }
+
+      .page {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 56px 36px 120px;
+      }
+
+      .page > header h1 {
+        font-size: 2.8em;
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      .page > header .tagline {
+        margin-top: 10px;
+        font-size: 1.15em;
+        color: var(--zerp-muted);
+        line-height: 1.5;
+      }
+
+      section h2 {
+        font-size: 1.7em;
+        font-weight: 900;
+        margin: 64px 0 6px;
+      }
+
+      section h2 .n {
+        font-family: "Roboto Mono", monospace;
+        font-size: 0.75em;
+        font-weight: 700;
+        color: var(--zerp-accent);
+        margin-right: 10px;
+      }
+
+      section h3.cname {
+        font-family: "Roboto Mono", monospace;
+        font-size: 1.1em;
+        font-weight: 700;
+        color: var(--zerp-accent);
+        margin: 36px 0 4px;
+      }
+
+      section > p,
+      .page > header p {
+        margin: 10px 0;
+        line-height: 1.55;
+        max-width: 76ch;
+      }
+
+      section > ul {
+        margin: 10px 0 10px 1.3em;
+        list-style: disc;
+      }
+
+      section > ul li {
+        line-height: 1.55;
+        padding: 3px 0;
+        max-width: 74ch;
+      }
+
+      .doc-table {
+        font-size: 1em;
+        margin: 16px 0;
+      }
+
+      .doc-table code {
+        padding: 1px 6px;
+        font-size: 0.9em;
+      }
+
+      .note {
+        font-size: 0.9em;
+        color: var(--zerp-muted);
+        margin: 6px 0 24px;
+      }
+
+      /* Live examples: real slide markup, real framework CSS, document flow.
+         em-based slide styles scale down cleanly with a smaller base size. */
+      .slide.demo {
+        width: auto;
+        height: auto;
+        min-height: 0;
+        display: block;
+        flex: none;
+        padding: 26px 30px;
+        margin: 14px 0 6px;
+        font-size: 13px;
+        border: 1px dashed var(--zerp-border);
+        border-radius: 14px;
+        background: var(--zerp-bg);
+        break-inside: avoid;
+      }
+
+      .slide.demo.type-specimen {
+        font-size: 16px;
+      }
+
+      /* Token panels are filled in by the script at the bottom of this file,
+         with literal values read from the framework stylesheet. */
+      .token-panel {
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin: 14px 0;
+        break-inside: avoid;
+      }
+
+      .token-panel .panel-title {
+        font-family: "Roboto Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 14px;
+      }
+
+      .token-panel .neutral-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 10px;
+        margin-bottom: 18px;
+      }
+
+      .token-panel .neutral-grid .swatch {
+        height: 34px;
+        border-radius: 6px;
+        margin-bottom: 4px;
+      }
+
+      .token-panel .tlabel {
+        font-family: "Roboto Mono", monospace;
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .token-panel .hue-grid {
+        display: grid;
+        grid-template-columns: 76px 1.1fr 1fr 1.5fr;
+        gap: 8px 12px;
+        align-items: center;
+      }
+
+      .token-panel .hue-grid .chip {
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-family: "Roboto Mono", monospace;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      /* Repurpose the deck theme switch as this page's theme control. */
+      .theme-switch {
+        right: 24px;
+      }
+
+      @page {
+        size: A4;
+        margin: 13mm 14mm;
+      }
+
+      @media print {
+        /* The body fill can't reach into the @page margins, so a colored
+           page background prints as a floating box. Blend with the paper
+           instead; demos and token panels carry their own backgrounds. */
+        html,
+        body {
+          background: #fff;
+        }
+
+        .page {
+          max-width: none;
+          padding: 0;
+        }
+
+        section h2 {
+          break-after: avoid;
+          margin-top: 40px;
+        }
+
+        section h3.cname,
+        section h3.cname + p {
+          break-after: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <h1>The zerp style system</h1>
+        <p class="tagline">
+          A short field guide for designers building decks on
+          <code>zerp</code>. Every example on this page is rendered live by the
+          framework's own stylesheet — what you see is what a slide gets.
+        </p>
+      </header>
+
+      <section>
+        <h2><span class="n">00</span>The layers at a glance</h2>
+        <div class="slide demo">
+          <ol>
+            <li>
+              <div>
+                <strong>Baseline</strong> — a global reset plus default styles
+                for every content tag. A plain Markdown slide is fully designed
+                with zero classes.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Type</strong> — one voice pair: Montserrat speaks,
+                Roboto&nbsp;Mono counts. Fonts ship inlined, so decks work
+                offline as a single file.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Design tokens</strong> — ~40 CSS variables for color
+                and elevation, generated from the Evil Martians
+                <em>Harmony</em> palette in a dark and a light theme.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Utilities</strong> — small single-purpose classes for
+                color, size, and layout. They always win over component
+                defaults.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Components</strong> — opt-in slide patterns: cards,
+                stats, comparisons, flows, steps, timelines, takeaways.
+              </div>
+            </li>
+            <li>
+              <div>
+                <strong>Guardrails</strong> — APCA contrast and type-size rules
+                enforced by <code>zerp check</code> and
+                <code>zerp verify</code>, in both themes.
+              </div>
+            </li>
+          </ol>
+        </div>
+        <p class="note">
+          Live examples (dashed frames) are rendered at reduced scale; slide
+          styles are em-based, so proportions are exact.
+        </p>
+      </section>
+
+      <section>
+        <h2><span class="n">01</span>Baseline</h2>
+        <p>
+          A universal reset zeroes margins and padding and sets
+          <code>border-box</code> sizing. The page paints
+          <code>--zerp-bg</code> behind <code>--zerp-text</code> in Montserrat.
+          Each slide is a full-viewport flex column with generous padding
+          (50&times;70px); content centers vertically (<code>.slide.top</code>
+          top-aligns a busy slide), and direct children space themselves with
+          an automatic 14px rhythm — you never add margins for ordinary
+          spacing.
+        </p>
+        <p>
+          On that canvas, every content tag is pre-styled. This whole example
+          uses no classes at all:
+        </p>
+        <div class="slide demo">
+          <h2>Headings are set in black weights</h2>
+          <p>
+            Body text runs at 1.25em with a relaxed line. Links look
+            <a href="#">like this</a>, emphasis is <strong>bold</strong> or
+            <em>italic</em>, and inline <code>code</code> sits in a chip.
+          </p>
+          <ul>
+            <li>Unordered lists get accent arrows</li>
+            <li>No bullets to restyle, nothing to align</li>
+          </ul>
+          <ol>
+            <li><div>Ordered lists become numbered takeaway rows</div></li>
+            <li><div>With mono counters and hairline dividers</div></li>
+          </ol>
+          <blockquote>
+            Quotes get an accent spine, a surface wash, and italics.
+          </blockquote>
+          <table>
+            <thead>
+              <tr><th>Tables</th><th>Are</th><th>Styled</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>hairline rows</td><td>roomy cells</td><td>no borders to fight</td></tr>
+              <tr><td>add <code>.mono</code></td><td>or <code>.compact</code></td><td>for data grids</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          Also covered: <code>pre</code> blocks, <code>kbd</code>,
+          <code>hr</code>, images (rounded, height-capped), and
+          <code>figure</code>/<code>figcaption</code>.
+        </p>
+      </section>
+
+      <section>
+        <h2><span class="n">02</span>Type</h2>
+        <p>
+          Two families, two jobs. <strong>Montserrat</strong> is the voice —
+          headlines, body, labels — in weights 400, 600, 700, and 900 (plus
+          400&nbsp;italic). <strong>Roboto&nbsp;Mono</strong> (400, 700) is the
+          data voice: code, <code>kbd</code>, stat values, list and step
+          counters, timeline years, the slide counter. If it's a number doing
+          work, it's mono.
+        </p>
+        <div class="slide demo type-specimen">
+          <p style="font-weight: 400">Montserrat 400 — body text and quiet lines</p>
+          <p style="font-weight: 600">Montserrat 600 — gentle emphasis</p>
+          <p style="font-weight: 700">Montserrat 700 — bold, labels, colored emphasis</p>
+          <p style="font-weight: 900">Montserrat 900 — headlines and hero numbers</p>
+          <p style="font-style: italic">Montserrat 400 italic — quotes &amp; asides · Съешь ещё этих мягких булок</p>
+          <p class="mono">Roboto Mono 400 — code · 0123456789</p>
+          <p class="mono" style="font-weight: 700">Roboto Mono 700 — counters · 01 02 03</p>
+        </div>
+        <table class="doc-table">
+          <thead>
+            <tr><th>Element</th><th>Size</th><th>Weight</th><th>Color</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>h1</code></td><td>3.2em (4em on title slides)</td><td>900</td><td>text</td></tr>
+            <tr><td><code>h2</code></td><td>2.2em</td><td>700</td><td>text</td></tr>
+            <tr><td><code>h3</code></td><td>1.4em</td><td>700</td><td>muted (text inside cards)</td></tr>
+            <tr><td><code>p</code>, <code>li</code></td><td>1.25em (~20px)</td><td>400</td><td>text</td></tr>
+            <tr><td><code>.sub</code></td><td>1em</td><td>700</td><td>muted — the safe detail line</td></tr>
+          </tbody>
+        </table>
+        <p>
+          The floor is 1em. Nothing renders smaller except inline
+          <code>.sm</code> spans (0.9em) inside body text — and the checker
+          holds the line. Latin and Cyrillic subsets (with extensions) are
+          embedded as woff2 data URLs, so a built deck is one self-sufficient
+          file.
+        </p>
+      </section>
+
+      <section>
+        <h2><span class="n">03</span>Design tokens</h2>
+        <p>
+          Every color on every slide comes from a <code>--zerp-*</code>
+          variable. Tokens are generated at build time from the Evil Martians
+          <em>Harmony</em> palette in two themes, and both themes ship with
+          every deck — so you pick tokens by <strong>meaning</strong>, never by
+          hex. Hardcoded colors are forbidden; they can't survive the theme
+          flip.
+        </p>
+        <p>
+          <strong>Neutrals</strong> carry the structure: <code>bg</code> (page)
+          · <code>surface</code> (cards, panels) · <code>border</code> ·
+          <code>text</code> · <code>muted</code> (secondary text) ·
+          <code>faint</code> (decorative glyphs only — never text).
+        </p>
+        <p>
+          <strong>Hues</strong> — blue, green, orange, purple, red, amber,
+          teal — each come in four roles: colored <em>text</em> on the page
+          (<code>--zerp-&lt;hue&gt;</code>), a <em>solid</em> fill paired with
+          <code>--zerp-on-solid</code>, and a soft <em>tint</em> wash paired
+          with its own <code>on-tint</code> text color. The pairs are designed
+          together; use them together.
+        </p>
+        <p>
+          <strong>Semantic aliases</strong> say why, not which:
+          <span class="accent">--zerp-accent</span> (blue) ·
+          <span class="ok">--zerp-ok</span> (green) ·
+          <span class="warn">--zerp-warn</span> (amber) ·
+          <span class="danger">--zerp-danger</span> (red). Prefer them when
+          color carries meaning; use hue names for categorical coding. One
+          more: <code>--zerp-shadow</code> is the elevation shadow behind
+          <code>.raised</code>.
+        </p>
+        <div id="token-panels"></div>
+        <p class="note">
+          Swatches above are read live from the shipped stylesheet — they can't
+          drift from the framework. Tint chips are labeled in their paired
+          on-tint color: the label demonstrates the contract.
+        </p>
+      </section>
+
+      <section>
+        <h2><span class="n">04</span>Utilities</h2>
+        <p>
+          One class, one job. Component defaults are declared with
+          <code>:where()</code> (zero specificity), so a utility placed on any
+          element always wins — <code>h3.accent</code> recolors a heading,
+          <code>.value.red</code> recolors a stat, <code>p.xl</code> enlarges a
+          paragraph. Say what you mean with classes instead of inline styles.
+        </p>
+        <ul>
+          <li>
+            <strong>Emphasis</strong> — <code>.accent .ok .warn .danger</code>
+            and the seven hue names: bold colored text by design (bold is what
+            keeps small colored text readable — don't fight the weight). Plus
+            <code>.muted</code> and <code>.mono</code>.
+          </li>
+          <li>
+            <strong>Size</strong> — <code>.lg</code> (1.25em) ·
+            <code>.xl</code> (1.6em) · <code>.sm</code> (0.9em, inline only) ·
+            <code>.sub</code> (the safe muted detail line).
+          </li>
+          <li>
+            <strong>Surface</strong> — <code>.tint-&lt;hue&gt;</code> colored
+            wash · <code>.edge-&lt;hue&gt;</code> (and
+            <code>.edge-ok/-warn/-danger/-accent</code>) recolors a component's
+            border by meaning · <code>.raised</code> elevation.
+          </li>
+          <li>
+            <strong>Layout</strong> — <code>.cols-2 .cols-3 .cols-4</code>
+            equal grids · <code>.row</code> centered flex row ·
+            <code>.stack</code> column · <code>.spread</code> space-between ·
+            <code>.grow</code> · <code>.center</code> · <code>.narrow</code>
+            width-capped centered block · <code>.slide.top</code>.
+          </li>
+        </ul>
+        <div class="slide demo">
+          <p>
+            Mark words as <span class="ok">on track</span>,
+            <span class="warn">at risk</span>,
+            <span class="danger">blocked</span>, or
+            <span class="accent">the point</span>; keep asides
+            <span class="muted">muted</span> and identifiers
+            <span class="mono">mono</span>.
+          </p>
+          <p class="xl">An .xl line for the moment that deserves it.</p>
+          <p class="sub">And a .sub detail line that is safe by construction.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2><span class="n">05</span>Components</h2>
+        <p>
+          Opt-in patterns that cover almost every slide you'll design. All of
+          them inherit tokens, both themes, and the utility overrides above.
+        </p>
+
+        <h3 class="cname">.card</h3>
+        <p>
+          The surface box. Add <code>.tint-&lt;hue&gt;</code> for a wash or
+          <code>.edge-&lt;hue&gt;</code> to recolor the border; inside a card an
+          <code>h3</code> becomes a title. Cards sharing a
+          <code>.cols-*</code>/<code>.row</code> equalize heights.
+        </p>
+        <div class="slide demo">
+          <div class="cols-3">
+            <div class="card">
+              <h3>Plain card</h3>
+              <p>Surface, border, quiet.</p>
+            </div>
+            <div class="card tint-green">
+              <h3>.tint-green</h3>
+              <p>A wash that says <span class="ok">good</span>.</p>
+            </div>
+            <div class="card edge-danger">
+              <h3>.edge-danger</h3>
+              <p>The border carries the meaning.</p>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="cname">.stat-row · .stat</h3>
+        <p>
+          Big numbers. Each <code>.stat</code> holds a mono
+          <code>.value</code> and a muted <code>.label</code>; recolor a value
+          with a hue class.
+        </p>
+        <div class="slide demo">
+          <div class="stat-row">
+            <div class="stat"><div class="value">5.26%</div><div class="label">house edge</div></div>
+            <div class="stat"><div class="value red">−$17</div><div class="label">expected / hour</div></div>
+            <div class="stat"><div class="value green">37:1</div><div class="label">payout</div></div>
+          </div>
+        </div>
+
+        <h3 class="cname">.compare</h3>
+        <p>
+          Two children with a divider — "vs" by default, or anything via
+          <code>data-vs="→"</code>.
+        </p>
+        <div class="slide demo">
+          <div class="compare">
+            <div class="card"><h3>Intuition</h3><p>"I'm due for a win."</p></div>
+            <div class="card"><h3>Math</h3><p>The wheel has no memory.</p></div>
+          </div>
+        </div>
+
+        <h3 class="cname">.flow</h3>
+        <p>Process row; arrows appear between children automatically.</p>
+        <div class="slide demo">
+          <div class="flow">
+            <span>Draft</span><span>Check</span><span>Verify</span><span>Ship</span>
+          </div>
+        </div>
+
+        <h3 class="cname">.steps</h3>
+        <p>
+          Auto-numbered card grid; children are plain divs with
+          <code>h3</code> + <code>p</code>.
+        </p>
+        <div class="slide demo">
+          <div class="steps">
+            <div><h3>Author</h3><p>Markdown or HTML in <code>slides/</code>.</p></div>
+            <div><h3>Validate</h3><p>Contrast, type, geometry.</p></div>
+            <div><h3>Present</h3><p>One offline HTML file.</p></div>
+          </div>
+        </div>
+
+        <h3 class="cname">.timeline</h3>
+        <p>
+          Milestone row of <code>.item</code>s, each with a mono
+          <code>.year</code> and a <code>.label</code>.
+        </p>
+        <div class="slide demo">
+          <div class="timeline">
+            <div class="item"><div class="year">1655</div><div class="label">Pascal's wheel</div></div>
+            <div class="item"><div class="year">1863</div><div class="label">Monte Carlo</div></div>
+            <div class="item"><div class="year">1941</div><div class="label">Vegas strip</div></div>
+          </div>
+        </div>
+
+        <h3 class="cname">.key-thought</h3>
+        <p>The boxed takeaway — one per slide, maximum.</p>
+        <div class="slide demo">
+          <div class="key-thought">
+            <p>Design with tokens and the theme flip is free.</p>
+            <p class="sub">Hardcode a hex and one theme is broken.</p>
+          </div>
+        </div>
+
+        <h3 class="cname">.pill</h3>
+        <p>
+          Inline badge; combine with <code>.ok/.warn/.danger/.accent</code> or
+          <code>.tint-&lt;hue&gt;</code> for the matched tint/on-tint pair.
+        </p>
+        <div class="slide demo">
+          <div class="row">
+            <span class="pill">neutral</span>
+            <span class="pill ok">shipped</span>
+            <span class="pill warn">beta</span>
+            <span class="pill danger">deprecated</span>
+            <span class="pill tint-purple">experiment</span>
+          </div>
+        </div>
+
+        <h3 class="cname">.concept</h3>
+        <p>
+          Definition-slide header: a big <code>.icon</code> over a shouty
+          accent <code>.label</code>; follow with a muted tagline.
+        </p>
+        <div class="slide demo">
+          <div class="concept">
+            <div class="icon">🎲</div>
+            <div class="label">House Edge</div>
+          </div>
+          <p class="muted center">The casino's built-in margin on every bet.</p>
+        </div>
+
+        <h3 class="cname">.slide.title</h3>
+        <p>
+          The title-slide recipe: <code>h1</code> + <code>h3</code>
+          (auto-accented) + a <code>.meta</code> block for presenter and date.
+        </p>
+        <div class="slide demo title">
+          <h1>Beating the House</h1>
+          <h3>Why the math always wins</h3>
+          <div class="meta">Eugene Mirotin · July 2026</div>
+        </div>
+
+        <p>
+          <strong>Also in the box:</strong> <code>.block-label</code> (top-left
+          section label) · <code>figure.corner</code> (pinned reference figure)
+          · <code>.img-row</code> (captioned image rows) ·
+          <code>.interactive-badge</code> + <code>.step-hint</code> (the
+          affordances for stepped slides) · <code>table.mono</code> /
+          <code>table.compact</code> · and the step-reveal attributes
+          <code>data-step</code> / <code>data-until-step</code>, whose styling
+          reserves space so reveals never reflow a centered slide.
+        </p>
+      </section>
+
+      <section>
+        <h2><span class="n">06</span>Theming &amp; guardrails</h2>
+        <p>
+          The theme is a single attribute — <code>data-zerp-theme</code> set to
+          <code>dark</code>, <code>light</code>, or <code>system</code> — and
+          only token values change with it. Presenters pick a default at build
+          time; viewers can override with the ◐ switch (persisted). Because
+          both themes always ship, everything you design must work in both —
+          that's the real reason raw colors are banned. (Sole exemption:
+          depicted real-world objects — a playing card's white face stays
+          white.)
+        </p>
+        <p>
+          The system is enforced, not aspirational.
+          <code>zerp check</code> statically analyzes every slide against both
+          themes: APCA text contrast, the 1em type floor, and surfaces that
+          blend into their background. <code>zerp verify</code> then loads the
+          deck in a real browser and checks geometry, overflow, and console
+          errors. The published defaults all pass; the checker exists to keep
+          <em>your</em> additions honest. Known traps it will catch:
+          <code>.sm</code> + <code>.muted</code> combined, <code>faint</code>
+          used for text, any text under 1em.
+        </p>
+        <p>
+          <strong>When you need to go beyond the box</strong>, escalate in
+          order: built-in components → utility classes →
+          a slide-scoped <code>&lt;style&gt;</code> that uses only
+          <code>var(--zerp-*)</code> tokens (deck-wide styles live in a
+          style-only <code>slides/00-styles.html</code>). Then re-run the
+          checks.
+        </p>
+        <p>
+          One last layer rides along for free: <strong>print</strong>. A built
+          deck paginates as one page per slide, hides the presentation chrome,
+          and prints steps in their final state — the PDF export is the same
+          file.
+        </p>
+      </section>
+
+      <footer>
+        <hr />
+        <p class="note">
+          Sources of truth: <code>src/assets/base-styles.css</code> (rules) ·
+          <code>scripts/generate-tokens.mjs</code> (tokens) ·
+          <code>llms.txt</code> (the full authoring contract). Generated
+          2026-07-31 against zerp 0.9.0.
+        </p>
+      </footer>
+    </div>
+
+    <div class="theme-switch">
+      <div class="theme-options">
+        <button data-theme="dark">dark</button>
+        <button data-theme="light">light</button>
+        <button data-theme="system" class="selected">system</button>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var HUES = ["blue", "green", "orange", "purple", "red", "amber", "teal"];
+        var NEUTRALS = ["bg", "surface", "border", "text", "muted", "faint"];
+        var root = document.documentElement;
+
+        function readTheme(theme) {
+          root.setAttribute("data-zerp-theme", theme);
+          var cs = getComputedStyle(root);
+          var out = {};
+          var names = NEUTRALS.concat(["on-solid"]);
+          HUES.forEach(function (h) {
+            names.push(h, h + "-solid", h + "-tint", h + "-on-tint");
+          });
+          names.forEach(function (n) {
+            out[n] = cs.getPropertyValue("--zerp-" + n).trim();
+          });
+          return out;
+        }
+
+        var values = { dark: readTheme("dark"), light: readTheme("light") };
+        root.setAttribute("data-zerp-theme", "system");
+
+        function el(tag, style, text, cls) {
+          var node = document.createElement(tag);
+          if (style) node.setAttribute("style", style);
+          if (text) node.textContent = text;
+          if (cls) node.className = cls;
+          return node;
+        }
+
+        function panel(theme) {
+          var v = values[theme];
+          var box = el(
+            "div",
+            "background:" + v.bg + ";color:" + v.text + ";border:1px solid " + v.border,
+            null,
+            "token-panel"
+          );
+          box.appendChild(
+            el("div", "color:" + v.muted, theme + " · page is --zerp-bg " + v.bg, "panel-title")
+          );
+
+          var neutrals = el("div", null, null, "neutral-grid");
+          NEUTRALS.forEach(function (n) {
+            var cell = el("div");
+            cell.appendChild(el("div", "background:" + v[n] + ";border:1px solid " + v.border, null, "swatch"));
+            var label = el("div", null, null, "tlabel");
+            label.appendChild(el("div", "font-weight:700", n));
+            label.appendChild(el("div", "color:" + v.muted, v[n]));
+            cell.appendChild(label);
+            neutrals.appendChild(cell);
+          });
+          box.appendChild(neutrals);
+
+          var grid = el("div", null, null, "hue-grid");
+          var head = "color:" + v.muted + ";font-family:'Roboto Mono',monospace;font-size:11px";
+          grid.appendChild(el("div", head, "hue"));
+          grid.appendChild(el("div", head, "text on bg"));
+          grid.appendChild(el("div", head, "solid + on-solid"));
+          grid.appendChild(el("div", head, "tint + on-tint"));
+          HUES.forEach(function (h) {
+            grid.appendChild(el("div", "font-family:'Roboto Mono',monospace;font-size:12px;color:" + v.muted, h));
+            grid.appendChild(
+              el("div", "color:" + v[h] + ";font-weight:700;font-size:13px", "Aa " + v[h])
+            );
+            grid.appendChild(
+              el("div", "background:" + v[h + "-solid"] + ";color:" + v["on-solid"], v[h + "-solid"], "chip")
+            );
+            grid.appendChild(
+              el(
+                "div",
+                "background:" + v[h + "-tint"] + ";color:" + v[h + "-on-tint"] + ";font-weight:700",
+                v[h + "-tint"] + " · Aa " + v[h + "-on-tint"],
+                "chip"
+              )
+            );
+          });
+          box.appendChild(grid);
+          return box;
+        }
+
+        var mount = document.getElementById("token-panels");
+        mount.appendChild(panel("dark"));
+        mount.appendChild(panel("light"));
+
+        var buttons = document.querySelectorAll(".theme-switch button");
+        buttons.forEach(function (button) {
+          button.addEventListener("click", function () {
+            root.setAttribute("data-zerp-theme", button.dataset.theme);
+            buttons.forEach(function (b) {
+              b.classList.toggle("selected", b === button);
+            });
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
