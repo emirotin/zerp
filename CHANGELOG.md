@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.0
 
 - **`zerp verify --safe-margin px` checks a print-safe inset.** When set, every top-level element of each authored slide must stay at least that many px inside all page edges; violations are reported as structured verify failures naming the element (id, class, or tag), the intruded edges, and the measured distances. Elements marked `data-zerp-bleed` — now a documented framework attribute for intentionally full-bleed content — are exempt, as are script/style tags and zero-size elements. Off by default (`0`), so existing verify behavior is unchanged; the report echoes the checked `safeMargin` the way it echoes the viewport, and `--json` carries the per-slide measurements in `safeZoneItems`. The mechanism formerly lived downstream as a separate probe (slide-bench's `_check_print_safe_zone` and its platform port) coupled to zerp's frame internals from outside; verify already steps and measures every slide, so the framework now owns the measurement and callers own only the threshold.
 
