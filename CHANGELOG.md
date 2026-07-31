@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **The package is resolvable from CommonJS and by path.** The `exports` map gains a `default` condition on the main entry (so `require("@emirotin/zerp")` works under Node ≥ 22.12 `require(esm)`) and explicit `./package.json`, `./llms.txt`, and `./dist/cli.js` subpath exports. Host applications that read the model-facing reference or spawn the CLI can now `require.resolve` those paths directly instead of hitting `ERR_PACKAGE_PATH_NOT_EXPORTED` and walking `node_modules` by hand.
+- **`engines.node` declares the real floor, `>=22`, instead of the maintainer's exact toolchain version.** The CLI and the playwright-core verify transport run fine on Node 22 (the test suite passes under 22.22.2); development stays pinned through Volta and `packageManager`. The `engines.pnpm` pin is dropped for the same reason — it constrained consumers, not contributors.
+
 ## 0.7.0
 
 - **`zerp verify` now drives the browser through `playwright-core`.** The hand-rolled DevTools-protocol client — Chrome over `--remote-debugging-pipe`, a bespoke CDP message pump, and device-metrics calibration — is replaced by `playwright-core`, a battle-tested browser driver. `playwright-core` bundles no browsers of its own, so the framework keeps its "bring your own browser" property: browsers stay external and optional, and the new dependency is pure JavaScript. The verify contract is unchanged — the same `VerifyReport` shape and failure strings, the same font-aware probe (it still measures after `document.fonts.ready` plus a paint settle and reports `fontsActive`), the same injected browser-error collector, the same exact-viewport measurement, temp-file handling, and 20s timeout.

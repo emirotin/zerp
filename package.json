@@ -35,8 +35,12 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./llms.txt": "./llms.txt",
+    "./dist/cli.js": "./dist/cli.js"
   },
   "publishConfig": {
     "access": "public"
@@ -81,8 +85,7 @@
     ]
   },
   "engines": {
-    "node": "24.14.1",
-    "pnpm": "10.33.0"
+    "node": ">=22"
   },
   "volta": {
     "node": "24.14.1",
