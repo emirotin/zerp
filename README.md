@@ -103,6 +103,7 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 - The page title comes from the first slide's top heading (override via the `title` build option; folder name as fallback).
 - Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
 - Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and checks that exactly one full-size slide frame is active and visible without page overflow. Overflow is relative to the checked viewport (`--size WxH`, default 1280x720) — verify a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked.
+- `zerp verify --safe-margin px` additionally requires every top-level element of each slide to stay at least that many px inside all page edges — a print-safe inset for decks headed to PDF. Mark intentionally full-bleed elements with `data-zerp-bleed` to exempt them. Off by default; choose a margin below the slide padding so ordinary content never trips it.
 - "Slide N" means the 1-based deck position (what the on-screen counter shows) — file prefixes only order files. `zerp slides` prints the position → file mapping; pressing `s` in a running deck shows the active slide's source.
 
 ## Printing and PDF export

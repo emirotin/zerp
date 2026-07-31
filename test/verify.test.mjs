@@ -179,3 +179,55 @@ test(
     assert.deepEqual(report.failures, []);
   },
 );
+
+test(
+  "zerp verify --safe-margin flags edge-hugging content and honors data-zerp-bleed",
+  { skip: !browserTestsEnabled || !canFindChrome() },
+  () => {
+    const withoutFlag = spawnSync(
+      process.execPath,
+      [
+        "dist/cli.js",
+        "verify",
+        "test/fixtures/safe-zone-deck",
+        "--theme",
+        "light",
+        "--size",
+        "1280x720",
+        "--json",
+      ],
+      { encoding: "utf8", timeout: 60_000 },
+    );
+    assert.equal(withoutFlag.status, 0, `${withoutFlag.stdout}\n${withoutFlag.stderr}`);
+    const [cleanReport] = JSON.parse(withoutFlag.stdout);
+    assert.deepEqual(cleanReport.failures, []);
+    assert.equal(cleanReport.safeMargin, undefined);
+
+    const withFlag = spawnSync(
+      process.execPath,
+      [
+        "dist/cli.js",
+        "verify",
+        "test/fixtures/safe-zone-deck",
+        "--theme",
+        "light",
+        "--size",
+        "1280x720",
+        "--safe-margin",
+        "24",
+        "--json",
+      ],
+      { encoding: "utf8", timeout: 60_000 },
+    );
+    assert.equal(withFlag.status, 1, `${withFlag.stdout}\n${withFlag.stderr}`);
+    const [report] = JSON.parse(withFlag.stdout);
+    assert.equal(report.safeMargin, 24);
+    assert.equal(report.failures.length, 1, JSON.stringify(report.failures));
+    const [failure] = report.failures;
+    assert.equal(failure.slide, 1);
+    assert.equal(failure.src, "slides/01-edge.html");
+    assert.match(failure.message, /edge-badge enters the 24px print safe margin/);
+    assert.match(failure.message, /left \(0px\)/);
+    assert.match(failure.message, /top \(\d+px\)/);
+  },
+);

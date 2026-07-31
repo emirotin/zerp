@@ -97,3 +97,9 @@ test("invalid verify size is rejected before launching a browser", () => {
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Invalid verification size/);
 });
+
+test("invalid verify safe margin is rejected before launching a browser", () => {
+  const result = runCli(["verify", "test/fixtures/clean-deck", "--safe-margin", "wide"]);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /Invalid safe margin/);
+});

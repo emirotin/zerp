@@ -228,7 +228,7 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 - No hardcoded colors anywhere (including inline styles and scripts). Sole exemption: colors of depicted real-world objects (a playing card's white face, a roulette pocket's black) may stay literal — they represent the object and must not flip with the theme.
 - No text below 1em; no `--zerp-faint` for text; no `.sm .muted` combos.
 - No `<div class="slide">` wrappers inside Markdown files (added automatically).
-- Do not override the framework-owned `[data-zerp-slide]` visibility rules or author those `data-zerp-*` attributes yourself.
+- Do not override the framework-owned `[data-zerp-slide]` visibility rules or author those `data-zerp-*` attributes yourself. One exception: put `data-zerp-bleed` on a top-level slide element that intentionally runs to the page edge (a full-bleed band or backdrop), so print-safe-margin checks skip it.
 - Do not recreate navigation; do not edit generated `index.html`.
 
 ## Validation commands

@@ -20,7 +20,7 @@ function printUsage(): void {
   zerp build [deck-dir] [--theme dark|light|system]
   zerp check [deck-dir] [--theme dark|light|both] [--strict] [--json]
   zerp slides [deck-dir] [--json]
-  zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--json]
+  zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--safe-margin px] [--json]
   zerp install-browser
 
 A deck directory must contain slides/.
@@ -84,6 +84,15 @@ function parseCheckThemes(raw: string | undefined): CheckTheme[] {
   throw new Error(`Invalid check theme: ${raw} (expected dark, light, or both)`);
 }
 
+/** Print-safe inset for `zerp verify`; 0 (the default) disables the check. */
+function parseSafeMargin(raw: string | undefined): number {
+  const value = raw ?? "0";
+  if (!/^\d+$/.test(value)) {
+    throw new Error(`Invalid safe margin: ${value} (expected a non-negative integer in CSS px)`);
+  }
+  return Number.parseInt(value, 10);
+}
+
 function parseVerifySize(raw: string | undefined): {
   width: number;
   height: number;
@@ -111,6 +120,7 @@ async function main(): Promise<void> {
       strict: { type: "boolean", default: false },
       json: { type: "boolean", default: false },
       size: { type: "string" },
+      "safe-margin": { type: "string" },
     },
   });
   const [command, firstArg, secondArg] = positionals;
@@ -166,6 +176,7 @@ async function main(): Promise<void> {
     const rootDir = path.resolve(firstArg ?? ".");
     const themes = parseVerifyThemes(values.theme);
     const { width, height, defaulted } = parseVerifySize(values.size);
+    const safeMargin = parseSafeMargin(values["safe-margin"]);
     const reports = [];
     let failed = false;
     for (const theme of themes) {
@@ -175,6 +186,7 @@ async function main(): Promise<void> {
         width,
         height,
         sizeDefaulted: defaulted,
+        safeMargin,
       });
       reports.push(report);
       if (values.json) {

@@ -15,6 +15,12 @@ export interface VerifyOptions {
   height: number;
   /** True when the caller fell back to the default size rather than choosing one. */
   sizeDefaulted?: boolean;
+  /** Print-safe inset in CSS px. When > 0, every top-level element of each
+   * authored slide must stay at least this far from every page edge (elements
+   * marked `data-zerp-bleed` are exempt). 0 or absent disables the check.
+   * The threshold is caller policy — pick one below the framework's slide
+   * padding so ordinary content never trips it. */
+  safeMargin?: number;
 }
 
 export interface SlideVerification {
@@ -30,6 +36,47 @@ export interface SlideVerification {
   activeDisplay: string | null;
   activeClass: boolean;
   activeRect: { x: number; y: number; width: number; height: number } | null;
+  /** Measured top-level slide elements for the safe-zone check; null when the
+   * check is off or the slide has no inner root. */
+  safeZoneItems: SafeZoneItem[] | null;
+}
+
+/** One top-level element of the authored slide, measured against the viewport
+ * for the print-safe-zone check. Viewport-relative CSS px. */
+export interface SafeZoneItem {
+  label: string;
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * The safe-zone verdict for one measured element: a message naming every page
+ * edge the element gets closer to than `safeMargin`, or null when it stays
+ * clear. A distance exactly at the margin passes — the margin is a floor.
+ */
+export function safeZoneFailureMessage(
+  item: SafeZoneItem,
+  viewportWidth: number,
+  viewportHeight: number,
+  safeMargin: number,
+): string | null {
+  const edges: [string, number][] = [
+    ["left", item.left],
+    ["top", item.top],
+    ["right", viewportWidth - item.right],
+    ["bottom", viewportHeight - item.bottom],
+  ];
+  const intrusions = edges
+    .filter(([, distance]) => distance < safeMargin)
+    .map(([edge, distance]) => `${edge} (${Math.round(Math.max(0, distance))}px)`);
+  if (intrusions.length === 0) {
+    return null;
+  }
+  return `${item.label} enters the ${safeMargin}px print safe margin: ${intrusions.join(", ")}`;
 }
 
 /** One verify failure. Deck-level failures (browser errors, frame-count
@@ -62,6 +109,9 @@ export interface VerifyReport {
    * together with it. `defaulted` distinguishes "checked at the default" from
    * a deliberately chosen size. */
   viewport: { width: number; height: number; defaulted: boolean };
+  /** The print-safe inset the deck was checked against; absent when the
+   * safe-zone check was off. */
+  safeMargin?: number;
   slides: SlideVerification[];
   browserErrors: string[];
   failures: VerifyFailure[];
@@ -156,7 +206,10 @@ window.addEventListener("unhandledrejection", function (event) {
 // Fonts are inlined as lazily-activated @font-face rules; measuring before they
 // activate would use fallback metrics and miss font-dependent overflow, so the
 // probe waits for the font set and a paint to settle first.
-const PROBE_EXPRESSION = `(async function () {
+// `safeMargin` is a validated non-negative integer interpolated into the script;
+// 0 skips the per-element measurement entirely.
+const probeExpression = (safeMargin: number): string => `(async function () {
+  var safeMargin = ${safeMargin};
   await document.fonts.ready;
   await new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
   var fontsActive = document.fonts.check("1em Montserrat");
@@ -177,6 +230,22 @@ const PROBE_EXPRESSION = `(async function () {
     var activeFrame = active[0] || null;
     var activeSlide = activeFrame ? activeFrame.querySelector(".slide") : null;
     var rect = activeFrame ? activeFrame.getBoundingClientRect() : null;
+    var safeZoneItems = null;
+    if (safeMargin > 0 && activeSlide) {
+      safeZoneItems = Array.from(activeSlide.children)
+        .filter(function (el) { return ["SCRIPT", "STYLE"].indexOf(el.tagName) === -1; })
+        .filter(function (el) { return !el.hasAttribute("data-zerp-bleed"); })
+        .map(function (el) {
+          var r = el.getBoundingClientRect();
+          return {
+            // getAttribute("class") stays a string on SVG elements, unlike className.
+            label: el.id || el.getAttribute("class") || el.tagName.toLowerCase(),
+            left: r.left, top: r.top, right: r.right, bottom: r.bottom,
+            width: r.width, height: r.height
+          };
+        })
+        .filter(function (item) { return item.width > 0 && item.height > 0; });
+    }
     checks.push({
       index: index + 1,
       src: activeSlide ? activeSlide.getAttribute("data-zerp-src") : null,
@@ -189,7 +258,8 @@ const PROBE_EXPRESSION = `(async function () {
       viewportHeight: window.innerHeight,
       activeDisplay: activeSlide ? getComputedStyle(activeSlide).display : null,
       activeClass: activeSlide ? activeSlide.classList.contains("active") : false,
-      activeRect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null
+      activeRect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
+      safeZoneItems: safeZoneItems
     });
   }
   return {
@@ -219,6 +289,7 @@ async function runProbe(
   htmlPath: string,
   width: number,
   height: number,
+  safeMargin: number,
 ): Promise<ProbeResult> {
   // playwright-core defaults `chromiumSandbox: false`, so this stays root-safe
   // without extra flags; the launch is bounded so a wedged browser cannot hang.
@@ -239,7 +310,7 @@ async function runProbe(
     const page = await context.newPage();
     await page.addInitScript(COLLECTOR_SOURCE);
     await page.goto(`file://${htmlPath}#1`, { waitUntil: "load" });
-    return (await page.evaluate(PROBE_EXPRESSION)) as ProbeResult;
+    return (await page.evaluate(probeExpression(safeMargin))) as ProbeResult;
   });
   try {
     return await withTimeout(session, VERIFICATION_TIMEOUT_MS, "Chrome verification timed out");
@@ -274,7 +345,7 @@ function rectFailure(
   return null;
 }
 
-function validateProbe(result: ProbeResult): VerifyFailure[] {
+function validateProbe(result: ProbeResult, safeMargin: number): VerifyFailure[] {
   const failures: VerifyFailure[] = result.browserErrors.map((error) => ({
     message: `browser error: ${error}`,
   }));
@@ -325,6 +396,17 @@ function validateProbe(result: ProbeResult): VerifyFailure[] {
     if (rectFailureMessage) {
       failures.push(at(rectFailureMessage));
     }
+    for (const item of slide.safeZoneItems ?? []) {
+      const message = safeZoneFailureMessage(
+        item,
+        slide.viewportWidth,
+        slide.viewportHeight,
+        safeMargin,
+      );
+      if (message) {
+        failures.push(at(message));
+      }
+    }
   });
   return failures;
 }
@@ -340,7 +422,14 @@ export async function verifyPresentation(options: VerifyOptions): Promise<Verify
   try {
     const html = await buildPresentationHtml({ rootDir: options.rootDir, theme: options.theme });
     writeFileSync(htmlPath, html, "utf8");
-    const result = await runProbe(executablePath, htmlPath, options.width, options.height);
+    const safeMargin = options.safeMargin ?? 0;
+    const result = await runProbe(
+      executablePath,
+      htmlPath,
+      options.width,
+      options.height,
+      safeMargin,
+    );
     return {
       theme: options.theme,
       slideCount: result.frameCount,
@@ -350,9 +439,10 @@ export async function verifyPresentation(options: VerifyOptions): Promise<Verify
         height: options.height,
         defaulted: options.sizeDefaulted ?? false,
       },
+      ...(safeMargin > 0 ? { safeMargin } : {}),
       slides: result.slides,
       browserErrors: result.browserErrors,
-      failures: validateProbe(result),
+      failures: validateProbe(result, safeMargin),
     };
   } finally {
     rmSync(htmlPath, { force: true });
