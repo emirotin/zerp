@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.1
 
 - **The package is resolvable from CommonJS and by path.** The `exports` map gains a `default` condition on the main entry (so `require("@emirotin/zerp")` works under Node ≥ 22.12 `require(esm)`) and explicit `./package.json`, `./llms.txt`, and `./dist/cli.js` subpath exports. Host applications that read the model-facing reference or spawn the CLI can now `require.resolve` those paths directly instead of hitting `ERR_PACKAGE_PATH_NOT_EXPORTED` and walking `node_modules` by hand.
 - **`engines.node` declares the real floor, `>=22`, instead of the maintainer's exact toolchain version.** The CLI and the playwright-core verify transport run fine on Node 22 (the test suite passes under 22.22.2); development stays pinned through Volta and `packageManager`. The `engines.pnpm` pin is dropped for the same reason — it constrained consumers, not contributors.
