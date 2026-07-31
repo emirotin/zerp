@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- **`zerp verify` failures are structured.** `VerifyReport.failures` entries are now `{ slide?, src?, message }` objects instead of pre-formatted strings — `--json` is for machines, and the slide number and source file were being composed into a label only for consumers to regex them back apart. Deck-level failures (browser errors, frame-count mismatches) carry only `message`. The human CLI output is unchanged: the new `formatVerifyFailure` renders the same `slide N (slides/foo.html): message` lines from the structured entries, making text a presentation of the data rather than the data itself. **Breaking for `--json` consumers** that treated `failures` as strings.
+
 ## 0.7.1
 
 - **The package is resolvable from CommonJS and by path.** The `exports` map gains a `default` condition on the main entry (so `require("@emirotin/zerp")` works under Node ≥ 22.12 `require(esm)`) and explicit `./package.json`, `./llms.txt`, and `./dist/cli.js` subpath exports. Host applications that read the model-facing reference or spawn the CLI can now `require.resolve` those paths directly instead of hitting `ERR_PACKAGE_PATH_NOT_EXPORTED` and walking `node_modules` by hand.

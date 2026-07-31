@@ -32,6 +32,27 @@ export interface SlideVerification {
   activeRect: { x: number; y: number; width: number; height: number } | null;
 }
 
+/** One verify failure. Deck-level failures (browser errors, frame-count
+ * mismatches) carry only `message`; per-slide failures name the 1-based deck
+ * position and, when zerp could attribute it, the source file to edit. The
+ * structured entry is the source of truth — `formatVerifyFailure` is its
+ * human rendering. */
+export interface VerifyFailure {
+  slide?: number;
+  src?: string;
+  message: string;
+}
+
+/** The human line for a failure: `slide N (slides/foo.html): message`,
+ * mirroring `zerp check`'s file attribution. */
+export function formatVerifyFailure(failure: VerifyFailure): string {
+  if (failure.slide === undefined) {
+    return failure.message;
+  }
+  const label = failure.src ? `slide ${failure.slide} (${failure.src})` : `slide ${failure.slide}`;
+  return `${label}: ${failure.message}`;
+}
+
 export interface VerifyReport {
   theme: VerifyTheme;
   slideCount: number;
@@ -43,7 +64,7 @@ export interface VerifyReport {
   viewport: { width: number; height: number; defaulted: boolean };
   slides: SlideVerification[];
   browserErrors: string[];
-  failures: string[];
+  failures: VerifyFailure[];
 }
 
 interface ProbeResult {
@@ -253,42 +274,48 @@ function rectFailure(
   return null;
 }
 
-function validateProbe(result: ProbeResult): string[] {
-  const failures = result.browserErrors.map((error) => `browser error: ${error}`);
+function validateProbe(result: ProbeResult): VerifyFailure[] {
+  const failures: VerifyFailure[] = result.browserErrors.map((error) => ({
+    message: `browser error: ${error}`,
+  }));
   if (result.frameCount === 0) {
-    failures.push("deck has no slide frames");
+    failures.push({ message: "deck has no slide frames" });
   }
   if (result.slideCount !== result.frameCount) {
-    failures.push(
-      `deck has ${result.slideCount} .slide elements for ${result.frameCount} slide frames`,
-    );
+    failures.push({
+      message: `deck has ${result.slideCount} .slide elements for ${result.frameCount} slide frames`,
+    });
   }
   if (result.innerSlideCount !== result.frameCount) {
-    failures.push(
-      `deck has ${result.innerSlideCount} framed slide roots for ${result.frameCount} slide frames`,
-    );
+    failures.push({
+      message: `deck has ${result.innerSlideCount} framed slide roots for ${result.frameCount} slide frames`,
+    });
   }
   result.slides.forEach((slide) => {
-    // Prefix each failure with the source file when known, mirroring zerp
-    // check's file attribution so a failure maps straight to the file to edit.
-    const label = slide.src ? `slide ${slide.index} (${slide.src})` : `slide ${slide.index}`;
+    // Failures carry the source file when known, mirroring zerp check's file
+    // attribution so a failure maps straight to the file to edit.
+    const at = (message: string): VerifyFailure => ({
+      slide: slide.index,
+      ...(slide.src ? { src: slide.src } : {}),
+      message,
+    });
     if (slide.activeCount !== 1) {
-      failures.push(`${label}: expected one active frame, got ${slide.activeCount}`);
+      failures.push(at(`expected one active frame, got ${slide.activeCount}`));
     }
     if (slide.visibleCount !== 1) {
-      failures.push(`${label}: expected one visible frame, got ${slide.visibleCount}`);
+      failures.push(at(`expected one visible frame, got ${slide.visibleCount}`));
     }
     if (slide.activeIndex !== slide.index) {
-      failures.push(`${label}: active frame is ${slide.activeIndex ?? "missing"}`);
+      failures.push(at(`active frame is ${slide.activeIndex ?? "missing"}`));
     }
     if (slide.bodyHeight > slide.viewportHeight + 1) {
-      failures.push(`${label}: body height is ${slide.bodyHeight}px`);
+      failures.push(at(`body height is ${slide.bodyHeight}px`));
     }
     if (slide.activeDisplay === "none") {
-      failures.push(`${label}: active inner slide is display:none`);
+      failures.push(at("active inner slide is display:none"));
     }
     if (!slide.activeClass) {
-      failures.push(`${label}: active inner slide is missing the active class`);
+      failures.push(at("active inner slide is missing the active class"));
     }
     const rectFailureMessage = rectFailure(
       slide.activeRect,
@@ -296,7 +323,7 @@ function validateProbe(result: ProbeResult): string[] {
       slide.viewportHeight,
     );
     if (rectFailureMessage) {
-      failures.push(`${label}: ${rectFailureMessage}`);
+      failures.push(at(rectFailureMessage));
     }
   });
   return failures;

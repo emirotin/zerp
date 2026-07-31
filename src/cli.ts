@@ -10,7 +10,7 @@ import type { CheckTheme } from "./check/types.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
 import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
-import { verifyPresentation, type VerifyTheme } from "./verify.js";
+import { formatVerifyFailure, verifyPresentation, type VerifyTheme } from "./verify.js";
 
 const THEME_NAMES = new Set(["dark", "light", "system"]);
 
@@ -190,7 +190,7 @@ async function main(): Promise<void> {
       }
       failed = true;
       for (const failure of report.failures) {
-        process.stdout.write(`  ✗ ${failure}\n`);
+        process.stdout.write(`  ✗ ${formatVerifyFailure(failure)}\n`);
       }
     }
     if (values.json) {
