@@ -10,7 +10,12 @@ import type { CheckTheme } from "./check/types.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
 import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
-import { formatVerifyFailure, verifyPresentation, type VerifyTheme } from "./verify.js";
+import {
+  formatVerifyFailure,
+  resolveVerificationTimeoutMs,
+  verifyPresentation,
+  type VerifyTheme,
+} from "./verify.js";
 
 const THEME_NAMES = new Set(["dark", "light", "system"]);
 
@@ -20,7 +25,7 @@ function printUsage(): void {
   zerp build [deck-dir] [--theme dark|light|system]
   zerp check [deck-dir] [--theme dark|light|both] [--strict] [--json]
   zerp slides [deck-dir] [--json]
-  zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--safe-margin px] [--json]
+  zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--safe-margin px] [--timeout ms] [--json]
   zerp install-browser
 
 A deck directory must contain slides/.
@@ -93,6 +98,18 @@ function parseSafeMargin(raw: string | undefined): number {
   return Number.parseInt(value, 10);
 }
 
+/**
+ * Session budget for `zerp verify` in ms. Absent defers to the environment and
+ * then to zerp's default, so the flag, `ZERP_VERIFY_TIMEOUT_MS` and the default
+ * are resolved in one place rather than each growing its own precedence rule.
+ */
+function parseVerifyTimeout(raw: string | undefined): number {
+  if (raw !== undefined && !/^\d+$/.test(raw)) {
+    throw new Error(`Invalid timeout: ${raw} (expected a positive integer in ms)`);
+  }
+  return resolveVerificationTimeoutMs(raw === undefined ? undefined : Number.parseInt(raw, 10));
+}
+
 function parseVerifySize(raw: string | undefined): {
   width: number;
   height: number;
@@ -121,6 +138,7 @@ async function main(): Promise<void> {
       json: { type: "boolean", default: false },
       size: { type: "string" },
       "safe-margin": { type: "string" },
+      timeout: { type: "string" },
     },
   });
   const [command, firstArg, secondArg] = positionals;
@@ -177,6 +195,7 @@ async function main(): Promise<void> {
     const themes = parseVerifyThemes(values.theme);
     const { width, height, defaulted } = parseVerifySize(values.size);
     const safeMargin = parseSafeMargin(values["safe-margin"]);
+    const timeoutMs = parseVerifyTimeout(values.timeout);
     const reports = [];
     let failed = false;
     for (const theme of themes) {
@@ -187,6 +206,7 @@ async function main(): Promise<void> {
         height,
         sizeDefaulted: defaulted,
         safeMargin,
+        timeoutMs,
       });
       reports.push(report);
       if (values.json) {

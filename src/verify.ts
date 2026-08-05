@@ -21,6 +21,10 @@ export interface VerifyOptions {
    * The threshold is caller policy — pick one below the framework's slide
    * padding so ordinary content never trips it. */
   safeMargin?: number;
+  /** Budget in ms for the whole browser session — launch, navigation, font
+   * activation and the probe. Absent falls back to `ZERP_VERIFY_TIMEOUT_MS`,
+   * then to {@link DEFAULT_VERIFICATION_TIMEOUT_MS}. */
+  timeoutMs?: number;
 }
 
 export interface SlideVerification {
@@ -137,7 +141,47 @@ const SYSTEM_CHROME_CANDIDATES = [
 ];
 let verificationSequence = 0;
 
-const VERIFICATION_TIMEOUT_MS = 20_000;
+/**
+ * Budget for one verification session when the caller names none.
+ *
+ * It covers everything: launching a cold browser, navigating, waiting for the
+ * inlined fonts to activate, and running the probe. Fine for a laptop with a
+ * warm page cache, and deliberately overridable — the same work on a small,
+ * loaded CI or container host, or on a deck carrying megabytes of imagery, can
+ * take several times as long, and a session that runs out of budget yields no
+ * report at all rather than a slow one.
+ */
+export const DEFAULT_VERIFICATION_TIMEOUT_MS = 20_000;
+
+/** Env fallback for {@link VerifyOptions.timeoutMs}, for hosts that spawn the CLI. */
+const TIMEOUT_ENV_VAR = "ZERP_VERIFY_TIMEOUT_MS";
+
+/**
+ * The session budget in ms: an explicit option, else the environment, else the
+ * default.
+ *
+ * A malformed env value throws rather than falling back. Silently ignoring it
+ * would leave the operator who set it believing verification has a budget it
+ * does not have — the failure that raising the timeout was meant to prevent,
+ * now invisible.
+ */
+export function resolveVerificationTimeoutMs(explicit?: number): number {
+  if (explicit !== undefined) {
+    return assertTimeoutMs(explicit, "timeout option");
+  }
+  const fromEnv = process.env[TIMEOUT_ENV_VAR];
+  if (fromEnv === undefined || fromEnv === "") {
+    return DEFAULT_VERIFICATION_TIMEOUT_MS;
+  }
+  return assertTimeoutMs(Number(fromEnv), TIMEOUT_ENV_VAR);
+}
+
+function assertTimeoutMs(value: number, source: string): number {
+  if (!Number.isInteger(value) || value < 1) {
+    throw new Error(`Invalid ${source}: ${value} (expected a positive integer in ms)`);
+  }
+  return value;
+}
 
 /**
  * Resolve a Chromium executable for verification, in priority order:
@@ -284,19 +328,23 @@ const probeExpression = (safeMargin: number): string => `(async function () {
  * first byte, navigate, wait for load, then evaluate the probe (which awaits
  * `document.fonts.ready` and a paint) and read the returned value.
  */
-async function runProbe(
-  executablePath: string,
-  htmlPath: string,
-  width: number,
-  height: number,
-  safeMargin: number,
-): Promise<ProbeResult> {
+interface ProbeOptions {
+  executablePath: string;
+  htmlPath: string;
+  width: number;
+  height: number;
+  safeMargin: number;
+  timeoutMs: number;
+}
+
+async function runProbe(options: ProbeOptions): Promise<ProbeResult> {
+  const { htmlPath, width, height, safeMargin, timeoutMs } = options;
   // playwright-core defaults `chromiumSandbox: false`, so this stays root-safe
   // without extra flags; the launch is bounded so a wedged browser cannot hang.
   const launch = chromium.launch({
-    executablePath,
+    executablePath: options.executablePath,
     headless: true,
-    timeout: VERIFICATION_TIMEOUT_MS,
+    timeout: timeoutMs,
   });
   let browser: Browser | undefined;
   const session = launch.then(async (launched) => {
@@ -313,7 +361,14 @@ async function runProbe(
     return (await page.evaluate(probeExpression(safeMargin))) as ProbeResult;
   });
   try {
-    return await withTimeout(session, VERIFICATION_TIMEOUT_MS, "Chrome verification timed out");
+    // The budget is named in the message: a timeout is the one failure whose
+    // fix is a configuration change, and the operator cannot make it without
+    // knowing which value ran out.
+    return await withTimeout(
+      session,
+      timeoutMs,
+      `Chrome verification timed out after ${timeoutMs}ms (raise --timeout or ${TIMEOUT_ENV_VAR})`,
+    );
   } finally {
     // Close the browser even if the race above rejected: if launch already
     // resolved, `browser` holds the handle; if it is still settling, await it
@@ -412,6 +467,7 @@ function validateProbe(result: ProbeResult, safeMargin: number): VerifyFailure[]
 }
 
 export async function verifyPresentation(options: VerifyOptions): Promise<VerifyReport> {
+  const timeoutMs = resolveVerificationTimeoutMs(options.timeoutMs);
   const executablePath = resolveBrowserExecutable();
   // The presentation is written next to the slides so deck-relative asset
   // URLs resolve; the file is plain (uninstrumented) and removed afterwards.
@@ -423,13 +479,14 @@ export async function verifyPresentation(options: VerifyOptions): Promise<Verify
     const html = await buildPresentationHtml({ rootDir: options.rootDir, theme: options.theme });
     writeFileSync(htmlPath, html, "utf8");
     const safeMargin = options.safeMargin ?? 0;
-    const result = await runProbe(
+    const result = await runProbe({
       executablePath,
       htmlPath,
-      options.width,
-      options.height,
+      width: options.width,
+      height: options.height,
       safeMargin,
-    );
+      timeoutMs,
+    });
     return {
       theme: options.theme,
       slideCount: result.frameCount,

@@ -144,7 +144,7 @@ zerp verify . --theme both --size 1280x720
 # entries include the source file); --theme dark|light|both narrows either command
 ```
 
-`zerp verify` needs a Chromium-class browser: run `zerp install-browser` once to download a managed Chromium, or set `CHROME_BIN` to an existing Chrome/Chromium.
+`zerp verify` needs a Chromium-class browser: run `zerp install-browser` once to download a managed Chromium, or set `CHROME_BIN` to an existing Chrome/Chromium. The whole session (launch, navigation, font activation, probe) is bounded by `--timeout ms` / `ZERP_VERIFY_TIMEOUT_MS`, 20000ms by default — raise it on a slow or loaded host. A timed-out session yields no report, which is a check that did not run, not a check that passed.
 
 Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
 
