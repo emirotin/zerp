@@ -8,7 +8,7 @@ This file guides agents modifying the `zerp` framework repository itself: its so
 
 - Start with `git status --short` and inspect the relevant files and diffs. Preserve unrelated or concurrent work.
 - Framework source edits belong under `src/` and `scripts/`; tests belong under `test/`; authored example-deck edits belong under `examples/**/slides/`.
-- Never hand-edit `dist/` or `examples/**/index.html`; regenerate build output with the repository scripts or CLI when needed.
+- Never hand-edit `dist/`, `examples/**/index.html`, or `docs/style-system.pdf`; regenerate build output with the repository scripts or CLI when needed.
 - Prefer the pinned Node/pnpm toolchain and existing package scripts, fixtures, generators, and test helpers over ad-hoc replacements.
 - Keep changes narrow and update tests or fixtures when framework behavior changes. If the consumer contract changes, update `README.md` and `llms.txt` as part of the same change.
 - Do not commit, publish, or release changes unless the task explicitly requests it.
@@ -32,6 +32,7 @@ This file guides agents modifying the `zerp` framework repository itself: its so
 - `src/verify.ts` implements `zerp verify`, a headless-browser contract check for frame visibility, viewport geometry, overflow, and browser errors.
 - `src/assets/default-runtime.js` contains the browser navigation/runtime logic and theme switch.
 - `scripts/build.mjs` builds TypeScript output into `dist/`, copies assets, and formats generated files.
+- `docs/style-system.html` is the authored designer guide; `scripts/build-docs.mjs` prints it to the shipped `docs/style-system.pdf` with headless Chrome (reusing `resolveBrowserExecutable` from `src/verify.ts`) and stamps the version and date into its footer. `prepublishOnly` runs it after the build, so a published PDF matches the released stylesheet.
 - The runtime provides a light/dark/system theme switch persisted in `localStorage`; `zerp build|serve --theme` sets the deck default.
 
 ## Deck Contract
@@ -68,6 +69,7 @@ Use the smallest relevant check while iterating, then run the complete checks re
 
 - `pnpm check` runs the TypeScript type check.
 - `pnpm build` creates `dist/`, including the framework-local CLI. Use `node dist/cli.js ...` for CLI checks in this repository.
+- `pnpm build:docs` reprints `docs/style-system.pdf` from `docs/style-system.html`; run it after any change to the guide or to the default styles it renders, and read the resulting PDF. It needs `dist/` and Chrome or Chromium.
 - `pnpm test` builds the package and runs the unit/CLI tests.
 - `pnpm lint` and `pnpm format:check` validate source and generated-file conventions.
 - `pnpm test:browser` runs browser regression tests and requires Chrome or Chromium.
@@ -81,6 +83,7 @@ Use the smallest relevant check while iterating, then run the complete checks re
 pnpm install
 pnpm check
 pnpm build
+pnpm build:docs
 pnpm test
 pnpm lint
 pnpm format:check

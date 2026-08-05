@@ -1,6 +1,6 @@
 {
   "name": "@emirotin/zerp",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Zero-config presentation framework for slide decks authored in HTML and/or Markdown.",
   "keywords": [
     "cli",
@@ -23,6 +23,7 @@
     "dist",
     "src",
     "examples/casino/slides",
+    "docs/style-system.pdf",
     "README.md",
     "LICENSE",
     "llms.txt",
@@ -40,6 +41,7 @@
     },
     "./package.json": "./package.json",
     "./llms.txt": "./llms.txt",
+    "./docs/style-system.pdf": "./docs/style-system.pdf",
     "./dist/cli.js": "./dist/cli.js"
   },
   "publishConfig": {
@@ -47,11 +49,12 @@
   },
   "scripts": {
     "build": "node ./scripts/build.mjs",
+    "build:docs": "node ./scripts/build-docs.mjs",
     "demo": "node ./scripts/demo.mjs",
     "shot": "node ./scripts/shot.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
-    "prepublishOnly": "pnpm build",
+    "prepublishOnly": "pnpm build && pnpm build:docs",
     "test": "pnpm build && node --test test/*.test.mjs",
     "test:browser": "ZERP_RUN_BROWSER_TEST=1 node --test test/verify.test.mjs",
     "format": "oxfmt --write .",

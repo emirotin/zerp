@@ -232,7 +232,7 @@ function connectBrowser(endpoint: string, timeoutMs: number): Promise<Browser> {
 }
 
 /**
- * Resolve a Chromium executable for verification, in priority order:
+ * Resolve a Chromium executable for headless work, in priority order:
  *
  *   1. `CHROME_BIN` — an explicit override used verbatim (wrapper scripts that
  *      exec a browser with extra flags are supported); the caller asked for
@@ -243,8 +243,11 @@ function connectBrowser(endpoint: string, timeoutMs: number): Promise<Browser> {
  *      is installed — so guard it with `existsSync`.
  *   3. A system-installed Chrome/Chromium, validated by `--version`.
  *   4. None found — point at `zerp install-browser` or `CHROME_BIN`.
+ *
+ * Exported so every headless entry point resolves a browser identically — the
+ * docs PDF build (`scripts/build-docs.mjs`) uses it too.
  */
-function resolveBrowserExecutable(): string {
+export function resolveBrowserExecutable(): string {
   const override = process.env.CHROME_BIN;
   if (override) {
     return override;

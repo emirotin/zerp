@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.2
+
+- **The designer-facing style guide ships with the package** as `docs/style-system.pdf`, resolvable as `@emirotin/zerp/docs/style-system.pdf` for hosts that hand it to a designer or an agent. It is a printed artifact of the framework, not a hand-written document: the guide renders its examples with the built stylesheet and the bundled fonts, so a copy printed from an older tree describes a deck no one is authoring. The new `pnpm build:docs` reprints it with headless Chrome — resolving a browser exactly the way `zerp verify` does (`CHROME_BIN` → the managed Chromium → a system Chrome) — and `prepublishOnly` now runs it after the build, so the PDF in a published tarball is printed from that release's own stylesheet and stamped with its version and print date. Chrome is only needed to reprint the guide, never to install or use the package.
+
 ## 0.9.1
 
 - **`zerp verify --timeout ms` (or `ZERP_VERIFY_TIMEOUT_MS`) sets the session budget.** The 20s bound covering browser launch, navigation, font activation and the probe was a constant, so a host slower than a developer laptop — a small or loaded container, or a deck carrying megabytes of imagery — had no way to raise it. The default is unchanged, an explicit option wins over the environment, and a malformed value throws rather than being ignored, since a silently discarded budget leaves the operator believing verification has room it does not have. The timeout message now names the budget that ran out and how to raise it. Worth restating for tooling that wraps verify: a session that overruns produces no report at all, which is a check that did not run, not a deck that passed.
