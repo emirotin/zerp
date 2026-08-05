@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import { type Browser, chromium } from "playwright-core";
+import { type Browser, type BrowserContext, chromium } from "playwright-core";
 
 import { buildPresentationHtml } from "./presentation.js";
 
@@ -25,6 +25,11 @@ export interface VerifyOptions {
    * activation and the probe. Absent falls back to `ZERP_VERIFY_TIMEOUT_MS`,
    * then to {@link DEFAULT_VERIFICATION_TIMEOUT_MS}. */
   timeoutMs?: number;
+  /** An already-running browser to verify in, instead of launching one:
+   * `http(s)://` connects over CDP, `ws(s)://` over the playwright protocol.
+   * Absent falls back to `ZERP_BROWSER_ENDPOINT`, then to launching. The
+   * browser belongs to whoever started it and is never closed here. */
+  browserEndpoint?: string;
 }
 
 export interface SlideVerification {
@@ -183,6 +188,49 @@ function assertTimeoutMs(value: number, source: string): number {
   return value;
 }
 
+/** Env fallback for {@link VerifyOptions.browserEndpoint}, for hosts that spawn the CLI. */
+const BROWSER_ENDPOINT_ENV_VAR = "ZERP_BROWSER_ENDPOINT";
+
+/** How long a shared browser gets to take its context back before we give up on it. */
+const CONTEXT_CLEANUP_TIMEOUT_MS = 5_000;
+
+/**
+ * The already-running browser to verify in: an explicit option, else the
+ * environment, else none (launch one).
+ *
+ * Rejects an endpoint whose scheme names no transport rather than guessing, for
+ * the same reason a malformed timeout throws — a host that configured browser
+ * reuse and silently got a per-run launch has the cost it was trying to avoid
+ * and no signal that it does.
+ */
+export function resolveBrowserEndpoint(explicit?: string): string | undefined {
+  const value = explicit ?? process.env[BROWSER_ENDPOINT_ENV_VAR];
+  if (value === undefined || value === "") {
+    return undefined;
+  }
+  if (!/^(?:https?|wss?):\/\//.test(value)) {
+    throw new Error(
+      `Invalid browser endpoint: ${value} (expected an http(s):// CDP or ws(s):// playwright URL)`,
+    );
+  }
+  return value;
+}
+
+/**
+ * Attach to a browser someone else is running.
+ *
+ * CDP is the interoperable transport: it is the browser's own protocol, so the
+ * two sides need no common playwright build. The playwright protocol is
+ * version-locked between client and server, so `ws://` is for a server started
+ * by a matching `chromium.launchServer()` — typically the same application that
+ * spawns this CLI.
+ */
+function connectBrowser(endpoint: string, timeoutMs: number): Promise<Browser> {
+  return endpoint.startsWith("http")
+    ? chromium.connectOverCDP(endpoint, { timeout: timeoutMs })
+    : chromium.connect(endpoint, { timeout: timeoutMs });
+}
+
 /**
  * Resolve a Chromium executable for verification, in priority order:
  *
@@ -329,32 +377,44 @@ const probeExpression = (safeMargin: number): string => `(async function () {
  * `document.fonts.ready` and a paint) and read the returned value.
  */
 interface ProbeOptions {
-  executablePath: string;
+  /** Absent when {@link ProbeOptions.browserEndpoint} supplies a browser instead. */
+  executablePath?: string;
   htmlPath: string;
   width: number;
   height: number;
   safeMargin: number;
   timeoutMs: number;
+  browserEndpoint?: string;
 }
 
 async function runProbe(options: ProbeOptions): Promise<ProbeResult> {
-  const { htmlPath, width, height, safeMargin, timeoutMs } = options;
-  // playwright-core defaults `chromiumSandbox: false`, so this stays root-safe
-  // without extra flags; the launch is bounded so a wedged browser cannot hang.
-  const launch = chromium.launch({
-    executablePath: options.executablePath,
-    headless: true,
-    timeout: timeoutMs,
-  });
+  const { htmlPath, width, height, safeMargin, timeoutMs, browserEndpoint } = options;
+  // A supplied browser is borrowed; a launched one is ours to terminate. The
+  // distinction decides the whole teardown below.
+  const borrowed = browserEndpoint !== undefined;
+  const opening = borrowed
+    ? connectBrowser(browserEndpoint, timeoutMs)
+    : // playwright-core defaults `chromiumSandbox: false`, so this stays root-safe
+      // without extra flags; the launch is bounded so a wedged browser cannot hang.
+      chromium.launch({
+        ...(options.executablePath === undefined ? {} : { executablePath: options.executablePath }),
+        headless: true,
+        timeout: timeoutMs,
+      });
   let browser: Browser | undefined;
-  const session = launch.then(async (launched) => {
-    browser = launched;
+  // Held as a promise, not a value: if the session times out while the context
+  // is still being created, the value assignment never happens and a borrowed
+  // browser would keep the context forever.
+  let opened: Promise<BrowserContext> | undefined;
+  const session = opening.then(async (connected) => {
+    browser = connected;
     // An exact layout viewport, unlike `--window-size`, whose delivered
     // innerWidth/innerHeight vary by platform and required calibration.
-    const context = await launched.newContext({
+    opened = connected.newContext({
       viewport: { width, height },
       deviceScaleFactor: 1,
     });
+    const context = await opened;
     const page = await context.newPage();
     await page.addInitScript(COLLECTOR_SOURCE);
     await page.goto(`file://${htmlPath}#1`, { waitUntil: "load" });
@@ -370,12 +430,24 @@ async function runProbe(options: ProbeOptions): Promise<ProbeResult> {
       `Chrome verification timed out after ${timeoutMs}ms (raise --timeout or ${TIMEOUT_ENV_VAR})`,
     );
   } finally {
-    // Close the browser even if the race above rejected: if launch already
-    // resolved, `browser` holds the handle; if it is still settling, await it
-    // so a late-arriving browser is not leaked.
-    const opened = browser ?? (await launch.catch(() => undefined));
+    // The context is closed explicitly rather than left to the browser: a
+    // borrowed browser survives this process, so an abandoned context is a leak
+    // that accumulates over every verification the host runs. Bounded, because
+    // teardown must not outlive the run it is cleaning up after.
     if (opened) {
-      await opened.close();
+      await withTimeout(
+        opened.then((context) => context.close()),
+        CONTEXT_CLEANUP_TIMEOUT_MS,
+        "closing the verification context timed out",
+      ).catch(() => {});
+    }
+    // Also close the browser even if the race above rejected: if it already
+    // resolved, `browser` holds the handle; if it is still settling, await it
+    // so a late-arriving browser is not leaked. On a borrowed browser this
+    // severs our connection and leaves the browser itself running.
+    const connected = browser ?? (await opening.catch(() => undefined));
+    if (connected) {
+      await connected.close().catch(() => {});
     }
   }
 }
@@ -468,7 +540,10 @@ function validateProbe(result: ProbeResult, safeMargin: number): VerifyFailure[]
 
 export async function verifyPresentation(options: VerifyOptions): Promise<VerifyReport> {
   const timeoutMs = resolveVerificationTimeoutMs(options.timeoutMs);
-  const executablePath = resolveBrowserExecutable();
+  const browserEndpoint = resolveBrowserEndpoint(options.browserEndpoint);
+  // A supplied browser is the browser; there is no local one to find, and
+  // demanding one would refuse to verify on a host that deliberately has none.
+  const executablePath = browserEndpoint === undefined ? resolveBrowserExecutable() : undefined;
   // The presentation is written next to the slides so deck-relative asset
   // URLs resolve; the file is plain (uninstrumented) and removed afterwards.
   const htmlPath = path.join(
@@ -480,12 +555,13 @@ export async function verifyPresentation(options: VerifyOptions): Promise<Verify
     writeFileSync(htmlPath, html, "utf8");
     const safeMargin = options.safeMargin ?? 0;
     const result = await runProbe({
-      executablePath,
+      ...(executablePath === undefined ? {} : { executablePath }),
       htmlPath,
       width: options.width,
       height: options.height,
       safeMargin,
       timeoutMs,
+      ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
     });
     return {
       theme: options.theme,

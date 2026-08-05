@@ -12,6 +12,7 @@ import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
 import {
   formatVerifyFailure,
+  resolveBrowserEndpoint,
   resolveVerificationTimeoutMs,
   verifyPresentation,
   type VerifyTheme,
@@ -25,7 +26,7 @@ function printUsage(): void {
   zerp build [deck-dir] [--theme dark|light|system]
   zerp check [deck-dir] [--theme dark|light|both] [--strict] [--json]
   zerp slides [deck-dir] [--json]
-  zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--safe-margin px] [--timeout ms] [--json]
+  zerp verify [deck-dir] [--theme dark|light|both] [--size WxH] [--safe-margin px] [--timeout ms] [--browser-endpoint url] [--json]
   zerp install-browser
 
 A deck directory must contain slides/.
@@ -139,6 +140,7 @@ async function main(): Promise<void> {
       size: { type: "string" },
       "safe-margin": { type: "string" },
       timeout: { type: "string" },
+      "browser-endpoint": { type: "string" },
     },
   });
   const [command, firstArg, secondArg] = positionals;
@@ -196,6 +198,9 @@ async function main(): Promise<void> {
     const { width, height, defaulted } = parseVerifySize(values.size);
     const safeMargin = parseSafeMargin(values["safe-margin"]);
     const timeoutMs = parseVerifyTimeout(values.timeout);
+    // Resolved once, before any browser work: an unusable endpoint should be
+    // rejected on the spot rather than once per theme.
+    const browserEndpoint = resolveBrowserEndpoint(values["browser-endpoint"]);
     const reports = [];
     let failed = false;
     for (const theme of themes) {
@@ -207,6 +212,7 @@ async function main(): Promise<void> {
         sizeDefaulted: defaulted,
         safeMargin,
         timeoutMs,
+        ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
       });
       reports.push(report);
       if (values.json) {

@@ -69,6 +69,21 @@ export CHROME_BIN="/path/to/chrome"
 
 The browser stays external and optional: the package itself is browser-free, so installs are light and offline-friendly.
 
+### Reusing a running browser
+
+By default each `zerp verify` launches a browser and closes it again. A host that verifies decks repeatedly — CI, a service, a watch loop — can keep one browser warm instead and point verify at it with `--browser-endpoint url` (or `ZERP_BROWSER_ENDPOINT`):
+
+```bash
+# CDP: any Chrome started with --remote-debugging-port
+pnpm exec zerp verify --browser-endpoint http://127.0.0.1:9222
+# playwright protocol: an endpoint from chromium.launchServer()
+pnpm exec zerp verify --browser-endpoint ws://127.0.0.1:5000/<guid>
+```
+
+Prefer `http(s)://` (CDP) when the host runs its own playwright build: it is the browser's own protocol, so the two sides need no common version. `ws(s)://` speaks the playwright protocol, which is version-locked between client and server.
+
+A supplied browser belongs to whoever started it: verify creates its own context, closes that context, and disconnects — it never closes the browser. No local browser is needed or looked for in this mode. The host must keep its event loop responsive while verify runs; a host that blocks it (a synchronous child-process call, say) can stall the very browser it is lending out.
+
 ## Tooling
 
 This repo pins Node and pnpm via Volta metadata in `package.json`:
