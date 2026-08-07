@@ -213,6 +213,9 @@ async function launchChrome(chrome, extraArgs) {
       "--disable-sync",
       "--disable-extensions",
       "--disable-component-update",
+      // Without a mock keychain, macOS prompts for the login-keychain password
+      // the first time an unfamiliar Chrome binary touches "Safe Storage".
+      "--use-mock-keychain",
       "--remote-debugging-port=0",
       `--user-data-dir=${profile}`,
       ...extraArgs,
