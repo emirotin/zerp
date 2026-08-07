@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
-import { bundledFaces, type CodepointRange } from "../fonts.js";
+import type { DeckCodepoints } from "../codepoints.js";
+import { rangesContain, selectedFaces } from "../fonts.js";
 import { woff2Codepoints } from "../woff2.js";
 
 /**
@@ -31,21 +32,21 @@ function cmapOf(file: string): Promise<Set<number>> {
   return codepoints;
 }
 
-function inRanges(codepoint: number, ranges: readonly CodepointRange[]): boolean {
-  return ranges.some((range) => codepoint >= range.first && codepoint <= range.last);
-}
-
 /**
- * The codepoints a built deck can draw: each face's cmap intersected with the
- * `unicode-range` its `@font-face` declares, since the browser never consults
- * a face outside that range however much the file happens to carry.
+ * The codepoints a built deck can draw: each selected face's cmap intersected
+ * with the `unicode-range` its `@font-face` declares, since the browser never
+ * consults a face outside that range however much the file happens to carry.
+ *
+ * `selection` is the deck's full codepoint set, which is what decides the
+ * faces the build inlines — so this reports the deck that will actually ship,
+ * not a hypothetical one carrying every subset fontsource offers.
  */
-export async function coveredCodepoints(): Promise<Set<number>> {
+export async function coveredCodepoints(selection: ReadonlySet<number>): Promise<Set<number>> {
   const covered = new Set<number>();
-  for (const face of await bundledFaces()) {
+  for (const face of await selectedFaces(selection)) {
     const cmap = await cmapOf(face.file);
     for (const codepoint of cmap) {
-      if (inRanges(codepoint, face.ranges)) {
+      if (rangesContain(face.ranges, codepoint)) {
         covered.add(codepoint);
       }
     }
@@ -53,11 +54,17 @@ export async function coveredCodepoints(): Promise<Set<number>> {
   return covered;
 }
 
-/** Codepoints of `wanted` that no bundled face can draw, lowest first. */
-export async function uncoveredCodepoints(wanted: Iterable<number>): Promise<number[]> {
-  const covered = await coveredCodepoints();
+/**
+ * Slide characters the built deck has no glyph for, lowest codepoint first.
+ *
+ * Both scopes of the scan are used and they are not interchangeable: the full
+ * document selects the faces, and slide content is what gets judged against
+ * them. Framework chrome is zerp's own business.
+ */
+export async function uncoveredCodepoints(deck: DeckCodepoints): Promise<number[]> {
+  const covered = await coveredCodepoints(deck.full);
   const missing: number[] = [];
-  for (const codepoint of wanted) {
+  for (const codepoint of deck.slideContent) {
     if (!covered.has(codepoint) && !EXEMPT.test(String.fromCodePoint(codepoint))) {
       missing.push(codepoint);
     }

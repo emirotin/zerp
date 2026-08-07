@@ -210,8 +210,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
   // reported against the first requested theme, not one per character and not
   // one per theme.
   if (structuralTheme) {
-    const { slideContent } = await deckCodepoints(options.rootDir);
-    const missing = await uncoveredCodepoints(slideContent);
+    const missing = await uncoveredCodepoints(await deckCodepoints(options.rootDir));
     if (missing.length > 0) {
       const shown = missing.slice(0, MAX_LISTED_CODEPOINTS);
       const points = shown.map((code) => `U+${code.toString(16).toUpperCase().padStart(4, "0")}`);

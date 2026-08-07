@@ -50,7 +50,7 @@ test("a built deck inlines the Zerp Symbols arrow face, scoped to U+2192", async
   const block = html.match(/@font-face \{[^}]*Zerp Symbols[^}]*\}/)?.[0];
   assert.ok(block, "Zerp Symbols @font-face present in the single-file deck");
   // Inlined as data, like every other face: a built deck stays offline.
-  assert.match(block, /src: url\(data:font\/woff2;base64,[A-Za-z0-9+/=]+\) format\('woff2'\);/);
+  assert.match(block, /src: url\(data:font\/woff2;base64,[A-Za-z0-9+/=]+\) format\("woff2"\);/);
   // The range is the whole point — without it this face would answer for
   // characters Montserrat and Roboto Mono already cover.
   assert.match(block, /unicode-range: U\+2192;/);

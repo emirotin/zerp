@@ -4,22 +4,42 @@ import { test } from "node:test";
 import { coveredCodepoints, uncoveredCodepoints } from "../dist/check/coverage.js";
 
 const cp = (character) => character.codePointAt(0);
+const setOf = (text) => new Set([...text].map(cp));
 
-test("coverage is every bundled face's cmap, clipped to its declared range", async () => {
-  const covered = await coveredCodepoints();
-  assert.ok(covered.has(cp("A")), "latin");
-  assert.ok(covered.has(cp("Ж")), "cyrillic");
+test("coverage is every selected face's cmap, clipped to its declared range", async () => {
+  const covered = await coveredCodepoints(setOf("Ж"));
+  assert.ok(covered.has(cp("A")), "latin, always carried");
+  assert.ok(covered.has(cp("Ж")), "cyrillic, because the deck asked for it");
   assert.ok(covered.has(cp("↓")), "an arrow Montserrat's latin subset carries");
   assert.ok(covered.has(cp("→")), "the one the symbol face was added for");
-  // Montserrat's cyrillic subset maps a few latin glyphs its unicode-range
-  // excludes; the browser would never use them from that face, so neither
-  // does this. U+0416 above proves the same file is being read.
   assert.ok(!covered.has(cp("≈")), "in no subset's range and in no subset's cmap");
   assert.ok(!covered.has(cp("※")), "inside the latin range, absent from the file");
 });
 
-test("uncovered reports what the deck cannot draw, minus pictographs", async () => {
-  const wanted = ["A", "→", "≈", "日", "🚀", "🇺🇸"].map(cp);
-  const missing = await uncoveredCodepoints(wanted);
+test("a deck that carries no cyrillic is not credited with cyrillic glyphs", async () => {
+  const covered = await coveredCodepoints(setOf("Latin only"));
+  assert.ok(covered.has(cp("A")));
+  // The build would not inline that subset, so the audit must not pretend it
+  // did: coverage follows selection.
+  assert.ok(!covered.has(cp("Ж")));
+});
+
+test("uncovered judges slide content against what the full document selects", async () => {
+  const missing = await uncoveredCodepoints({
+    // Cyrillic arrives only through chrome/script text here, which is enough
+    // to pull the subset in — and that is what makes Ж covered below.
+    full: setOf("AЖ→≈日🚀🇺🇸"),
+    slideContent: setOf("AЖ→≈日🚀🇺🇸"),
+  });
+  // Pictographs and flags are exempt; A, Ж and → are covered.
   assert.deepEqual(missing, [cp("≈"), cp("日")]);
+});
+
+test("chrome-only characters are never warned about", async () => {
+  const missing = await uncoveredCodepoints({
+    full: setOf("Deck ←"),
+    slideContent: setOf("Deck"),
+  });
+  // ← is the nav button. No bundled face covers it, and it is zerp's own.
+  assert.deepEqual(missing, []);
 });

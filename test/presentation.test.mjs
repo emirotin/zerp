@@ -56,8 +56,12 @@ test("fonts are bundled inline and no external requests remain", async () => {
   }
   assert.ok(html.includes("font-weight: 900"), "black weight bundled");
   assert.ok(html.includes("font-style: italic"), "italic face bundled");
-  assert.ok(html.length > 200_000, "inlined fonts present");
-  assert.ok(html.length < 2_000_000, "bundle stays lean");
+  // This deck's text is latin, so it carries the seven latin faces and the
+  // symbol face, and no subset it would never draw from.
+  assert.equal(html.match(/@font-face/g).length, 8);
+  assert.doesNotMatch(html, /\/\* montserrat-(cyrillic|vietnamese)/);
+  assert.ok(html.length > 150_000, "inlined fonts present");
+  assert.ok(html.length < 400_000, "bundle stays lean");
 });
 
 test("deck title comes from the first slide's highest-level heading", async () => {

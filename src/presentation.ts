@@ -300,12 +300,15 @@ export async function deckCodepoints(rootDir: string): Promise<DeckCodepoints> {
 export async function buildPresentationHtml(options: BuildOptions): Promise<string> {
   const lang = options.lang ?? "en";
   const theme = options.theme ?? "system";
-  const [slidesHtml, defaultStyles, defaultRuntime, fontCss] = await Promise.all([
+  const [slidesHtml, defaultStyles, defaultRuntime] = await Promise.all([
     composeSlidesHtml(options.rootDir),
     readAsset("./assets/default-styles.css"),
     readAsset("./assets/default-runtime.js"),
-    fontFaceCss(),
   ]);
+  // Which subsets to carry is a fact about this deck's text, so the font CSS
+  // is built after the slides are assembled, from the full document's
+  // codepoints — chrome included, since chrome is rendered too.
+  const fontCss = await fontFaceCss((await codepointsFor(slidesHtml)).full);
   const title =
     options.title ?? deriveDeckTitle(slidesHtml) ?? path.basename(path.resolve(options.rootDir));
 
