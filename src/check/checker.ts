@@ -118,6 +118,29 @@ function walkElements(el: DomElement, visit: (el: DomElement) => void): void {
   }
 }
 
+// linkedom uppercases every tag name, including foreign content, but a real
+// DOM keeps SVG local names as authored. Compare case-insensitively so this
+// holds whichever parser the report is built from.
+function isTag(el: DomElement, name: string): boolean {
+  return el.tagName.toLowerCase() === name;
+}
+
+function firstSvgText(el: DomElement): DomElement | null {
+  if (isTag(el, "text")) {
+    return el;
+  }
+  for (let i = 0; i < el.childNodes.length; i++) {
+    const child = el.childNodes[i];
+    if (child && child.nodeType === 1) {
+      const found = firstSvgText(child as DomElement);
+      if (found) {
+        return found;
+      }
+    }
+  }
+  return null;
+}
+
 function elementLabel(el: DomElement): string {
   const cls = el.getAttribute("class");
   const label = `<${el.tagName.toLowerCase()}${cls ? ` class="${cls}"` : ""}>`;
@@ -141,6 +164,40 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
   const tokenContrast = await loadTokenContrast();
   const findings: Finding[] = [];
   const themes = options.themes ?? THEMES;
+
+  // Text inside <svg> is the one place slide copy can hide from everything
+  // below: the cascade walk only reaches HTML text, so an SVG label's size and
+  // contrast are never computed, and export or rasterization pipelines isolate
+  // SVG from the document's inlined fonts. Structural rather than theme-
+  // dependent, so it is reported once against the first requested theme
+  // instead of duplicated into every theme's group. aria-hidden opts out, the
+  // same way it does for every other check (walkElements honors it).
+  const structuralTheme = themes[0];
+  if (structuralTheme) {
+    for (let slideIndex = 0; slideIndex < slideNodes.length; slideIndex++) {
+      const slide = slideNodes[slideIndex] as DomElement;
+      walkElements(slide, (el) => {
+        if (!isTag(el, "svg")) {
+          return;
+        }
+        const label = firstSvgText(el);
+        if (!label) {
+          return;
+        }
+        findings.push({
+          severity: "warning",
+          theme: structuralTheme,
+          slideIndex: slideIndex + 1,
+          slideSrc: slide.getAttribute("data-zerp-src"),
+          slideSrcSlide: slide.getAttribute("data-zerp-src-slide"),
+          snippet: snippetOf(label.textContent ?? "") || elementLabel(el),
+          message:
+            "<text> in <svg> is audited as HTML — its fill and font-size attributes are invisible here",
+          suggestion: "put the label in HTML positioned over the svg and keep the svg to shapes",
+        });
+      });
+    }
+  }
 
   for (const theme of themes) {
     const resolver = new StyleResolver(model, model.themeVars[theme]);

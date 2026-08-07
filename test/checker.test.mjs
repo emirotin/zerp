@@ -37,6 +37,27 @@ test("clean deck passes with no findings", async () => {
   assert.match(formatReport(report), /all clear/);
 });
 
+test("svg text is flagged once, and aria-hidden opts out", async () => {
+  const report = await checkPresentation({ rootDir: "test/fixtures/svg-text-deck" });
+  const svgFindings = report.findings.filter((f) => f.message.includes("<svg>"));
+  // The fixture's labelled svg is flagged; the aria-hidden decorative one is
+  // not, and a structural finding is not repeated per theme.
+  assert.equal(svgFindings.length, 1);
+  const [finding] = svgFindings;
+  assert.equal(finding.severity, "warning");
+  assert.equal(finding.snippet, "Pocket 17");
+  assert.match(finding.suggestion, /HTML positioned over the svg/);
+  // The label is 8px and painted with --zerp-faint, and nothing else in the
+  // report says so: that silence is what the warning exists to break.
+  assert.deepEqual(
+    report.findings.filter((f) => f.severity === "error"),
+    [],
+  );
+  // Follows the established severity model: a warning, escalated by --strict.
+  assert.equal(reportHasFailures(report, false), false);
+  assert.equal(reportHasFailures(report, true), true);
+});
+
 const findingAt = (overrides) => ({
   severity: "error",
   theme: "dark",

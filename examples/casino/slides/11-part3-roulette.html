@@ -35,7 +35,9 @@
       var isRed = {};
       for (var i = 0; i < reds.length; i++) isRed[reds[i]] = true;
 
-      var svg = '<svg viewBox="0 0 280 280" width="280" height="280">';
+      // The pocket numerals are the wheel, not slide copy: everything a reader
+      // needs is in the list beside it, so the graphic is decoration.
+      var svg = '<svg viewBox="0 0 280 280" width="280" height="280" aria-hidden="true">';
       svg +=
         '<circle cx="140" cy="140" r="136" style="fill: var(--zerp-surface); stroke: var(--zerp-border)" stroke-width="2"/>';
       var n = numbers.length;

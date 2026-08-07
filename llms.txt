@@ -146,7 +146,7 @@ zerp verify . --theme both --size 1280x720
 
 `zerp verify` needs a Chromium-class browser: run `zerp install-browser` once to download a managed Chromium, or set `CHROME_BIN` to an existing Chrome/Chromium. The whole session (launch, navigation, font activation, probe) is bounded by `--timeout ms` / `ZERP_VERIFY_TIMEOUT_MS`, 20000ms by default — raise it on a slow or loaded host. A timed-out session yields no report, which is a check that did not run, not a check that passed. To skip the per-run browser launch entirely, point `--browser-endpoint url` / `ZERP_BROWSER_ENDPOINT` at an already-running browser (`http(s)://` CDP, `ws(s)://` playwright); verify borrows it and never closes it.
 
-Fix every `✗` error and `⚠` warning (font too small, text contrast too low, or a surface whose background blends into what is behind it — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
+Fix every `✗` error and `⚠` warning (font too small, text contrast too low, a surface whose background blends into what is behind it, or a label sealed inside an `<svg>` where neither can be measured — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
 
 **Verify is viewport-specific.** Overflow and frame geometry are judged against the exact `--size WxH` viewport (default 1280x720) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; verify it with its actual target size. `zerp check` is viewport-independent (static contrast/type analysis, no layout).
 
@@ -222,11 +222,56 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 4. Re-run `zerp check` — custom CSS is checked too (`:where()` is understood). Selectors it cannot verify are listed as skipped; keep them simple (tag/class selectors).
 5. If the layout changes, run `zerp verify . --theme both --size 1280x720` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
 
+## Diagrams and inline SVG
+
+Inline `<svg>` is the right tool for the shapes of a diagram — paths, arcs, connectors, fills, wheels, boards. It is the wrong place for the words. **Draw with SVG; label with HTML positioned over it.**
+
+- `zerp check` audits HTML text. An `<svg><text>` label is not skipped so much as mismeasured: SVG paints with a `fill` and a `font-size` attribute, neither of which is CSS the cascade can see, so a label that is really 8px in `--zerp-faint` is scored as inherited 16px in `--zerp-text` and passes clean. `zerp check` emits a `⚠` warning for `<text>` inside `<svg>` for exactly this reason.
+- Export and rasterization pipelines treat an SVG as its own document and do not reliably hand it the deck's inlined fonts. HTML text keeps Montserrat and Roboto Mono everywhere; SVG text re-resolves to whatever the consuming machine happens to have.
+- Once the words live in HTML the graphic is decoration: mark the `<svg>` `aria-hidden="true"`, and both screen readers and `zerp check` skip it.
+- Numerals that are part of a depicted object rather than slide copy — a roulette wheel's pocket numbers, a die's pips, a keyboard's legends — are drawing, and stay in the SVG. The test is whether a reader who cannot see them loses information: if they would, that information belongs in HTML next to the graphic, and the `<svg>` then goes `aria-hidden`.
+
+```html
+<div class="slide">
+  <h2>Two pockets</h2>
+  <div class="wheel">
+    <svg viewBox="0 0 240 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="46" fill="var(--zerp-red-solid)" />
+      <circle cx="180" cy="60" r="46" fill="var(--zerp-green-solid)" />
+    </svg>
+    <span class="pocket left">18 red</span>
+    <span class="pocket right">1 zero</span>
+  </div>
+  <style>
+    .wheel {
+      position: relative;
+      width: fit-content;
+      margin-inline: auto;
+    }
+    .wheel .pocket {
+      position: absolute;
+      top: 50px;
+      font-weight: 700;
+      color: var(--zerp-on-solid);
+    }
+    .wheel .left {
+      left: 22px;
+    }
+    .wheel .right {
+      left: 148px;
+    }
+  </style>
+</div>
+```
+
+A script that builds a diagram at runtime follows the same rule: emit the shapes into the SVG and the labels into sibling HTML, so the words stay checkable static markup.
+
 ## What to avoid
 
 - No full HTML documents inside slide files; no duplicated framework CSS or runtime.
 - No hardcoded colors anywhere (including inline styles and scripts). Sole exemption: colors of depicted real-world objects (a playing card's white face, a roulette pocket's black) may stay literal — they represent the object and must not flip with the theme.
 - No text below 1em; no `--zerp-faint` for text; no `.sm .muted` combos.
+- No `<text>` inside inline `<svg>` — draw the shapes in SVG and position HTML labels over it (see "Diagrams and inline SVG").
 - No `<div class="slide">` wrappers inside Markdown files (added automatically).
 - Do not override the framework-owned `[data-zerp-slide]` visibility rules or author those `data-zerp-*` attributes yourself. One exception: put `data-zerp-bleed` on a top-level slide element that intentionally runs to the page edge (a full-bleed band or backdrop), so print-safe-margin checks skip it.
 - Do not recreate navigation; do not edit generated `index.html`.
