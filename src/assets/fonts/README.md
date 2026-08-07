@@ -24,13 +24,13 @@ for every other character.
 
 ## Source
 
-| | |
-| --- | --- |
-| Font | Noto Sans Symbols |
-| Version | 2.003 (`Version 2.003`, name ID 5) |
-| Upstream | <https://github.com/google/fonts/tree/main/ofl/notosanssymbols> |
+|             |                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------- |
+| Font        | Noto Sans Symbols                                                                                       |
+| Version     | 2.003 (`Version 2.003`, name ID 5)                                                                      |
+| Upstream    | <https://github.com/google/fonts/tree/main/ofl/notosanssymbols>                                         |
 | Source file | <https://raw.githubusercontent.com/google/fonts/main/ofl/notosanssymbols/NotoSansSymbols%5Bwght%5D.ttf> |
-| License | SIL Open Font License 1.1 — full text in `OFL.txt` |
+| License     | SIL Open Font License 1.1 — full text in `OFL.txt`                                                      |
 
 Noto Sans Symbols is the first family in the Noto symbol set that actually
 contains U+2192: Noto Sans Symbols **2** (2.008) does not map any of
