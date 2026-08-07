@@ -4,6 +4,7 @@ import path from "node:path";
 import { parseDocument } from "htmlparser2";
 import { parseHTML } from "linkedom";
 
+import { type DeckCodepoints, scanDeckCodepoints } from "./codepoints.js";
 import { fontFaceCss } from "./fonts.js";
 import { renderMarkdownSlides } from "./markdown.js";
 
@@ -269,6 +270,33 @@ const NAV_HTML = `    <div class="nav">
       <button id="nav-next" onclick="next()">→</button>
     </div>`;
 
+// Framework chrome, defined once so the codepoint scan can be handed exactly
+// what the document body appends after the slides.
+const CHROME_HTML = `    <div class="progress" id="progress"></div>
+    <div class="counter" id="counter"></div>
+${THEME_SWITCH_HTML}
+${NAV_HTML}`;
+
+async function codepointsFor(slidesHtml: string): Promise<DeckCodepoints> {
+  const [defaultStyles, defaultRuntime] = await Promise.all([
+    readAsset("./assets/default-styles.css"),
+    readAsset("./assets/default-runtime.js"),
+  ]);
+  return scanDeckCodepoints({
+    slidesHtml,
+    // The runtime rides along inside the chrome scan because that is where it
+    // sits in the built document, and the counter and source badge it writes
+    // are chrome text that exists in no markup.
+    chromeHtml: `${CHROME_HTML}<script>${defaultRuntime}</script>`,
+    css: [defaultStyles],
+  });
+}
+
+/** The codepoints this deck can render — see {@link DeckCodepoints}. */
+export async function deckCodepoints(rootDir: string): Promise<DeckCodepoints> {
+  return codepointsFor(await composeSlidesHtml(rootDir));
+}
+
 export async function buildPresentationHtml(options: BuildOptions): Promise<string> {
   const lang = options.lang ?? "en";
   const theme = options.theme ?? "system";
@@ -296,10 +324,7 @@ ${defaultStyles}
   </head>
   <body>
 ${slidesHtml}
-    <div class="progress" id="progress"></div>
-    <div class="counter" id="counter"></div>
-${THEME_SWITCH_HTML}
-${NAV_HTML}
+${CHROME_HTML}
     <script>
 ${defaultRuntime}
     </script>
