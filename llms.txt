@@ -276,6 +276,28 @@ A built deck carries its fonts inside itself, as inlined subsets of Montserrat a
 - Mathematical and geometric symbols mostly are not: `≈ ≠ ≤ ≥ ▲ ▼ ◆ ★ ✓ ✗`. Say `~`, `<=`, `+`/`−`, or use words.
 - `→` is covered everywhere, because zerp bundles a face for it and its own `ul` markers use it.
 - Emoji are exempt from the warning and safe to use: every platform draws them from its own colour emoji font, in the browser and in exports alike, so they never depended on the deck's fonts.
+### Choosing other typefaces
+
+A deck may name its own families in an optional `zerp` key in **its own package.json** — the only deck-level configuration zerp has. Everything else stays zero-config.
+
+```json
+{
+  "dependencies": { "@fontsource/inter": "^5" },
+  "zerp": {
+    "fonts": {
+      "body": { "family": "Inter" },
+      "mono": { "family": "JetBrains Mono", "weights": ["400", "700"] }
+    }
+  }
+}
+```
+
+- `family` is the name the font declares, exactly as you would write it in `font-family`; zerp compares it with the package and errors if they disagree.
+- `fontsourcePackage` is optional and defaults to `@fontsource/` + the slugified family. **The deck installs that package itself** (`pnpm add @fontsource/inter`) — zerp resolves it from the deck's `node_modules`, and a package it cannot find is a build error that names the install command.
+- `weights` is optional. It defaults to what zerp's styles use — body `400 600 700 900 400-italic`, mono `400 700` — and a weight the family does not ship is simply not emitted.
+- Both roles keep everything else: the `→` face rides along, and subsets are still chosen by the deck's text, which is what makes a CJK family (`@fontsource/noto-sans-jp`) possible at all — it is carried a few ranges at a time.
+- Anything outside the Google Fonts directory, or a family that must not be bundled, is out of scope: this is a swap, not a font pipeline.
+
 **A built deck carries only the subsets its own text needs**, so a latin deck ships no Cyrillic and a deck that types one `№` ships the Cyrillic subset that covers it. This is what keeps a single-file deck small, and it has one consequence for scripts: string literals inside a slide `<script>` do count towards the choice (a script that prints `Ж` still pulls Cyrillic in), but characters a script derives at runtime — from a fetch, a computation, `String.fromCharCode` — appear nowhere in the source and cannot. This is the same reason the existing rule says to build static markup and have the script toggle classes or set `textContent`: if a script can produce characters that appear nowhere in the source, put a sample of them in static markup (a legend, a caption, a `hidden` element) so both the subset selection and this check can see them.
 
 ## What to avoid

@@ -41,9 +41,12 @@ function cmapOf(file: string): Promise<Set<number>> {
  * faces the build inlines — so this reports the deck that will actually ship,
  * not a hypothetical one carrying every subset fontsource offers.
  */
-export async function coveredCodepoints(selection: ReadonlySet<number>): Promise<Set<number>> {
+export async function coveredCodepoints(
+  rootDir: string,
+  selection: ReadonlySet<number>,
+): Promise<Set<number>> {
   const covered = new Set<number>();
-  for (const face of await selectedFaces(selection)) {
+  for (const face of await selectedFaces(rootDir, selection)) {
     const cmap = await cmapOf(face.file);
     for (const codepoint of cmap) {
       if (rangesContain(face.ranges, codepoint)) {
@@ -61,8 +64,11 @@ export async function coveredCodepoints(selection: ReadonlySet<number>): Promise
  * document selects the faces, and slide content is what gets judged against
  * them. Framework chrome is zerp's own business.
  */
-export async function uncoveredCodepoints(deck: DeckCodepoints): Promise<number[]> {
-  const covered = await coveredCodepoints(deck.full);
+export async function uncoveredCodepoints(
+  rootDir: string,
+  deck: DeckCodepoints,
+): Promise<number[]> {
+  const covered = await coveredCodepoints(rootDir, deck.full);
   const missing: number[] = [];
   for (const codepoint of deck.slideContent) {
     if (!covered.has(codepoint) && !EXEMPT.test(String.fromCodePoint(codepoint))) {

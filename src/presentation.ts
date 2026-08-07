@@ -5,7 +5,7 @@ import { parseDocument } from "htmlparser2";
 import { parseHTML } from "linkedom";
 
 import { type DeckCodepoints, scanDeckCodepoints } from "./codepoints.js";
-import { fontFaceCss } from "./fonts.js";
+import { fontCss } from "./fonts.js";
 import { renderMarkdownSlides } from "./markdown.js";
 
 const SLIDE_EXTENSIONS = new Set([".html", ".md"]);
@@ -308,7 +308,16 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
   // Which subsets to carry is a fact about this deck's text, so the font CSS
   // is built after the slides are assembled, from the full document's
   // codepoints — chrome included, since chrome is rendered too.
-  const fontCss = await fontFaceCss((await codepointsFor(slidesHtml)).full);
+  const fonts = await fontCss(options.rootDir, (await codepointsFor(slidesHtml)).full);
+  // The family tokens come after the base styles, which define them, and only
+  // exist when the deck configured its own families. A default deck's document
+  // is unchanged.
+  const fontTokens = fonts.tokens
+    ? `
+    <style data-zerp="font-tokens">
+${fonts.tokens}
+    </style>`
+    : "";
   const title =
     options.title ?? deriveDeckTitle(slidesHtml) ?? path.basename(path.resolve(options.rootDir));
 
@@ -319,11 +328,11 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${escapeHtml(title)}</title>
     <style data-zerp="fonts">
-${fontCss}
+${fonts.faces}
     </style>
     <style data-zerp="base">
 ${defaultStyles}
-    </style>
+    </style>${fontTokens}
   </head>
   <body>
 ${slidesHtml}

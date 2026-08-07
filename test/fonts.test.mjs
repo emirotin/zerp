@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { fontFaceCss, parseUnicodeRange, selectedFaces } from "../dist/fonts.js";
+import { fontCss, parseUnicodeRange, selectedFaces } from "../dist/fonts.js";
 
 const setOf = (text) => new Set([...text].map((character) => character.codePointAt(0)));
+// A deck with no zerp.fonts config: zerps own families, selection only.
+const deck = "test/fixtures/clean-deck";
 const subsetsFor = async (text) =>
-  (await selectedFaces(setOf(text))).map((face) => `${face.family}/${face.subset}`);
+  (await selectedFaces(deck, setOf(text))).map((face) => `${face.family}/${face.subset}`);
 
 test("unicode-range parses single codepoints, ranges and wildcards", () => {
   assert.deepEqual(parseUnicodeRange("U+2192"), [{ first: 0x2192, last: 0x2192 }]);
@@ -54,7 +56,7 @@ test("a subset is carried exactly when the deck renders something it claims", as
 });
 
 test("the emitted css is self-contained and matches the selection", async () => {
-  const css = await fontFaceCss(setOf("Ж"));
+  const { faces: css } = await fontCss(deck, setOf("Ж"));
   assert.equal(css.match(/@font-face/g).length, (await subsetsFor("Ж")).length);
   assert.match(css, /src: url\(data:font\/woff2;base64,[A-Za-z0-9+/=]+\) format\("woff2"\);/);
   assert.doesNotMatch(css, /url\(\.\/files\//, "no path survives inlining");

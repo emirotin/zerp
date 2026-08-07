@@ -156,6 +156,40 @@ The explicit `width`/`height` already describe the page — do **not** also pass
 `landscape=True`, because Chromium swaps the two dimensions when `landscape` is
 set and you get a portrait page.
 
+## Deck configuration (optional)
+
+A deck needs no configuration: a directory with `slides/` is a deck. The one
+thing it cannot express otherwise is which typefaces it is set in, so an
+optional `zerp` key in the deck's own `package.json` can name them:
+
+```json
+{
+  "dependencies": { "@fontsource/inter": "^5", "@fontsource/jetbrains-mono": "^5" },
+  "zerp": {
+    "fonts": {
+      "body": { "family": "Inter" },
+      "mono": { "family": "JetBrains Mono" }
+    }
+  }
+}
+```
+
+- `family` is the name the font declares — the same one you would write in
+  `font-family`. zerp checks it against the package and says so if they differ.
+- `fontsourcePackage` is optional; it defaults to `@fontsource/<family>`
+  slugified (`"JetBrains Mono"` → `@fontsource/jetbrains-mono`).
+- **The deck installs the package itself.** zerp resolves it from the deck's
+  `node_modules` (falling back to its own), so `pnpm add @fontsource/inter`
+  before building. A package that cannot be resolved is a build error naming
+  the package and the install command.
+- `weights` is optional and defaults to what zerp's own styles ask for: body
+  `400 600 700 900 400-italic`, mono `400 700` (fontsource file stems). Weights
+  a family does not ship are simply not emitted — browsers synthesize.
+- Subsets are still chosen by the deck's text, so a CJK family is carried a few
+  ranges at a time rather than all of it.
+- Everything else is unchanged: the `→` face is always bundled, and each family
+  keeps its role in the four stacks zerp draws with.
+
 ## Library API
 
 ```ts

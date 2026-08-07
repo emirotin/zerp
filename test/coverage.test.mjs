@@ -5,9 +5,11 @@ import { coveredCodepoints, uncoveredCodepoints } from "../dist/check/coverage.j
 
 const cp = (character) => character.codePointAt(0);
 const setOf = (text) => new Set([...text].map(cp));
+// Any deck with no font config of its own: coverage follows zerp's families.
+const deck = "test/fixtures/clean-deck";
 
 test("coverage is every selected face's cmap, clipped to its declared range", async () => {
-  const covered = await coveredCodepoints(setOf("Ж"));
+  const covered = await coveredCodepoints(deck, setOf("Ж"));
   assert.ok(covered.has(cp("A")), "latin, always carried");
   assert.ok(covered.has(cp("Ж")), "cyrillic, because the deck asked for it");
   assert.ok(covered.has(cp("↓")), "an arrow Montserrat's latin subset carries");
@@ -17,7 +19,7 @@ test("coverage is every selected face's cmap, clipped to its declared range", as
 });
 
 test("a deck that carries no cyrillic is not credited with cyrillic glyphs", async () => {
-  const covered = await coveredCodepoints(setOf("Latin only"));
+  const covered = await coveredCodepoints(deck, setOf("Latin only"));
   assert.ok(covered.has(cp("A")));
   // The build would not inline that subset, so the audit must not pretend it
   // did: coverage follows selection.
@@ -25,7 +27,7 @@ test("a deck that carries no cyrillic is not credited with cyrillic glyphs", asy
 });
 
 test("uncovered judges slide content against what the full document selects", async () => {
-  const missing = await uncoveredCodepoints({
+  const missing = await uncoveredCodepoints(deck, {
     // Cyrillic arrives only through chrome/script text here, which is enough
     // to pull the subset in — and that is what makes Ж covered below.
     full: setOf("AЖ→≈日🚀🇺🇸"),
@@ -36,7 +38,7 @@ test("uncovered judges slide content against what the full document selects", as
 });
 
 test("chrome-only characters are never warned about", async () => {
-  const missing = await uncoveredCodepoints({
+  const missing = await uncoveredCodepoints(deck, {
     full: setOf("Deck ←"),
     slideContent: setOf("Deck"),
   });

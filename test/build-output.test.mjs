@@ -58,11 +58,18 @@ test("a built deck inlines the Zerp Symbols arrow face, scoped to U+2192", async
 
 test("the arrow markers name Zerp Symbols first so exporters pick it up", async () => {
   const css = await readFile("dist/assets/default-styles.css", "utf8");
-  assert.match(css, /\.slide ul li::before \{[^}]*font-family: "Zerp Symbols", "Montserrat"/);
-  assert.match(css, /\.flow > \* \+ \*::before \{[^}]*font-family: "Zerp Symbols", "Montserrat"/);
-  // Behind the real family everywhere else, where it only ever serves U+2192.
-  assert.match(css, /font-family: "Montserrat", "Zerp Symbols", sans-serif;/);
-  assert.match(css, /font-family: "Roboto Mono", "Zerp Symbols", monospace;/);
+  // Four stacks, defined once and read by every rule, so a deck can redefine
+  // them without the framework knowing which rules exist.
+  assert.match(css, /--zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;/);
+  assert.match(css, /--zerp-font-marker: "Zerp Symbols", "Montserrat", sans-serif;/);
+  assert.match(css, /--zerp-font-mono: "Roboto Mono", "Zerp Symbols", monospace;/);
+  // The nav's ← and → both come from the same fallback on purpose.
+  assert.match(css, /--zerp-font-nav: "Roboto Mono", monospace;/);
+  assert.match(css, /\.slide ul li::before \{[^}]*font-family: var\(--zerp-font-marker\)/);
+  assert.match(css, /\.flow > \* \+ \*::before \{[^}]*font-family: var\(--zerp-font-marker\)/);
+  assert.match(css, /\.nav button \{[^}]*font-family: var\(--zerp-font-nav\)/);
+  // No rule names a family directly any more.
+  assert.doesNotMatch(css.split(":root {").slice(2).join(""), /font-family: "/);
 });
 
 test("token contrast json is emitted for the checker", async () => {

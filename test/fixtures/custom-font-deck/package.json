@@ -1,0 +1,11 @@
+{
+  "name": "custom-font-deck",
+  "private": true,
+  "zerp": {
+    "fonts": {
+      "body": {
+        "family": "Roboto Mono"
+      }
+    }
+  }
+}

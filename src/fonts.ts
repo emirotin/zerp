@@ -3,12 +3,19 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { type DeckFontConfig, readDeckConfig } from "./deck-config.js";
+
 const require = createRequire(import.meta.url);
 
-const FONT_FACES = [
-  { pkg: "@fontsource/montserrat", faces: ["400", "600", "700", "900", "400-italic"] },
-  { pkg: "@fontsource/roboto-mono", faces: ["400", "700"] },
-];
+// zerp's own type pair, and the weights base-styles.css actually asks for.
+// A deck may name others (see DeckFontConfig); these are the fallback and the
+// default weight list both roles inherit.
+const BODY = {
+  family: "Montserrat",
+  pkg: "@fontsource/montserrat",
+  weights: ["400", "600", "700", "900", "400-italic"],
+};
+const MONO = { family: "Roboto Mono", pkg: "@fontsource/roboto-mono", weights: ["400", "700"] };
 
 // The floor. Latin is in every deck whether its text says so or not: the
 // framework's own chrome is latin, so is every fallback the browser reaches
@@ -117,8 +124,7 @@ function subsetOf(slug: string, family: string, face: string): string {
 // selected ones are ever read off disk.
 const blockCache = new Map<string, Promise<FaceBlock[]>>();
 
-async function readFaceBlocks(pkg: string, face: string): Promise<FaceBlock[]> {
-  const cssPath = require.resolve(`${pkg}/${face}.css`);
+async function readFaceBlocks(cssPath: string, pkg: string, face: string): Promise<FaceBlock[]> {
   const filesDir = path.join(path.dirname(cssPath), "files");
   const family = pkg.split("/")[1] ?? "";
   const css = await readFile(cssPath, "utf8");
@@ -142,14 +148,87 @@ async function readFaceBlocks(pkg: string, face: string): Promise<FaceBlock[]> {
   return blocks;
 }
 
-function faceBlocks(pkg: string, face: string): Promise<FaceBlock[]> {
-  const key = `${pkg}/${face}`;
-  const cached = blockCache.get(key);
+function faceBlocks(cssPath: string, pkg: string, face: string): Promise<FaceBlock[]> {
+  const cached = blockCache.get(cssPath);
   if (cached) {
     return cached;
   }
-  const blocks = readFaceBlocks(pkg, face);
-  blockCache.set(key, blocks);
+  const blocks = readFaceBlocks(cssPath, pkg, face);
+  blockCache.set(cssPath, blocks);
+  return blocks;
+}
+
+/**
+ * Resolve a fontsource weight from the DECK first and zerp second.
+ *
+ * A deck naming its own family installs that package itself — zerp cannot
+ * depend on families it does not know about — so the deck's node_modules is
+ * the authority. Falling back to zerp's own resolution is what lets a deck
+ * name one of the bundled families to trim its weights without also having to
+ * install it.
+ */
+function resolveFaceCss(deckRequire: NodeRequire, pkg: string, face: string): string | null {
+  for (const resolver of [deckRequire, require]) {
+    try {
+      return resolver.resolve(`${pkg}/${face}.css`);
+    } catch {
+      // Not installed here; try the next place.
+    }
+  }
+  return null;
+}
+
+interface FamilyPlan {
+  role: "body" | "mono";
+  /** The family name the emitted stacks will use. */
+  family: string;
+  pkg: string;
+  weights: string[];
+  /** True when the deck asked for this family rather than taking the default. */
+  configured: boolean;
+}
+
+function slugify(family: string): string {
+  return family.toLowerCase().replaceAll(/\s+/g, "-");
+}
+
+function familyPlan(role: "body" | "mono", config: DeckFontConfig | undefined): FamilyPlan {
+  const fallback = role === "body" ? BODY : MONO;
+  if (!config) {
+    return { role, ...fallback, configured: false };
+  }
+  return {
+    role,
+    family: config.family,
+    pkg: config.fontsourcePackage ?? `@fontsource/${slugify(config.family)}`,
+    // Missing weights are simply not emitted: the browser synthesizes what it
+    // needs and zerp's own type scale only asks for what the defaults ship.
+    weights: config.weights ?? fallback.weights,
+    configured: true,
+  };
+}
+
+async function planBlocks(rootDir: string, plan: FamilyPlan): Promise<FaceBlock[]> {
+  const deckRequire = createRequire(path.join(path.resolve(rootDir), "package.json"));
+  const blocks: FaceBlock[] = [];
+  for (const face of plan.weights) {
+    const cssPath = resolveFaceCss(deckRequire, plan.pkg, face);
+    if (cssPath) {
+      blocks.push(...(await faceBlocks(cssPath, plan.pkg, face)));
+    }
+  }
+  if (blocks.length === 0) {
+    throw new Error(
+      `Cannot resolve "${plan.pkg}" for the ${plan.role} font (tried ${plan.weights.map((face) => `${face}.css`).join(", ")}). ` +
+        `The deck names it in zerp.fonts.${plan.role}, so the deck installs it: pnpm add ${plan.pkg}`,
+    );
+  }
+  const declared = blocks.find((block) => block.family === plan.family);
+  if (!declared) {
+    throw new Error(
+      `"${plan.pkg}" declares font-family "${blocks[0]?.family}", but zerp.fonts.${plan.role}.family says "${plan.family}". Use the name the package declares.`,
+    );
+  }
   return blocks;
 }
 
@@ -182,15 +261,28 @@ const symbolBlock: FaceBlock = {
  * Pass the FULL document codepoints, chrome included, not slide content:
  * getting this wrong costs a reader a fallback glyph, while getting it
  * generously wrong costs bytes.
+ *
+ * The same selection runs over a deck's own families, so a configured
+ * Noto Sans JP is carried exactly one chunk at a time — which is the only way
+ * a CJK family can be carried at all.
  */
-async function selectFaceBlocks(codepoints: ReadonlySet<number>): Promise<FaceBlock[]> {
+async function selectFaceBlocks(
+  rootDir: string,
+  plans: FamilyPlan[],
+  codepoints: ReadonlySet<number>,
+): Promise<FaceBlock[]> {
   const selected: FaceBlock[] = [];
-  for (const { pkg, faces } of FONT_FACES) {
-    for (const face of faces) {
-      for (const block of await faceBlocks(pkg, face)) {
-        if (block.subset === ALWAYS || rangesTouch(block.ranges, codepoints)) {
-          selected.push(block);
-        }
+  // Keyed by woff2, so a deck that sets body and mono to the same family
+  // inlines each file once instead of paying for it twice.
+  const seen = new Set<string>();
+  for (const plan of plans) {
+    for (const block of await planBlocks(rootDir, plan)) {
+      if (seen.has(block.file)) {
+        continue;
+      }
+      if (block.subset === ALWAYS || rangesTouch(block.ranges, codepoints)) {
+        seen.add(block.file);
+        selected.push(block);
       }
     }
   }
@@ -198,9 +290,17 @@ async function selectFaceBlocks(codepoints: ReadonlySet<number>): Promise<FaceBl
   return selected;
 }
 
+async function planFamilies(rootDir: string): Promise<FamilyPlan[]> {
+  const config = await readDeckConfig(rootDir);
+  return (["body", "mono"] as const).map((role) => familyPlan(role, config.fonts?.[role]));
+}
+
 /** The faces a deck's own text selects — see {@link selectFaceBlocks}. */
-export function selectedFaces(codepoints: ReadonlySet<number>): Promise<FontFaceInfo[]> {
-  return selectFaceBlocks(codepoints);
+export async function selectedFaces(
+  rootDir: string,
+  codepoints: ReadonlySet<number>,
+): Promise<FontFaceInfo[]> {
+  return selectFaceBlocks(rootDir, await planFamilies(rootDir), codepoints);
 }
 
 // Base64-encoding a woff2 is the expensive half of a build and the same file
@@ -227,19 +327,51 @@ async function inline(block: FaceBlock): Promise<string> {
 }
 
 /**
- * Self-contained @font-face CSS with woff2 data URLs (offline decks), for the
- * subsets this deck's text needs.
+ * The four family tokens, or "" when the deck takes zerp's own families.
+ *
+ * base-styles.css defines these with the defaults, so this is emitted after it
+ * and only when it has something to say. A deck that configures nothing gets
+ * the byte-for-byte document it got before the tokens existed.
+ */
+function familyTokenCss(plans: FamilyPlan[]): string {
+  if (!plans.some((plan) => plan.configured)) {
+    return "";
+  }
+  const body = plans.find((plan) => plan.role === "body")?.family ?? BODY.family;
+  const mono = plans.find((plan) => plan.role === "mono")?.family ?? MONO.family;
+  const symbols = `"${SYMBOL_FACE.family}"`;
+  return `:root {
+  --zerp-font-body: "${body}", ${symbols}, sans-serif;
+  --zerp-font-marker: ${symbols}, "${body}", sans-serif;
+  --zerp-font-mono: "${mono}", ${symbols}, monospace;
+  --zerp-font-nav: "${mono}", monospace;
+}`;
+}
+
+/** The two stylesheets a deck's fonts contribute. */
+export interface FontCss {
+  /** `@font-face` blocks with woff2 data URLs — self-contained, offline. */
+  faces: string;
+  /** `:root` family tokens, empty unless the deck configured its own. */
+  tokens: string;
+}
+
+/**
+ * Build a deck's font CSS: the subsets its text needs, in the families it
+ * asked for.
  *
  * The result is a function of the deck, so it is not cached as a whole; the
  * file reads and base64 behind it are. `zerp serve` rebuilds the document per
  * request and therefore re-selects per request, which is what keeps live
- * reload honest when a slide gains a character in a new script.
+ * reload honest when a slide gains a character in a new script. (A change to
+ * package.json needs a server restart — serve watches slides/.)
  */
-export async function fontFaceCss(codepoints: ReadonlySet<number>): Promise<string> {
-  const blocks = await selectFaceBlocks(codepoints);
-  const css: string[] = [];
+export async function fontCss(rootDir: string, codepoints: ReadonlySet<number>): Promise<FontCss> {
+  const plans = await planFamilies(rootDir);
+  const blocks = await selectFaceBlocks(rootDir, plans, codepoints);
+  const faces: string[] = [];
   for (const block of blocks) {
-    css.push(await inline(block));
+    faces.push(await inline(block));
   }
-  return css.join("\n");
+  return { faces: faces.join("\n"), tokens: familyTokenCss(plans) };
 }

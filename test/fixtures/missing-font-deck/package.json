@@ -1,0 +1,11 @@
+{
+  "name": "missing-font-deck",
+  "private": true,
+  "zerp": {
+    "fonts": {
+      "mono": {
+        "family": "Not Installed"
+      }
+    }
+  }
+}
