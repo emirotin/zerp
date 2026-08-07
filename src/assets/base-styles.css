@@ -193,11 +193,12 @@ hr {
   counter-reset: zerp-ol;
 }
 
+/* Block flow, not flex: the counter is an in-flow inline box on the first
+   line, so wrapped lines return under the marker exactly like ul's arrow.
+   A flex li would also make the marker a flex item, which export pipelines
+   (PPTX) cannot position — an inline marker is plain text to them. */
 .slide ol > li {
   counter-increment: zerp-ol;
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
   border-bottom: 1px solid var(--zerp-border);
   padding: 10px 0;
 }
@@ -208,6 +209,7 @@ hr {
 
 .slide ol > li::before {
   content: counter(zerp-ol, decimal-leading-zero);
+  margin-right: 16px;
   font-family: "Roboto Mono", monospace;
   font-size: 1.2em;
   font-weight: 700;
