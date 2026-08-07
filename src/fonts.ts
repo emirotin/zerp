@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 
@@ -31,6 +32,57 @@ const SYMBOL_FACE = {
   unicodeRange: "U+2192",
 };
 
+/** An inclusive codepoint range, as written in a `unicode-range`. */
+export interface CodepointRange {
+  readonly first: number;
+  readonly last: number;
+}
+
+/** One `@font-face` block a built deck inlines. */
+export interface BundledFace {
+  /** Family name the block declares. */
+  family: string;
+  /** fontsource subset slug (`latin`, `cyrillic-ext`, …). */
+  subset: string;
+  /** Absolute path of the woff2 the block inlines. */
+  file: string;
+  /**
+   * The range the block declares. The browser consults the face for these
+   * codepoints and no others, so a face's real coverage is its cmap
+   * intersected with this.
+   */
+  ranges: readonly CodepointRange[];
+  /** The block itself, `src` already rewritten to a data URL. */
+  css: string;
+}
+
+/**
+ * Parse a `unicode-range` value: comma-separated `U+XXXX`, `U+XXXX-YYYY` and
+ * wildcard `U+XX??` forms. An unparseable token is dropped rather than guessed
+ * at — a range that claims too little only costs a subset that was going to be
+ * included anyway.
+ */
+export function parseUnicodeRange(value: string): CodepointRange[] {
+  const ranges: CodepointRange[] = [];
+  for (const token of value.split(",")) {
+    const match = token.trim().match(/^u\+([0-9a-f?]{1,6})(?:-([0-9a-f]{1,6}))?$/i);
+    if (!match) {
+      continue;
+    }
+    const [, start = "", end] = match;
+    if (start.includes("?")) {
+      ranges.push({
+        first: Number.parseInt(start.replaceAll("?", "0"), 16),
+        last: Number.parseInt(start.replaceAll("?", "F"), 16),
+      });
+      continue;
+    }
+    const first = Number.parseInt(start, 16);
+    ranges.push({ first, last: end === undefined ? first : Number.parseInt(end, 16) });
+  }
+  return ranges;
+}
+
 function subsetOf(slug: string, family: string, face: string): string {
   const [weight, style] = face.includes("-italic") ? face.split("-") : [face, "normal"];
   const prefix = `${family}-`;
@@ -41,37 +93,62 @@ function subsetOf(slug: string, family: string, face: string): string {
   return slug.slice(prefix.length, slug.length - suffix.length);
 }
 
-let cache: Promise<string> | null = null;
+// Reading and base64-encoding the woff2 files is the expensive half of this
+// module and the result never changes within a process, so the parsed faces of
+// each fontsource stylesheet are cached whole.
+const faceCache = new Map<string, Promise<BundledFace[]>>();
 
-async function inlineFaceCss(pkg: string, face: string): Promise<string> {
+async function readFontsourceFaces(pkg: string, face: string): Promise<BundledFace[]> {
   const cssPath = require.resolve(`${pkg}/${face}.css`);
   const filesDir = path.join(path.dirname(cssPath), "files");
   const family = pkg.split("/")[1] ?? "";
   const css = await readFile(cssPath, "utf8");
-  const blocks: string[] = [];
+  const faces: BundledFace[] = [];
 
   for (const match of css.matchAll(FACE_BLOCK)) {
-    const slug = match[1] ?? "";
-    if (!SUBSETS.has(subsetOf(slug, family, face))) {
-      continue;
-    }
     const block = match[0];
     const woff2Match = block.match(/url\(\.\/files\/([^)]+\.woff2)\)/);
     if (!woff2Match) {
       continue;
     }
-    const data = await readFile(path.join(filesDir, woff2Match[1] ?? ""));
+    const file = path.join(filesDir, woff2Match[1] ?? "");
+    const data = await readFile(file);
     const dataUrl = `data:font/woff2;base64,${data.toString("base64")}`;
-    blocks.push(block.replace(/src: [^;]+;/, `src: url(${dataUrl}) format("woff2");`));
+    faces.push({
+      family: block.match(/font-family:\s*'([^']+)'/)?.[1] ?? family,
+      subset: subsetOf(match[1] ?? "", family, face),
+      file,
+      ranges: parseUnicodeRange(block.match(/unicode-range:\s*([^;]+);/)?.[1] ?? ""),
+      css: block.replace(/src: [^;]+;/, `src: url(${dataUrl}) format("woff2");`),
+    });
   }
 
-  return blocks.join("\n");
+  return faces;
 }
 
-async function inlineSymbolFaceCss(): Promise<string> {
-  const data = await readFile(new URL(SYMBOL_FACE.file, import.meta.url));
+function fontsourceFaces(pkg: string, face: string): Promise<BundledFace[]> {
+  const key = `${pkg}/${face}`;
+  const cached = faceCache.get(key);
+  if (cached) {
+    return cached;
+  }
+  const faces = readFontsourceFaces(pkg, face);
+  faceCache.set(key, faces);
+  return faces;
+}
+
+let symbolFaceCache: Promise<BundledFace> | null = null;
+
+async function readSymbolFace(): Promise<BundledFace> {
+  const file = new URL(SYMBOL_FACE.file, import.meta.url);
+  const data = await readFile(file);
   const dataUrl = `data:font/woff2;base64,${data.toString("base64")}`;
-  return `/* zerp-symbols-400-normal */
+  return {
+    family: SYMBOL_FACE.family,
+    subset: "symbols",
+    file: fileURLToPath(file),
+    ranges: parseUnicodeRange(SYMBOL_FACE.unicodeRange),
+    css: `/* zerp-symbols-400-normal */
 @font-face {
   font-family: '${SYMBOL_FACE.family}';
   font-style: normal;
@@ -79,22 +156,32 @@ async function inlineSymbolFaceCss(): Promise<string> {
   font-weight: 400;
   src: url(${dataUrl}) format('woff2');
   unicode-range: ${SYMBOL_FACE.unicodeRange};
-}`;
+}`,
+  };
 }
 
-async function buildFontCss(): Promise<string> {
-  const parts: string[] = [];
-  for (const { pkg, faces } of FONT_FACES) {
-    for (const face of faces) {
-      parts.push(await inlineFaceCss(pkg, face));
+function symbolFace(): Promise<BundledFace> {
+  symbolFaceCache ??= readSymbolFace();
+  return symbolFaceCache;
+}
+
+/** Every `@font-face` a built deck carries, in stylesheet order. */
+export async function bundledFaces(): Promise<BundledFace[]> {
+  const faces: BundledFace[] = [];
+  for (const { pkg, faces: weights } of FONT_FACES) {
+    for (const weight of weights) {
+      for (const face of await fontsourceFaces(pkg, weight)) {
+        if (SUBSETS.has(face.subset)) {
+          faces.push(face);
+        }
+      }
     }
   }
-  parts.push(await inlineSymbolFaceCss());
-  return parts.join("\n");
+  faces.push(await symbolFace());
+  return faces;
 }
 
 /** Self-contained @font-face CSS with woff2 data URLs (offline decks). */
-export function fontFaceCss(): Promise<string> {
-  cache ??= buildFontCss();
-  return cache;
+export async function fontFaceCss(): Promise<string> {
+  return (await bundledFaces()).map((face) => face.css).join("\n");
 }

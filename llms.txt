@@ -146,7 +146,7 @@ zerp verify . --theme both --size 1280x720
 
 `zerp verify` needs a Chromium-class browser: run `zerp install-browser` once to download a managed Chromium, or set `CHROME_BIN` to an existing Chrome/Chromium. The whole session (launch, navigation, font activation, probe) is bounded by `--timeout ms` / `ZERP_VERIFY_TIMEOUT_MS`, 20000ms by default — raise it on a slow or loaded host. A timed-out session yields no report, which is a check that did not run, not a check that passed. To skip the per-run browser launch entirely, point `--browser-endpoint url` / `ZERP_BROWSER_ENDPOINT` at an already-running browser (`http(s)://` CDP, `ws(s)://` playwright); verify borrows it and never closes it.
 
-Fix every `✗` error and `⚠` warning (font too small, text contrast too low, a surface whose background blends into what is behind it, or a label sealed inside an `<svg>` where neither can be measured — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
+Fix every `✗` error and `⚠` warning (font too small, text contrast too low, a surface whose background blends into what is behind it, a label sealed inside an `<svg>` where neither can be measured, or characters no bundled font can draw — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
 
 **Verify is viewport-specific.** Overflow and frame geometry are judged against the exact `--size WxH` viewport (default 1280x720) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; verify it with its actual target size. `zerp check` is viewport-independent (static contrast/type analysis, no layout).
 
@@ -265,6 +265,18 @@ Inline `<svg>` is the right tool for the shapes of a diagram — paths, arcs, co
 ```
 
 A script that builds a diagram at runtime follows the same rule: emit the shapes into the SVG and the labels into sibling HTML, so the words stay checkable static markup.
+
+## Characters and glyph coverage
+
+A built deck carries its fonts inside itself, as inlined subsets of Montserrat and Roboto Mono plus a one-glyph face for `→`. That is what makes it a single offline file, and it is also a hard edge: **a character no bundled subset covers is drawn by whatever font the viewing machine falls back to** — a different shape, weight and width on every OS, and re-resolved again by the reader's machine once the deck is exported to a format whose text runs carry one font face.
+
+`zerp check` reports the characters your slides use and the deck cannot draw, as one `⚠` warning listing them with their codepoints. It reads the actual `cmap` of each bundled woff2, so it knows, for example, that `※` sits inside Montserrat's declared latin range and is still not in the file.
+
+- Latin, Latin-Extended and Cyrillic text is covered. Common typography is covered: `— – … ‘ ’ “ ” · × − ↑ ↓ € ™`.
+- Mathematical and geometric symbols mostly are not: `≈ ≠ ≤ ≥ ▲ ▼ ◆ ★ ✓ ✗`. Say `~`, `<=`, `+`/`−`, or use words.
+- `→` is covered everywhere, because zerp bundles a face for it and its own `ul` markers use it.
+- Emoji are exempt from the warning and safe to use: every platform draws them from its own colour emoji font, in the browser and in exports alike, so they never depended on the deck's fonts.
+- Text a script writes at runtime is not scanned, and neither is text pulled from a URL or a fetch. If a script prints characters outside the covered set, put a sample of them in static markup too (a legend, a caption, a `hidden` element) so both the check and the deck's font selection can see them.
 
 ## What to avoid
 

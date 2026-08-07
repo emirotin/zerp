@@ -58,6 +58,42 @@ test("svg text is flagged once, and aria-hidden opts out", async () => {
   assert.equal(reportHasFailures(report, true), true);
 });
 
+test("characters no bundled face can draw are reported once, for the deck", async () => {
+  const report = await checkPresentation({ rootDir: "test/fixtures/uncovered-glyph-deck" });
+  const coverage = report.findings.filter((f) => f.message.includes("no glyph"));
+  // One finding for the whole deck, not one per character and not one per
+  // theme, and it belongs to no single slide.
+  assert.equal(coverage.length, 1);
+  const [finding] = coverage;
+  assert.equal(finding.severity, "warning");
+  assert.equal(finding.slideIndex, 0);
+  // 日本語 from a heading, ※ from a list item, and ≈ from the data-vs
+  // attribute `.compare::after` prints — the attribute is copy too.
+  assert.equal(finding.snippet, "※ ≈ 日 本 語");
+  assert.match(finding.message, /5 characters \(U\+203B, U\+2248, U\+65E5, U\+672C, U\+8A9E\)/);
+  assert.match(finding.message, /system fallback/);
+  // ※ is inside Montserrat's declared latin range (U+2000-206F) and absent
+  // from the subset's cmap: coverage is the file, not the promise.
+  // 🚀 is not listed at all — pictographs come from the platform's emoji font
+  // everywhere, so warning about them would be true and useless.
+  assert.ok(!finding.message.includes("U+1F680"));
+  // Follows the established severity model: a warning, escalated by --strict.
+  assert.equal(reportHasFailures(report, false), false);
+  assert.equal(reportHasFailures(report, true), true);
+  assert.match(formatReport(report), /deck \[dark\]/);
+});
+
+test("the decks that ship stay covered", async () => {
+  for (const rootDir of ["test/fixtures/kitchen-sink", "examples/casino"]) {
+    const report = await checkPresentation({ rootDir });
+    assert.deepEqual(
+      report.findings.filter((f) => f.message.includes("no glyph")),
+      [],
+      `${rootDir} draws every character it renders`,
+    );
+  }
+});
+
 const findingAt = (overrides) => ({
   severity: "error",
   theme: "dark",

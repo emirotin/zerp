@@ -2,10 +2,11 @@ import { readFile } from "node:fs/promises";
 
 import { parseHTML } from "linkedom";
 
-import { buildPresentationHtml } from "../presentation.js";
+import { buildPresentationHtml, deckCodepoints } from "../presentation.js";
 import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./apca.js";
 import { StyleResolver } from "./cascade.js";
 import { blend, parseColor, rgbDistance, toHex } from "./color.js";
+import { uncoveredCodepoints } from "./coverage.js";
 import { parseStylesheets, type StyleSheetInput } from "./css-model.js";
 import type { CheckReport, CheckTheme, DomElement, Finding } from "./types.js";
 
@@ -36,6 +37,9 @@ const THEMES: CheckTheme[] = ["dark", "light"];
 // a visible border/shadow to read as a distinct panel.
 const SURFACE_MIN_RGB_DIST = 30;
 const SURFACE_MIN_LC = 15;
+// A deck that pastes in a script zerp bundles nothing for would otherwise
+// print hundreds of codepoints; the count still states the full total.
+const MAX_LISTED_CODEPOINTS = 8;
 
 let tokenContrastCache: TokenContrast | null = null;
 
@@ -195,6 +199,33 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
             "<text> in <svg> is audited as HTML — its fill and font-size attributes are invisible here",
           suggestion: "put the label in HTML positioned over the svg and keep the svg to shapes",
         });
+      });
+    }
+  }
+
+  // Glyph coverage: a character no bundled face can draw is not a styling
+  // mistake, it is a promise the deck cannot keep. It renders from whatever
+  // the viewing machine falls back to, and an export re-resolves it on the
+  // reader's machine. Deck-wide and theme-independent, so it is one finding
+  // reported against the first requested theme, not one per character and not
+  // one per theme.
+  if (structuralTheme) {
+    const { slideContent } = await deckCodepoints(options.rootDir);
+    const missing = await uncoveredCodepoints(slideContent);
+    if (missing.length > 0) {
+      const shown = missing.slice(0, MAX_LISTED_CODEPOINTS);
+      const points = shown.map((code) => `U+${code.toString(16).toUpperCase().padStart(4, "0")}`);
+      const rest = missing.length - shown.length;
+      const suffix = rest > 0 ? `, +${rest} more` : "";
+      findings.push({
+        severity: "warning",
+        theme: structuralTheme,
+        slideIndex: 0,
+        slideSrc: null,
+        slideSrcSlide: null,
+        snippet: shown.map((code) => String.fromCodePoint(code)).join(" "),
+        message: `${missing.length} character${missing.length === 1 ? "" : "s"} (${points.join(", ")}${suffix}) ${missing.length === 1 ? "has" : "have"} no glyph in any bundled font — each renders via system fallback, which looks different on every machine and in exports`,
+        suggestion: "use characters the bundled subsets cover, or drop them",
       });
     }
   }

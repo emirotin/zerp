@@ -51,7 +51,10 @@ export function formatReport(report: CheckReport, options: { summaryOnly?: boole
     const [ordinal = "1", ofFile = "1"] = (first.slideSrcSlide ?? "").split("/");
     const inFile = Number(ofFile) > 1 ? ` · ${ordinal}/${ofFile} in file` : "";
     const src = first.slideSrc ? ` (${first.slideSrc}${inFile})` : "";
-    lines.push(`slide ${first.slideIndex}${src} [${first.theme}]`);
+    // Slide index 0 is a finding about the deck as a whole rather than about
+    // any one slide; it sorts first for the same reason.
+    const where = first.slideIndex === 0 ? "deck" : `slide ${first.slideIndex}${src}`;
+    lines.push(`${where} [${first.theme}]`);
     for (const finding of group) {
       lines.push(`  ${ICONS[finding.severity]} "${finding.snippet}" — ${finding.message}`);
       if (finding.suggestion) {
