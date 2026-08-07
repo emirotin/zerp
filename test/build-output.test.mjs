@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { test } from "node:test";
 
+import { buildPresentationHtml } from "../dist/presentation.js";
+
 test("built default stylesheet = generated tokens + token-free base styles", async () => {
   const css = await readFile("dist/assets/default-styles.css", "utf8");
   assert.match(css, /--zerp-bg: #12141c;/);
@@ -41,6 +43,26 @@ test("step-hiding rules are scoped to @media screen", async () => {
   // The unscoped base frame rule stays outside any at-rule.
   const beforeScreen = css.slice(0, css.indexOf("@media screen"));
   assert.match(beforeScreen, /\[data-zerp-slide\] \{[^}]*display: none/);
+});
+
+test("a built deck inlines the Zerp Symbols arrow face, scoped to U+2192", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/kitchen-sink" });
+  const block = html.match(/@font-face \{[^}]*Zerp Symbols[^}]*\}/)?.[0];
+  assert.ok(block, "Zerp Symbols @font-face present in the single-file deck");
+  // Inlined as data, like every other face: a built deck stays offline.
+  assert.match(block, /src: url\(data:font\/woff2;base64,[A-Za-z0-9+/=]+\) format\('woff2'\);/);
+  // The range is the whole point — without it this face would answer for
+  // characters Montserrat and Roboto Mono already cover.
+  assert.match(block, /unicode-range: U\+2192;/);
+});
+
+test("the arrow markers name Zerp Symbols first so exporters pick it up", async () => {
+  const css = await readFile("dist/assets/default-styles.css", "utf8");
+  assert.match(css, /\.slide ul li::before \{[^}]*font-family: "Zerp Symbols", "Montserrat"/);
+  assert.match(css, /\.flow > \* \+ \*::before \{[^}]*font-family: "Zerp Symbols", "Montserrat"/);
+  // Behind the real family everywhere else, where it only ever serves U+2192.
+  assert.match(css, /font-family: "Montserrat", "Zerp Symbols", sans-serif;/);
+  assert.match(css, /font-family: "Roboto Mono", "Zerp Symbols", monospace;/);
 });
 
 test("token contrast json is emitted for the checker", async () => {

@@ -9,6 +9,11 @@
 /* Tokens are generated from @evilmartians/harmony and prepended at build
    time. Only var(--zerp-*) color references are allowed in this file. */
 
+/* "Zerp Symbols" is a single-glyph face declared with unicode-range: U+2192,
+   so the browser consults it for → and for nothing else. It sits behind the
+   real family in every general stack: an author who types → anywhere gets a
+   known arrow instead of a per-machine fallback, and no other character is
+   affected. The two arrow markers name it first — see .slide ul li::before. */
 html,
 body {
   width: 100%;
@@ -16,7 +21,7 @@ body {
   overflow: hidden;
   background: var(--zerp-bg);
   color: var(--zerp-text);
-  font-family: "Montserrat", sans-serif;
+  font-family: "Montserrat", "Zerp Symbols", sans-serif;
 }
 
 b,
@@ -182,8 +187,14 @@ hr {
   padding: 5px 0;
 }
 
+/* "Zerp Symbols" first, not merely present: it is the only bundled face that
+   covers U+2192, and a pipeline that reads a rendered deck back out takes the
+   first family of the computed stack as the run's one font. Naming it first
+   here is what keeps the arrow a known glyph outside the browser. It carries
+   nothing but U+2192, so Montserrat still draws everything else. */
 .slide ul li::before {
   content: "→ ";
+  font-family: "Zerp Symbols", "Montserrat", sans-serif;
   color: var(--zerp-accent);
 }
 
@@ -210,7 +221,7 @@ hr {
 .slide ol > li::before {
   content: counter(zerp-ol, decimal-leading-zero);
   margin-right: 16px;
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   font-size: 1.2em;
   font-weight: 700;
   color: var(--zerp-accent);
@@ -218,7 +229,7 @@ hr {
 
 code,
 kbd {
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   font-size: 0.95em;
   background: var(--zerp-surface);
   border: 1px solid var(--zerp-border);
@@ -285,7 +296,7 @@ tr:last-child td {
 }
 
 table.mono td {
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
 }
 
 table.compact th,
@@ -356,7 +367,7 @@ figcaption,
 }
 
 .stat .value {
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   font-size: 3em;
   font-weight: 900;
   line-height: 1.1;
@@ -432,6 +443,7 @@ figcaption,
 
 .flow > * + *::before {
   content: "→";
+  font-family: "Zerp Symbols", "Montserrat", sans-serif;
   position: absolute;
   top: 50%;
   left: -18px;
@@ -466,7 +478,7 @@ figcaption,
 .steps > *::before {
   content: counter(zerp-step, decimal-leading-zero);
   display: block;
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   font-size: 2em;
   font-weight: 900;
   color: var(--zerp-accent);
@@ -491,7 +503,7 @@ figcaption,
 }
 
 .timeline .item .year {
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   font-weight: 700;
 }
 
@@ -735,7 +747,7 @@ figcaption,
 }
 
 .mono {
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
 }
 
 .raised {
@@ -965,6 +977,12 @@ figcaption,
   z-index: 100;
 }
 
+/* The one stack deliberately left without "Zerp Symbols": these two buttons
+   are ← and →, and no bundled subset covers either, so today both come from
+   the same system fallback and match each other. Adding the U+2192-only face
+   would resolve → and leave ← behind, pairing a long thin arrow with a short
+   heavy one. Nav chrome is never exported (it is display:none in print), so
+   it gains nothing from a deterministic glyph and would only lose the pair. */
 .nav button {
   background: none;
   border: none;
@@ -1000,7 +1018,7 @@ figcaption,
   font-size: 1em;
   font-weight: 700;
   color: var(--zerp-muted);
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   z-index: 100;
 }
 
@@ -1019,7 +1037,7 @@ figcaption,
   color: var(--zerp-muted);
   font-size: 1em;
   font-weight: 700;
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   z-index: 100;
 }
 
@@ -1081,7 +1099,7 @@ figcaption,
   border-radius: 999px;
   color: var(--zerp-muted);
   cursor: pointer;
-  font-family: "Roboto Mono", monospace;
+  font-family: "Roboto Mono", "Zerp Symbols", monospace;
   font-size: 1em;
   font-weight: 700;
   padding: 0 12px;

@@ -15,6 +15,22 @@ const SUBSETS = new Set(["latin", "latin-ext", "cyrillic", "cyrillic-ext"]);
 
 const FACE_BLOCK = /\/\* ([a-z0-9-]+) \*\/\s*@font-face \{[^}]*\}/g;
 
+// zerp draws two markers with a right arrow (the ul bullet and the .flow
+// connector) and decks type one in prose, but neither bundled family covers
+// U+2192: Montserrat's latin subset has ↑ ↓ • and no →, Roboto Mono's has no
+// arrows at all. Left unresolved the glyph comes from whatever the viewing
+// machine falls back to — a different shape per OS in the browser, and
+// re-resolved by the reader's machine once a deck is exported to a format
+// whose text runs carry a single font face. This 812-byte face carries the
+// one glyph; unicode-range keeps it from ever serving another character, so
+// naming it in a font stack is inert for everything else.
+// Provenance and the regeneration commands: ./assets/fonts/README.md.
+const SYMBOL_FACE = {
+  family: "Zerp Symbols",
+  file: "./assets/fonts/zerp-symbols.woff2",
+  unicodeRange: "U+2192",
+};
+
 function subsetOf(slug: string, family: string, face: string): string {
   const [weight, style] = face.includes("-italic") ? face.split("-") : [face, "normal"];
   const prefix = `${family}-`;
@@ -52,6 +68,20 @@ async function inlineFaceCss(pkg: string, face: string): Promise<string> {
   return blocks.join("\n");
 }
 
+async function inlineSymbolFaceCss(): Promise<string> {
+  const data = await readFile(new URL(SYMBOL_FACE.file, import.meta.url));
+  const dataUrl = `data:font/woff2;base64,${data.toString("base64")}`;
+  return `/* zerp-symbols-400-normal */
+@font-face {
+  font-family: '${SYMBOL_FACE.family}';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(${dataUrl}) format('woff2');
+  unicode-range: ${SYMBOL_FACE.unicodeRange};
+}`;
+}
+
 async function buildFontCss(): Promise<string> {
   const parts: string[] = [];
   for (const { pkg, faces } of FONT_FACES) {
@@ -59,6 +89,7 @@ async function buildFontCss(): Promise<string> {
       parts.push(await inlineFaceCss(pkg, face));
     }
   }
+  parts.push(await inlineSymbolFaceCss());
   return parts.join("\n");
 }
 
