@@ -27,6 +27,7 @@
     "README.md",
     "LICENSE",
     "llms.txt",
+    "llms-pptx.txt",
     "MIGRATION.md",
     "CHANGELOG.md"
   ],
@@ -41,6 +42,7 @@
     },
     "./package.json": "./package.json",
     "./llms.txt": "./llms.txt",
+    "./llms-pptx.txt": "./llms-pptx.txt",
     "./docs/style-system.pdf": "./docs/style-system.pdf",
     "./dist/cli.js": "./dist/cli.js"
   },

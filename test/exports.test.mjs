@@ -20,5 +20,6 @@ test("package metadata paths are exported for path consumers", () => {
   assert.equal(require(packageJson).name, "@emirotin/zerp");
 
   assert.match(require.resolve("@emirotin/zerp/llms.txt"), /llms\.txt$/);
+  assert.match(require.resolve("@emirotin/zerp/llms-pptx.txt"), /llms-pptx\.txt$/);
   assert.match(require.resolve("@emirotin/zerp/dist/cli.js"), /dist[/\\]cli\.js$/);
 });
