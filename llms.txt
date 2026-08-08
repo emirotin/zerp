@@ -132,6 +132,7 @@ Built decks are print-ready. The same `index.html` paginates for print with no e
 - Steps print in their **final state**: `data-step` content is present, `data-until-step` content is absent. A printed deck shows every reveal.
 - Print with a **page size equal to the presentation viewport** (e.g. 1280×720 CSS px) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
 - **Page capacity is physical**: content that overflows a slide is clipped at the bottom of the page, not reflowed onto a second page. Fix overflow the same way as on screen (trim content, or top-align with `.slide.top`); `zerp check` and `zerp verify` still gate it.
+- If a deck will additionally be exported to PPTX by a downstream pipeline, `llms-pptx.txt` (shipped alongside this file) has the export-specific authoring restrictions; the caller includes it alongside this guide when that target applies.
 
 ## Validation loop (required)
 

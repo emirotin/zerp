@@ -1,0 +1,43 @@
+# zerp PPTX export restrictions for LLMs
+
+## Scope
+
+This file is a supplement to `llms.txt`, not a replacement. A caller includes it alongside `llms.txt` — concatenated, not conditionally switched on inside a single file — whenever the deck being authored is destined for export to PPTX by a downstream pipeline. There is no in-deck flag or zerp option that turns this on; the decision and the concatenation are the caller's responsibility.
+
+Everything below EXTENDS `llms.txt`: it never contradicts the base guide, and where a rule here is stricter, the stricter rule wins. Do not apply these restrictions to decks that only ever render in the browser or print to PDF — they trade away things that work fine there to guarantee fidelity in a format zerp itself does not produce.
+
+The rules below are empirically verified PPTX export behaviors, not stylistic preferences: each describes an authoring pattern that renders fine in the browser (and in `zerp`'s own print pipeline) but degrades or vanishes once the deck is converted to PPTX.
+
+## Pills and badges must stand alone
+
+An inline element with box decoration (background, border, radius) that sits **inside** a sentence or paragraph is flattened to a plain colored text run in the export — the box vanishes. A standalone pill — its own element in a `.row` or `.stack`, not inside flowing text — exports as a proper shape.
+
+- Never embed `.pill` or `.interactive-badge`-style chips mid-sentence.
+- Give every pill/badge its own line, or its own `.row`/`.stack`, never inline text flow.
+
+## Inline `<code>`/`<kbd>` chips lose their box
+
+`<code>` and `<kbd>` render with a border and rounded corners in the browser, but the export at best approximates them with a flat text-highlight band — the border and rounding do not survive. Don't let meaning depend on the chip's box shape; the mono font plus the highlight band is what carries it across both targets.
+
+## Font weights: stick to 400/700 (+ italics)
+
+Use only weight 400 and 700 per family, plus italics, unless the deck's `zerp` font config (see `llms.txt`, "Choosing other typefaces") supplies a dedicated family for a heavier look. Weights like 600 or 900 are remapped to synthetic family names at export time; a machine without the embedded font renders those synthetic weights degraded (often falling back to a generic sans-serif at the wrong weight). If a slide needs a genuinely heavier or lighter look, install and declare a matching real family rather than reaching for an intermediate weight.
+
+## SVG `<text>` — stricter for exports
+
+`llms.txt`'s "Diagrams and inline SVG" section already covers the general rule: draw shapes in SVG, label with HTML positioned over it, never put words in `<svg><text>`. That restriction applies double for PPTX export — apply it without exception on export-bound decks, including cases the base guide treats as borderline (e.g. a short label that "reads fine in every browser you tried").
+
+## Interactive and scripted slides export their final state
+
+PPTX export follows print semantics: `data-step` content is present, `data-until-step` content is absent, and any `slide-next`/`slide-prev` driven script state is captured only at whatever its default/final render produced. There is no click-through or step-by-step reveal in the exported deck.
+
+- Anything essential to the slide's meaning must be present in the static markup that renders after all steps have played out — never leave the payoff dependent on a viewer stepping through it live.
+- Treat this the same way you already treat printing (`llms.txt`, "Printing and PDF export"): PPTX export goes through the same final-state pathway, not a live DOM.
+
+## Emoji render from the viewer's platform font
+
+Emoji are not part of the deck's bundled font subsets (see `llms.txt`, "Characters and glyph coverage") in the browser or the export. Each viewer's OS/PowerPoint build supplies its own emoji glyphs, so exact size, color palette, and shape vary between machines. Don't lay out a slide so that its alignment depends on a specific emoji's rendered size — leave breathing room instead of pixel-fitting around it.
+
+## Prefer simple in-flow markup inside list items
+
+An `<li>` containing only plain inline text (and inline emphasis) exports as native, editable PPTX text. An `<li>` containing an image, a nested list, or other block content falls back to a heavier, less editable export path (e.g. the whole list rendered as a picture rather than text). Keep list items to plain in-flow text and inline markup; if a list entry needs an image or nested structure, pull it out of the `<li>` and lay it out alongside the list instead of inside it.
