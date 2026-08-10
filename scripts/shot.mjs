@@ -258,7 +258,7 @@ async function captureScreenshot(cdp, { url, width, height, scale, timeoutMs }) 
   const loaded = cdp.waitForEvent("Page.loadEventFired", sessionId, timeoutMs);
   await cdp.send("Page.navigate", { url }, sessionId);
   await loaded;
-  // Let reveal/theme-switch transitions and any deferred script settle.
+  // Let reveal/theme transitions and any deferred script settle.
   await sleep(500);
   const { data } = await cdp.send(
     "Page.captureScreenshot",

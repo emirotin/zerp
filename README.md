@@ -129,7 +129,7 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 
 A built deck is print-ready as-is. Printing (browser print dialog, or a headless
 print backend) produces **one page per slide** in deck order: presentation chrome
-(nav, counter, progress bar, theme switch, source badge) is hidden, and steps are
+(nav, counter, progress bar, theme toggle, source badge) is hidden, and steps are
 rendered in their final state — every `data-step` reveal shown, every
 `data-until-step` element gone.
 

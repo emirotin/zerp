@@ -1070,63 +1070,38 @@ figcaption,
   transition: width 0.3s;
 }
 
-.theme-switch {
+.theme-toggle {
   position: fixed;
   bottom: 24px;
   right: 110px;
+  width: 36px;
   height: 36px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 100;
-}
-
-.theme-switch .theme-trigger {
-  background: none;
-  border: none;
-  color: var(--zerp-muted);
-  cursor: pointer;
-  font-size: 1em;
-  padding: 0 8px;
-  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
-}
-
-.theme-switch .theme-trigger:hover {
-  color: var(--zerp-text);
-}
-
-.theme-switch .theme-options {
-  display: flex;
-  gap: 4px;
-  background: var(--zerp-surface);
-  border: 1px solid var(--zerp-border);
-  border-radius: 999px;
-  padding: 4px;
-}
-
-.theme-switch .theme-options button {
   background: none;
   border: none;
   border-radius: 999px;
   color: var(--zerp-muted);
   cursor: pointer;
-  font-family: var(--zerp-font-mono);
-  font-size: 1em;
-  font-weight: 700;
-  padding: 0 12px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
+  padding: 0;
+  z-index: 100;
 }
 
-.theme-switch .theme-options button.selected {
-  background: var(--zerp-blue-tint);
-  color: var(--zerp-blue-on-tint);
+.theme-toggle:hover {
+  color: var(--zerp-text);
+}
+
+/* Both icons ship; the runtime names the one that matches the next press. */
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  display: none;
+}
+
+.theme-toggle[data-theme-target="light"] .theme-icon-sun,
+.theme-toggle[data-theme-target="dark"] .theme-icon-moon {
+  display: block;
 }
 
 /* ---- print: one page per slide (Chromium print backend) ---- */
@@ -1157,7 +1132,7 @@ figcaption,
   /* Presentation chrome has no meaning on paper. */
   .nav,
   .counter,
-  .theme-switch,
+  .theme-toggle,
   .progress,
   .source-badge {
     display: none !important;

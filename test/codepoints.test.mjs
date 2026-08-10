@@ -63,6 +63,7 @@ test("a real deck's scan sees markdown, css markers and chrome", async () => {
   // The nav's arrows are chrome: full only.
   assert.ok(has(full, "←"), "← from the nav");
   assert.ok(!has(slideContent, "←"), "chrome is excluded from slide content");
-  // The theme switch trigger, also chrome.
-  assert.ok(has(full, "◐") && !has(slideContent, "◐"));
+  // The theme toggle draws its sun/moon as SVG precisely so no font has to
+  // carry those codepoints — it must contribute nothing to the scan.
+  assert.ok(!has(full, "☀") && !has(full, "☾"), "theme toggle needs no glyphs");
 });

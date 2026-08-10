@@ -187,7 +187,7 @@
     }
     if (event.key === "t" || event.key === "T") {
       event.preventDefault();
-      cycleTheme();
+      toggleTheme();
     }
     if (event.key === "s" || event.key === "S") {
       event.preventDefault();
@@ -210,64 +210,96 @@
     }
   });
 
+  // Theme control: three states in the model, two on screen at any moment.
+  // The deck default (system, or whatever `--theme` baked in) is one state;
+  // an explicit override stored in localStorage is the other. One press pins
+  // the opposite of what you are looking at, the next press unpins it. Nothing
+  // outside a press ever writes or clears the override — an OS scheme change
+  // must not silently demote a deliberate choice back to "default".
   const THEME_KEY = "zerp-theme";
-  const THEME_ORDER = ["light", "system", "dark"];
-  const themeSwitch = document.getElementById("theme-switch");
-  const themeOptions = themeSwitch ? themeSwitch.querySelector(".theme-options") : null;
+  const themeToggle = document.getElementById("theme-toggle");
+  const darkQuery = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
 
-  function syncThemeSwitch(value) {
-    if (!themeSwitch) {
+  function readOverride() {
+    try {
+      const stored = localStorage.getItem(THEME_KEY);
+      return stored === "light" || stored === "dark" ? stored : null;
+    } catch {
+      /* storage unavailable */
+      return null;
+    }
+  }
+
+  function writeOverride(value) {
+    try {
+      if (value) {
+        localStorage.setItem(THEME_KEY, value);
+      } else {
+        localStorage.removeItem(THEME_KEY);
+      }
+    } catch {
+      /* storage unavailable */
+    }
+  }
+
+  function defaultTheme() {
+    const value = document.documentElement.dataset.zerpDefaultTheme;
+    return value === "light" || value === "dark" ? value : "system";
+  }
+
+  // Which of the two palettes a `data-zerp-theme` value actually paints.
+  function resolveScheme(theme) {
+    if (theme !== "system") {
+      return theme;
+    }
+    return darkQuery && darkQuery.matches ? "dark" : "light";
+  }
+
+  function syncThemeToggle() {
+    if (!themeToggle) {
       return;
     }
-    for (const button of themeSwitch.querySelectorAll("[data-theme-choice]")) {
-      button.classList.toggle("selected", button.dataset.themeChoice === value);
-    }
+    const override = readOverride();
+    const shown = override ?? resolveScheme(defaultTheme());
+    // The icon always names where the next press lands, never where you are.
+    const target = override ? resolveScheme(defaultTheme()) : shown === "dark" ? "light" : "dark";
+    const label = override
+      ? "Use the default theme (" + target + ")"
+      : "Switch to the " + target + " theme";
+    themeToggle.dataset.themeTarget = target;
+    themeToggle.setAttribute("aria-label", label);
+    themeToggle.title = label;
   }
 
   function applyTheme(value) {
     document.documentElement.dataset.zerpTheme = value;
-    try {
-      localStorage.setItem(THEME_KEY, value);
-    } catch {
-      /* storage unavailable */
-    }
-    syncThemeSwitch(value);
+    syncThemeToggle();
   }
 
-  function cycleTheme() {
-    const current = document.documentElement.dataset.zerpTheme || "system";
-    const index = THEME_ORDER.indexOf(current);
-    applyTheme(THEME_ORDER[(index + 1) % THEME_ORDER.length]);
+  function toggleTheme() {
+    const override = readOverride();
+    if (override) {
+      writeOverride(null);
+      applyTheme(defaultTheme());
+      return;
+    }
+    const next = resolveScheme(defaultTheme()) === "dark" ? "light" : "dark";
+    writeOverride(next);
+    applyTheme(next);
   }
 
   function initTheme() {
-    let stored = null;
-    try {
-      stored = localStorage.getItem(THEME_KEY);
-    } catch {
-      /* storage unavailable */
-    }
-    const value = THEME_ORDER.includes(stored)
-      ? stored
-      : document.documentElement.dataset.zerpDefaultTheme || "system";
-    document.documentElement.dataset.zerpTheme = value;
-    syncThemeSwitch(value);
+    applyTheme(readOverride() ?? defaultTheme());
   }
 
-  if (themeSwitch && themeOptions) {
-    const trigger = themeSwitch.querySelector(".theme-trigger");
-    if (trigger) {
-      trigger.addEventListener("click", () => {
-        themeOptions.hidden = !themeOptions.hidden;
-      });
-    }
-    themeOptions.addEventListener("click", (event) => {
-      const choice = event.target.closest("[data-theme-choice]");
-      if (choice) {
-        applyTheme(choice.dataset.themeChoice);
-        themeOptions.hidden = true;
-      }
-    });
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme);
+  }
+
+  // An OS scheme flip repaints through CSS on its own; all that is left to do
+  // is restate where the button now leads.
+  if (darkQuery && darkQuery.addEventListener) {
+    darkQuery.addEventListener("change", syncThemeToggle);
   }
 
   initTheme();

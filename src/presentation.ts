@@ -256,14 +256,20 @@ function deriveDeckTitle(slidesHtml: string): string | null {
   return null;
 }
 
-const THEME_SWITCH_HTML = `    <div class="theme-switch" id="theme-switch">
-      <button class="theme-trigger" aria-label="Theme">◐</button>
-      <div class="theme-options" hidden>
-        <button data-theme-choice="light">Light</button>
-        <button data-theme-choice="system">Auto</button>
-        <button data-theme-choice="dark">Dark</button>
-      </div>
-    </div>`;
+// A two-state control over a three-state model: default vs. pinned override.
+// The runtime sets data-theme-target to the scheme the next press produces and
+// the CSS reveals the matching icon, so the button always shows where it leads.
+// Drawn rather than typed: sun/moon codepoints render as color emoji on some
+// platforms and are missing from the bundled families on all of them.
+const THEME_TOGGLE_HTML = `    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Theme">
+      <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="4.5" />
+        <path d="M12 2v2.6M12 19.4V22M2 12h2.6M19.4 12H22M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9" />
+      </svg>
+      <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+        <path d="M20.5 14.8A8.7 8.7 0 0 1 9.2 3.5a8.7 8.7 0 1 0 11.3 11.3Z" />
+      </svg>
+    </button>`;
 
 const NAV_HTML = `    <div class="nav">
       <button id="nav-prev" onclick="prev()">←</button>
@@ -274,7 +280,7 @@ const NAV_HTML = `    <div class="nav">
 // what the document body appends after the slides.
 const CHROME_HTML = `    <div class="progress" id="progress"></div>
     <div class="counter" id="counter"></div>
-${THEME_SWITCH_HTML}
+${THEME_TOGGLE_HTML}
 ${NAV_HTML}`;
 
 async function codepointsFor(slidesHtml: string): Promise<DeckCodepoints> {

@@ -173,9 +173,41 @@
         white-space: nowrap;
       }
 
-      /* Repurpose the deck theme switch as this page's theme control. */
+      /* This guide gets the explicit three-state control rather than the
+         deck's two-state toggle: it is a settings-shaped page whose whole
+         subject is the token flip, so naming all three states is the point. */
       .theme-switch {
+        position: fixed;
+        bottom: 24px;
         right: 24px;
+        display: flex;
+        gap: 4px;
+        background: var(--zerp-surface);
+        border: 1px solid var(--zerp-border);
+        border-radius: 999px;
+        padding: 4px;
+        z-index: 100;
+      }
+
+      .theme-switch button {
+        background: none;
+        border: none;
+        border-radius: 999px;
+        color: var(--zerp-muted);
+        cursor: pointer;
+        font-family: "Roboto Mono", monospace;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 0 12px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
+      }
+
+      .theme-switch button.selected {
+        background: var(--zerp-blue-tint);
+        color: var(--zerp-blue-on-tint);
       }
 
       @page {
@@ -195,6 +227,11 @@
         .page {
           max-width: none;
           padding: 0;
+        }
+
+        /* This page's control is its own, so it needs its own print rule. */
+        .theme-switch {
+          display: none !important;
         }
 
         section h2 {
@@ -651,10 +688,11 @@
         <p>
           The theme is a single attribute — <code>data-zerp-theme</code> set to <code>dark</code>,
           <code>light</code>, or <code>system</code> — and only token values change with it.
-          Presenters pick a default at build time; viewers can override with the ◐ switch
-          (persisted). Because both themes always ship, everything you design must work in both —
-          that's the real reason raw colors are banned. (Sole exemption: depicted real-world objects
-          — a playing card's white face stays white.)
+          Presenters pick a default at build time; viewers override it with the sun/moon toggle in
+          the deck chrome (or the <code>t</code> key), which pins the opposite scheme and, on a
+          second press, hands control back to the default. Because both themes always ship,
+          everything you design must work in both — that's the real reason raw colors are banned.
+          (Sole exemption: depicted real-world objects — a playing card's white face stays white.)
         </p>
         <p>
           The system is enforced, not aspirational.
@@ -691,11 +729,9 @@
     </div>
 
     <div class="theme-switch">
-      <div class="theme-options">
-        <button data-theme="dark">dark</button>
-        <button data-theme="light">light</button>
-        <button data-theme="system" class="selected">system</button>
-      </div>
+      <button data-theme="dark">dark</button>
+      <button data-theme="light">light</button>
+      <button data-theme="system" class="selected">system</button>
     </div>
 
     <script>

@@ -21,8 +21,9 @@ test("slides carry their source path and chrome markup is present", async () => 
     html,
     /<div data-zerp-slide>\s*<div class="slide" data-zerp-src="slides\/00-ok\.md" data-zerp-src-slide="1\/1" data-zerp-index="1">/,
   );
-  assert.match(html, /id="theme-switch"/);
-  assert.match(html, /data-theme-choice="system"/);
+  assert.match(html, /id="theme-toggle"/);
+  assert.match(html, /class="theme-icon-sun"/);
+  assert.match(html, /class="theme-icon-moon"/);
 });
 
 test("multi-slide files get in-file ordinals and global deck positions", async () => {
