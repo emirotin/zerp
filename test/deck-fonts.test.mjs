@@ -74,6 +74,8 @@ test("config mistakes are named, not ignored", async () => {
     [{ fonts: { body: { fontsourcePackage: "@fontsource/inter" } } }, /family must be/],
     [{ fonts: { body: { family: "Inter", weight: ["400"] } } }, /unknown key "weight"/],
     [{ fonts: { body: { family: "Inter", weights: "400" } } }, /weights must be an array/],
+    [{ fonts: { display: { fontsourcePackage: "@fontsource/inter" } } }, /family must be/],
+    [{ fonts: { display: { family: "Inter", weight: ["400"] } } }, /unknown key "weight"/],
     [{ fonts: { heading: { family: "Inter" } } }, /unknown key "heading"/],
     [{ font: {} }, /unknown key "font"/],
   ];
@@ -81,6 +83,15 @@ test("config mistakes are named, not ignored", async () => {
     const dir = await writeTempDeck(zerp);
     await assert.rejects(readDeckConfig(dir), expected);
   }
+});
+
+test("display is a role of its own", async () => {
+  const dir = await writeTempDeck({
+    fonts: { display: { family: "Roboto Mono", weights: ["400"] } },
+  });
+  assert.deepEqual(await readDeckConfig(dir), {
+    fonts: { display: { family: "Roboto Mono", weights: ["400"] } },
+  });
 });
 
 test("a package that declares a different family name says so", async () => {
