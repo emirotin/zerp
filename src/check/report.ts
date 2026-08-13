@@ -54,15 +54,14 @@ export function formatReport(report: CheckReport, options: { summaryOnly?: boole
     const where = `slide ${first.slideIndex}${src}`;
     lines.push(`${where} [${first.theme}]`);
     for (const finding of group) {
-      lines.push(`  ${ICONS[finding.severity]} "${finding.snippet}" — ${finding.message}`);
+      lines.push(
+        `  ${ICONS[finding.severity]} [${finding.category}] "${finding.snippet}" — ${finding.message}`,
+      );
       if (finding.suggestion) {
         lines.push(`    fix: ${finding.suggestion}`);
       }
     }
     lines.push("");
-  }
-  if (report.skippedSelectors.length > 0) {
-    lines.push(`skipped selectors (not checked): ${report.skippedSelectors.join(", ")}`);
   }
   if (report.findings.length === 0) {
     lines.push("all clear ✓");

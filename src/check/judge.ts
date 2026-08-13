@@ -91,8 +91,14 @@ function backdropFor(slide: ProbeSlide, el: ProbeElement): BackgroundResult {
     }
     node = node.parent === null ? undefined : slide.elements[node.parent];
   }
-  // Nothing opaque above the slide root: the page background is the backdrop.
-  return { kind: "color", color: compositeLayers(layers, { r: 0, g: 0, b: 0, a: 1 }) };
+  // Nothing opaque inside the slide: the theme background lives on html/body,
+  // not on .slide, so the probe records it separately (pageBackgroundColor).
+  // Composite over that real value rather than assuming a color — falling
+  // back to black here would misjudge every plain-background slide against a
+  // backdrop the deck never has. The black default only applies if the field
+  // is missing (hand-authored test probes) or unparseable.
+  const pageBg = parseColor(slide.pageBackgroundColor ?? "") ?? { r: 0, g: 0, b: 0, a: 1 };
+  return { kind: "color", color: compositeLayers(layers, pageBg) };
 }
 
 function wanted(only: FindingCategory[] | undefined, category: FindingCategory): boolean {

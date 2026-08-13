@@ -92,14 +92,29 @@ test("invalid theme is rejected", () => {
   assert.match(result.stderr, /Invalid theme/);
 });
 
-test("invalid verify size is rejected before launching a browser", () => {
-  const result = runCli(["verify", "test/fixtures/clean-deck", "--size", "wide"]);
+test("invalid check size is rejected before launching a browser", () => {
+  const result = runCli(["check", "test/fixtures/clean-deck", "--size", "wide"]);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Invalid verification size/);
 });
 
-test("invalid verify safe margin is rejected before launching a browser", () => {
-  const result = runCli(["verify", "test/fixtures/clean-deck", "--safe-margin", "wide"]);
+test("invalid check safe margin is rejected before launching a browser", () => {
+  const result = runCli(["check", "test/fixtures/clean-deck", "--safe-margin", "wide"]);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Invalid safe margin/);
+});
+
+test("verify is gone and check absorbs its flags", async () => {
+  const help = await runCli(["--help"]);
+  assert.ok(!help.stdout.includes("zerp verify"), "verify is no longer a command");
+  assert.match(help.stdout, /--only/);
+  assert.match(help.stdout, /--safe-margin/);
+});
+
+test("check reports both audits in one pass", async () => {
+  const result = await runCli(["check", "test/fixtures/stack-coverage-deck", "--json"]);
+  const report = JSON.parse(result.stdout);
+  const categories = new Set(report.findings.map((f) => f.category));
+  assert.ok(categories.has("glyph"), "the Greek h1 falls back and is reported");
+  assert.ok(!("skippedSelectors" in report), "nothing is skipped any more");
 });

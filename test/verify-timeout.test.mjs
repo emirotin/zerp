@@ -76,8 +76,8 @@ test("an explicit non-positive budget is rejected", () => {
   assert.throws(() => resolveVerificationTimeoutMs(-1), /Invalid timeout option/);
 });
 
-test("zerp verify rejects a malformed --timeout before opening a browser", () => {
-  const result = runCli(["verify", "test/fixtures/wrapper-deck", "--timeout", "soon"]);
+test("zerp check rejects a malformed --timeout before opening a browser", () => {
+  const result = runCli(["check", "test/fixtures/wrapper-deck", "--timeout", "soon"]);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Invalid timeout: soon/);
 });

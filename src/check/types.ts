@@ -1,15 +1,19 @@
 export type CheckTheme = "dark" | "light";
 export type Severity = "error" | "warning" | "unverifiable";
-export type FindingCategory =
-  | "contrast"
-  | "type-size"
-  | "surface"
-  | "glyph"
-  | "svg-text"
-  | "frame"
-  | "overflow"
-  | "safe-zone"
-  | "console";
+// The runtime list backs the type so both stay in sync automatically — the
+// CLI's `--only` validation needs the values at runtime, not just the type.
+export const FINDING_CATEGORIES = [
+  "contrast",
+  "type-size",
+  "surface",
+  "glyph",
+  "svg-text",
+  "frame",
+  "overflow",
+  "safe-zone",
+  "console",
+] as const;
+export type FindingCategory = (typeof FINDING_CATEGORIES)[number];
 export interface Finding {
   severity: Severity;
   category: FindingCategory;
@@ -25,7 +29,6 @@ export interface CheckReport {
   slideCount: number;
   themes: CheckTheme[];
   findings: Finding[];
-  skippedSelectors: string[];
 }
 export interface DomNode {
   nodeType: number;

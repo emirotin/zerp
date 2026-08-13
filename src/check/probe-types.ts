@@ -46,6 +46,14 @@ export interface ProbeSlide {
   activeRect: { x: number; y: number; width: number; height: number } | null;
   safeZoneItems: SafeZoneItem[] | null;
   svgTextSnippets: string[];
+  /**
+   * The document's own computed background (`getComputedStyle(document.body)`),
+   * where the theme background actually lives — `.slide` itself carries no
+   * background rule. judge.ts's contrast/surface backdrop walk falls back to
+   * this when no ancestor inside the slide has an opaque background, instead
+   * of assuming a color it was never told.
+   */
+  pageBackgroundColor: string;
 }
 
 export interface DeckProbe {

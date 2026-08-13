@@ -155,7 +155,8 @@ const SLIDE_EXPRESSION = (index: number, safeMargin: number): string => `(functi
     activeClass: activeSlide ? activeSlide.classList.contains("active") : false,
     activeRect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
     safeZoneItems: safeZoneItems,
-    svgTextSnippets: svgTexts
+    svgTextSnippets: svgTexts,
+    pageBackgroundColor: getComputedStyle(document.body).backgroundColor
   };
 })()`;
 

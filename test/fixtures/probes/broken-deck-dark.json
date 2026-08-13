@@ -249,7 +249,8 @@
         "height": 1080
       },
       "safeZoneItems": null,
-      "svgTextSnippets": []
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(18, 20, 28)"
     }
   ],
   "browserErrors": []
