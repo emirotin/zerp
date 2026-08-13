@@ -162,12 +162,24 @@ async function main(): Promise<void> {
     const theme = parseTheme(values.theme);
     const outFile = await writePresentation({ rootDir, theme });
     process.stdout.write(`Wrote ${outFile}\n`);
+    // The build itself needs no browser and must still succeed without one; the
+    // post-build check is a courtesy that now drives real Chrome, so its
+    // absence is reported explicitly rather than folded into a generic
+    // "check skipped" line a CI host with no browser installed could scroll
+    // past without noticing it lost check coverage.
     try {
       const report = await checkPresentation({ rootDir });
       process.stdout.write(formatReport(report, { summaryOnly: true }));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      process.stdout.write(`check skipped: ${message}\n`);
+      if (message.includes("No Chrome/Chromium found")) {
+        process.stdout.write(
+          "check skipped: no browser found — run `zerp install-browser`, set CHROME_BIN, " +
+            "or run `zerp check` once a browser is available\n",
+        );
+      } else {
+        process.stdout.write(`check skipped: ${message}\n`);
+      }
     }
     return;
   }

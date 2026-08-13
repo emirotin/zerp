@@ -33,6 +33,25 @@ test("zerp check --json emits a machine-readable report with sourced errors", ()
   assert.equal(errors[0].slideSrc, "slides/00-bad.html");
 });
 
+// The only end-to-end guard that the fix-hint table (token-contrast.json,
+// loaded by checker.ts and passed into judge()) is actually wired up. If a
+// future change drops tokenContrast from the judge() call, or the table's
+// background hex stops matching what the browser reports, every suggestion
+// silently goes back to null and the suite would otherwise stay green.
+test("zerp check names a fix token for a real contrast error", () => {
+  const result = runCli(["check", "test/fixtures/broken-deck", "--json"]);
+  assert.equal(result.status, 1);
+  const report = JSON.parse(result.stdout);
+  const contrastErrors = report.findings.filter(
+    (f) => f.category === "contrast" && f.severity === "error",
+  );
+  assert.ok(contrastErrors.length > 0, "broken deck reports contrast errors");
+  assert.ok(
+    contrastErrors.some((f) => f.suggestion && f.suggestion.includes("var(--zerp-")),
+    "at least one contrast error names a fix token",
+  );
+});
+
 test("zerp check --json on a clean deck has no error findings and exits 0", () => {
   const result = runCli(["check", "test/fixtures/clean-deck", "--json"]);
   assert.equal(result.status, 0);

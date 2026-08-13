@@ -90,13 +90,19 @@ function canFindChrome() {
  * stalls, and the child times out against a frozen browser. Any host keeping a
  * browser warm for other processes has the same obligation — stay responsive.
  */
-function runVerify(args, env) {
+// Renamed from runVerify when the `verify` CLI command was merged into
+// `check` (see task-7-report.md): same transport-reuse plumbing, now
+// spawning `zerp check`. checkPresentation's JSON report is a single object
+// with `findings` (not an array of per-theme VerifyReports with `failures`),
+// so callers below read `.findings` off one parsed object instead of
+// destructuring `[report]`.
+function runCheck(args, env) {
   return new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,
       [
         "dist/cli.js",
-        "verify",
+        "check",
         "test/fixtures/wrapper-deck",
         "--theme",
         "dark",
@@ -122,7 +128,7 @@ function runVerify(args, env) {
 // two properties that make reuse safe: the borrowed browser outlives the run,
 // and each run takes its context back with it.
 test(
-  "zerp verify reuses a browser over CDP without closing or leaking into it",
+  "zerp check reuses a browser over CDP without closing or leaking into it",
   { skip: !browserTestsEnabled || !canFindChrome() },
   async () => {
     const port = await freePort();
@@ -136,22 +142,20 @@ test(
       const baselineContexts = inspector.contexts().length;
       await inspector.close();
 
-      const first = await runVerify(["--browser-endpoint", endpoint]);
+      const first = await runCheck(["--browser-endpoint", endpoint]);
       assert.equal(first.status, 0, `${first.stdout}\n${first.stderr}`);
-      const [firstReport] = JSON.parse(first.stdout);
-      assert.equal(firstReport.fontsActive, true);
-      assert.deepEqual(firstReport.failures, []);
-      assert.equal(firstReport.slides[0]?.viewportWidth, 1920);
+      const firstReport = JSON.parse(first.stdout);
+      assert.deepEqual(firstReport.findings, []);
 
       // Still alive after the first run: a borrowed browser is disconnected
       // from, never terminated — otherwise the second run has nothing to reuse.
       assert.equal(host.isConnected(), true);
 
       // The env var is the path a spawning host actually uses.
-      const second = await runVerify([], { [ENV_VAR]: endpoint });
+      const second = await runCheck([], { [ENV_VAR]: endpoint });
       assert.equal(second.status, 0, `${second.stdout}\n${second.stderr}`);
-      const [secondReport] = JSON.parse(second.stdout);
-      assert.deepEqual(secondReport.failures, []);
+      const secondReport = JSON.parse(second.stdout);
+      assert.deepEqual(secondReport.findings, []);
       assert.equal(host.isConnected(), true);
 
       // Contexts are the thing that accumulates when a client walks away from a
@@ -160,7 +164,7 @@ test(
       assert.equal(
         after.contexts().length,
         baselineContexts,
-        "verification contexts were left behind in the borrowed browser",
+        "check contexts were left behind in the borrowed browser",
       );
       await after.close();
     } finally {
@@ -170,7 +174,7 @@ test(
 );
 
 test(
-  "zerp verify needs no local browser when one is supplied",
+  "zerp check needs no local browser when one is supplied",
   { skip: !browserTestsEnabled || !canFindChrome() },
   async () => {
     const port = await freePort();
@@ -181,12 +185,12 @@ test(
     try {
       // CHROME_BIN points at a path that does not exist: resolution must not run
       // at all when the browser arrives over the endpoint.
-      const result = await runVerify(["--browser-endpoint", `http://127.0.0.1:${port}`], {
+      const result = await runCheck(["--browser-endpoint", `http://127.0.0.1:${port}`], {
         CHROME_BIN: "/nonexistent/chrome",
       });
       assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-      const [report] = JSON.parse(result.stdout);
-      assert.deepEqual(report.failures, []);
+      const report = JSON.parse(result.stdout);
+      assert.deepEqual(report.findings, []);
     } finally {
       await host.close();
     }
@@ -197,19 +201,18 @@ test(
 // it fits a host that spawns this CLI from the same playwright build — which is
 // exactly what this test is.
 test(
-  "zerp verify reuses a playwright browser server over ws://",
+  "zerp check reuses a playwright browser server over ws://",
   { skip: !browserTestsEnabled || !canFindChrome() },
   async () => {
     const server = await chromium.launchServer({ headless: true });
     try {
-      const result = await runVerify(["--browser-endpoint", server.wsEndpoint()]);
+      const result = await runCheck(["--browser-endpoint", server.wsEndpoint()]);
       assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-      const [report] = JSON.parse(result.stdout);
-      assert.equal(report.fontsActive, true);
-      assert.deepEqual(report.failures, []);
+      const report = JSON.parse(result.stdout);
+      assert.deepEqual(report.findings, []);
 
       // The server is still serving: a second run reuses it.
-      const again = await runVerify(["--browser-endpoint", server.wsEndpoint()]);
+      const again = await runCheck(["--browser-endpoint", server.wsEndpoint()]);
       assert.equal(again.status, 0, `${again.stdout}\n${again.stderr}`);
     } finally {
       await server.close();
@@ -222,7 +225,7 @@ test(
   { skip: !browserTestsEnabled },
   async () => {
     const port = await freePort();
-    const result = await runVerify([
+    const result = await runCheck([
       "--browser-endpoint",
       `http://127.0.0.1:${port}`,
       "--timeout",

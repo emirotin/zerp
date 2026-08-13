@@ -81,6 +81,80 @@ test(
   },
 );
 
+// Ported from the deleted `zerp verify` CLI tests (test/verify.test.mjs) when
+// the verify command was merged into check: these facts (viewport per slide,
+// frame/visibility/display counts) live on DeckProbe, not on CheckReport's
+// JSON (which only carries slideCount/themes/findings), so there is no
+// `zerp check --json` equivalent to assert them through — probeDeck is the
+// layer that actually owns them, same as it always did.
+test(
+  "a custom --size reaches every slide's viewport, not just the default",
+  { skip: !browserTestsEnabled || !canFindChrome() },
+  async () => {
+    // 1600x900 rather than the 1920x1080 default, so this pins width/height
+    // actually taking effect rather than merely matching what the default
+    // probe would have reported anyway.
+    const probe = await probeDeck({
+      rootDir: "test/fixtures/wrapper-deck",
+      theme: "dark",
+      width: 1600,
+      height: 900,
+      safeMargin: 0,
+      timeoutMs: 30000,
+    });
+    assert.equal(probe.width, 1600);
+    assert.equal(probe.height, 900);
+    for (const slide of probe.slides) {
+      assert.equal(slide.viewportWidth, 1600);
+      assert.equal(slide.viewportHeight, 900);
+    }
+  },
+);
+
+test(
+  "the probe honors an authored slide root's own display value and reports frame/visibility facts per slide",
+  { skip: !browserTestsEnabled || !canFindChrome() },
+  async () => {
+    // wrapper-deck's first slide sets `display: grid` on its own authored
+    // root (see slides/00-grid-root.html); the framework's frame wrapper
+    // must not override it. This is exactly the class of regression `zerp
+    // verify` used to catch (wrapper visibility, custom root display) —
+    // ported here onto the probe directly.
+    const probe = await probeDeck({
+      rootDir: "test/fixtures/wrapper-deck",
+      theme: "dark",
+      width: 1920,
+      height: 1080,
+      safeMargin: 0,
+      timeoutMs: 30000,
+    });
+    assert.equal(probe.frameCount, 2);
+    assert.equal(probe.slideCount, 2);
+    assert.equal(probe.innerSlideCount, 2);
+    assert.equal(probe.slides[0]?.activeDisplay, "grid");
+    assert.deepEqual(
+      probe.slides.map((slide) => [
+        slide.activeCount,
+        slide.visibleCount,
+        slide.activeIndex,
+        slide.activeClass,
+      ]),
+      [
+        [1, 1, 1, true],
+        [1, 1, 2, true],
+      ],
+    );
+    // Each slide carries its source attribution, mirroring zerp check.
+    assert.deepEqual(
+      probe.slides.map((slide) => slide.src),
+      ["slides/00-grid-root.html", "slides/01-plain.md"],
+    );
+    for (const slide of probe.slides) {
+      assert.equal(slide.srcSlide, "1/1");
+    }
+  },
+);
+
 test(
   "browser errors report deck-relative paths, not absolute file:// URLs",
   { skip: !browserTestsEnabled || !canFindChrome() },

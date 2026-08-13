@@ -44,54 +44,15 @@ function canResolveWithoutChromeBin() {
   return systemChromeAvailable(SYSTEM_CHROME_CANDIDATES);
 }
 
-test(
-  "zerp verify renders the exact requested viewport size",
-  { skip: !browserTestsEnabled || !canFindChrome() },
-  () => {
-    const result = spawnSync(
-      process.execPath,
-      [
-        "dist/cli.js",
-        "verify",
-        "test/fixtures/wrapper-deck",
-        "--theme",
-        "dark",
-        "--size",
-        "1600x900",
-        "--json",
-      ],
-      { encoding: "utf8", timeout: 60_000 },
-    );
-    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-    const [report] = JSON.parse(result.stdout);
-    // The probe waits for the inlined fonts before measuring; fontsActive
-    // proves the wait happened instead of assuming it.
-    assert.equal(report.fontsActive, true);
-    // A size that differs from the 1920×1080 default, so this pins --size
-    // actually taking effect rather than merely matching what verify would
-    // have done anyway.
-    assert.deepEqual(report.viewport, { width: 1600, height: 900, defaulted: false });
-    for (const slide of report.slides) {
-      assert.equal(slide.viewportWidth, 1600);
-      assert.equal(slide.viewportHeight, 900);
-    }
-  },
-);
-
-test(
-  "zerp verify records whether the checked viewport was the default",
-  { skip: !browserTestsEnabled || !canFindChrome() },
-  () => {
-    const result = spawnSync(
-      process.execPath,
-      ["dist/cli.js", "verify", "test/fixtures/wrapper-deck", "--theme", "dark", "--json"],
-      { encoding: "utf8", timeout: 60_000 },
-    );
-    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-    const [report] = JSON.parse(result.stdout);
-    assert.deepEqual(report.viewport, { width: 1920, height: 1080, defaulted: true });
-  },
-);
+// `zerp verify` renders the exact requested viewport size / records whether
+// the checked size was the default: both used to live here, asserting on
+// VerifyReport's own `viewport`/`fontsActive` fields. checkPresentation's
+// report carries neither (it exposes slideCount/themes/findings, not a
+// per-run viewport echo), so there is no equivalent to convert those two
+// cases to — that was verify's own report surface, not a behavior check.
+// The behavior itself (a custom --size actually reaching the browser) is
+// ported onto probeDeck directly in probe.test.mjs, which is the layer that
+// still owns those facts.
 
 test("verify measures after fonts settle over a playwright-core session", async () => {
   const { readFile } = await import("node:fs/promises");
@@ -99,62 +60,22 @@ test("verify measures after fonts settle over a playwright-core session", async 
   // Guard the two load-bearing transport properties: the probe must wait for
   // font activation (font-dependent overflow was invisible without it), and
   // the transport must be playwright-core — the battle-tested driver that
-  // retired the hand-rolled `--remote-debugging-pipe` CDP client.
+  // retired the hand-rolled `--remote-debugging-pipe` CDP client. verify.ts's
+  // own probe plumbing is unused by the CLI now (probe.ts reimplements it),
+  // but it stays exported and this still pins its properties.
   assert.match(source, /document\.fonts\.ready/);
   assert.match(source, /playwright-core/);
 });
 
-test(
-  "zerp verify catches wrapper visibility and custom root display regressions",
-  { skip: !browserTestsEnabled || !canFindChrome() },
-  () => {
-    const result = spawnSync(
-      process.execPath,
-      [
-        "dist/cli.js",
-        "verify",
-        "test/fixtures/wrapper-deck",
-        "--theme",
-        "both",
-        "--size",
-        "1920x1080",
-        "--json",
-      ],
-      { encoding: "utf8", timeout: 60_000 },
-    );
-    assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-    const reports = JSON.parse(result.stdout);
-    assert.equal(reports.length, 2);
-    for (const report of reports) {
-      assert.equal(report.slideCount, 2);
-      assert.deepEqual(report.failures, []);
-      assert.equal(report.slides[0]?.activeDisplay, "grid");
-      assert.deepEqual(
-        report.slides.map((slide) => [
-          slide.activeCount,
-          slide.visibleCount,
-          slide.activeIndex,
-          slide.activeClass,
-        ]),
-        [
-          [1, 1, 1, true],
-          [1, 1, 2, true],
-        ],
-      );
-      // Each slide carries its source attribution, mirroring zerp check.
-      assert.deepEqual(
-        report.slides.map((slide) => slide.src),
-        ["slides/00-grid-root.html", "slides/01-plain.md"],
-      );
-      for (const slide of report.slides) {
-        assert.equal(slide.srcSlide, "1/1");
-      }
-    }
-  },
-);
+// wrapper-deck's frame/visibility/custom-root-display regression coverage
+// moved to probe.test.mjs ("the probe honors an authored slide root's own
+// display value...") — CheckReport's findings can only prove the *absence*
+// of a frame problem, not pin the exact activeDisplay/activeIndex/src facts
+// the original verify test checked, so the faithful port is onto the probe
+// layer that still carries them.
 
 test(
-  "zerp verify resolves a browser with CHROME_BIN unset",
+  "zerp check resolves a browser with CHROME_BIN unset",
   { skip: !browserTestsEnabled || !canResolveWithoutChromeBin() },
   () => {
     // Exercise the fallback chain (playwright-managed chromium, then system
@@ -165,51 +86,54 @@ test(
       process.execPath,
       [
         "dist/cli.js",
-        "verify",
+        "check",
         "test/fixtures/wrapper-deck",
         "--theme",
         "dark",
         "--size",
         "1920x1080",
+        "--only",
+        "frame",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000, env },
     );
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
-    const [report] = JSON.parse(result.stdout);
-    assert.equal(report.fontsActive, true);
-    assert.deepEqual(report.failures, []);
+    const report = JSON.parse(result.stdout);
+    assert.deepEqual(report.findings, []);
   },
 );
 
 test(
-  "zerp verify --safe-margin flags edge-hugging content and honors data-zerp-bleed",
+  "zerp check --safe-margin flags edge-hugging content and honors data-zerp-bleed",
   { skip: !browserTestsEnabled || !canFindChrome() },
   () => {
     const withoutFlag = spawnSync(
       process.execPath,
       [
         "dist/cli.js",
-        "verify",
+        "check",
         "test/fixtures/safe-zone-deck",
         "--theme",
         "light",
         "--size",
         "1920x1080",
+        "--only",
+        "safe-zone",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000 },
     );
     assert.equal(withoutFlag.status, 0, `${withoutFlag.stdout}\n${withoutFlag.stderr}`);
-    const [cleanReport] = JSON.parse(withoutFlag.stdout);
-    assert.deepEqual(cleanReport.failures, []);
-    assert.equal(cleanReport.safeMargin, undefined);
+    const cleanReport = JSON.parse(withoutFlag.stdout);
+    // safe-zone checking is off unless --safe-margin is given (0 disables it).
+    assert.deepEqual(cleanReport.findings, []);
 
     const withFlag = spawnSync(
       process.execPath,
       [
         "dist/cli.js",
-        "verify",
+        "check",
         "test/fixtures/safe-zone-deck",
         "--theme",
         "light",
@@ -217,19 +141,21 @@ test(
         "1920x1080",
         "--safe-margin",
         "24",
+        "--only",
+        "safe-zone",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000 },
     );
     assert.equal(withFlag.status, 1, `${withFlag.stdout}\n${withFlag.stderr}`);
-    const [report] = JSON.parse(withFlag.stdout);
-    assert.equal(report.safeMargin, 24);
-    assert.equal(report.failures.length, 1, JSON.stringify(report.failures));
-    const [failure] = report.failures;
-    assert.equal(failure.slide, 1);
-    assert.equal(failure.src, "slides/01-edge.html");
-    assert.match(failure.message, /edge-badge enters the 24px print safe margin/);
-    assert.match(failure.message, /left \(0px\)/);
-    assert.match(failure.message, /top \(\d+px\)/);
+    const report = JSON.parse(withFlag.stdout);
+    assert.equal(report.findings.length, 1, JSON.stringify(report.findings));
+    const [finding] = report.findings;
+    assert.equal(finding.category, "safe-zone");
+    assert.equal(finding.slideIndex, 1);
+    assert.equal(finding.slideSrc, "slides/01-edge.html");
+    assert.match(finding.message, /edge-badge enters the 24px print safe margin/);
+    assert.match(finding.message, /left \(0px\)/);
+    assert.match(finding.message, /top \(\d+px\)/);
   },
 );
