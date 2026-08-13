@@ -57,7 +57,7 @@ test(
         "--theme",
         "dark",
         "--size",
-        "1920x1080",
+        "1600x900",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000 },
@@ -67,11 +67,13 @@ test(
     // The probe waits for the inlined fonts before measuring; fontsActive
     // proves the wait happened instead of assuming it.
     assert.equal(report.fontsActive, true);
-    // An explicitly passed --size is recorded as a deliberate choice.
-    assert.deepEqual(report.viewport, { width: 1920, height: 1080, defaulted: false });
+    // A size that differs from the 1920×1080 default, so this pins --size
+    // actually taking effect rather than merely matching what verify would
+    // have done anyway.
+    assert.deepEqual(report.viewport, { width: 1600, height: 900, defaulted: false });
     for (const slide of report.slides) {
-      assert.equal(slide.viewportWidth, 1920);
-      assert.equal(slide.viewportHeight, 1080);
+      assert.equal(slide.viewportWidth, 1600);
+      assert.equal(slide.viewportHeight, 900);
     }
   },
 );
