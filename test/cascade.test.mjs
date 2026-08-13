@@ -113,3 +113,26 @@ test("later background-color longhand overrides earlier background shorthand", (
   assert.equal(result.kind, "color");
   assert.equal(toHex(result.color), "#0000ff");
 });
+
+test("font-family is inherited like color", () => {
+  const model = parseStylesheets([
+    {
+      css: `:root { --zerp-font-body: "Montserrat", sans-serif; --zerp-font-display: "Bebas", sans-serif; }
+            .slide { font-family: var(--zerp-font-body); }
+            :where(.slide h1) { font-family: var(--zerp-font-display); }`,
+      origin: "framework",
+    },
+  ]);
+  const { document } = parseHTML(
+    "<body><div class=slide><h1>T</h1><p>body <em>emphasis</em></p></div></body>",
+  );
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+  const h1 = document.querySelector("h1");
+  const em = document.querySelector("em");
+  assert.equal(resolver.resolveVars(resolver.computedFor(h1).fontFamily), '"Bebas", sans-serif');
+  // Inherited through <p> from .slide, two levels up.
+  assert.equal(
+    resolver.resolveVars(resolver.computedFor(em).fontFamily),
+    '"Montserrat", sans-serif',
+  );
+});

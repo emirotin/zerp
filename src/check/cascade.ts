@@ -4,6 +4,8 @@ import type { DomElement } from "./types.js";
 
 export interface ComputedText {
   color: string;
+  /** Unresolved declaration value; expand with resolveVars before parsing. */
+  fontFamily: string;
   fontSizePx: number;
   fontWeight: number;
   opacity: number;
@@ -195,6 +197,7 @@ export class StyleResolver {
       ? this.computedFor(parent)
       : {
           color: this.vars.get("--zerp-text") ?? "#000000",
+          fontFamily: this.vars.get("--zerp-font-body") ?? "sans-serif",
           fontSizePx: ROOT_PX,
           fontWeight: 400,
           opacity: 1,
@@ -211,11 +214,14 @@ export class StyleResolver {
       : parentComputed.fontWeight;
     const colorRaw = own.get("color");
     const color = !colorRaw || colorRaw === "inherit" ? parentComputed.color : colorRaw;
+    const familyRaw = own.get("font-family");
+    const fontFamily =
+      !familyRaw || familyRaw === "inherit" ? parentComputed.fontFamily : familyRaw;
     const opacityRaw = Number.parseFloat(own.get("opacity") ?? "1");
     const opacity =
       parentComputed.opacity *
       (Number.isNaN(opacityRaw) ? 1 : Math.min(Math.max(opacityRaw, 0), 1));
-    const computed: ComputedText = { color, fontSizePx, fontWeight, opacity };
+    const computed: ComputedText = { color, fontFamily, fontSizePx, fontWeight, opacity };
     this.computedCache.set(el, computed);
     return computed;
   }
