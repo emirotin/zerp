@@ -412,6 +412,29 @@ function judgeContrastAndTypeSize(
   }
 }
 
+// Ported from src/verify.ts's rectFailure. Kept as a local, pure copy rather
+// than imported: verify.ts pulls in playwright-core and node:fs at module
+// scope, and judge.ts must stay importable with none of that in its graph.
+function rectFailure(
+  rect: ProbeSlide["activeRect"],
+  viewportWidth: number,
+  viewportHeight: number,
+): string | null {
+  if (!rect) {
+    return "active frame has no bounding rectangle";
+  }
+  const tolerance = 1;
+  if (
+    Math.abs(rect.x) > tolerance ||
+    Math.abs(rect.y) > tolerance ||
+    Math.abs(rect.width - viewportWidth) > tolerance ||
+    Math.abs(rect.height - viewportHeight) > tolerance
+  ) {
+    return `active frame rect is ${rect.x},${rect.y},${rect.width},${rect.height}; expected viewport ${viewportWidth}x${viewportHeight}`;
+  }
+  return null;
+}
+
 // Ported from src/verify.ts's safeZoneFailureMessage. Kept as a local, pure
 // copy rather than imported: verify.ts pulls in playwright-core and node:fs
 // at module scope, and judge.ts must stay importable with none of that in
@@ -455,12 +478,13 @@ function deckFinding(probe: DeckProbe, category: FindingCategory, message: strin
 
 /**
  * Ports every assertion `zerp verify` makes today (src/verify.ts's
- * `validateProbe`, roughly lines 483-537) onto the probe/judge split: frame
- * count and identity, body overflow, the active inner slide's display and
- * class, the print safe-zone, and collected browser errors. All fire at
- * `error` severity — these are hard contract violations, not style advice.
- * Safe-zone checking stays off unless `safeMargin` is supplied, matching
- * `verify`'s `safeMargin > 0` gate on the probe side.
+ * `validateProbe`, lines 478-541) onto the probe/judge split: frame count
+ * and identity, body overflow, the active inner slide's display, class and
+ * bounding rect versus the viewport, the print safe-zone, and collected
+ * browser errors. All fire at `error` severity — these are hard contract
+ * violations, not style advice. Safe-zone checking stays off unless
+ * `safeMargin` is supplied, matching `verify`'s `safeMargin > 0` gate on
+ * the probe side.
  */
 function judgeStructural(
   probe: DeckProbe,
@@ -545,6 +569,10 @@ function judgeStructural(
       }
       if (!slide.activeClass) {
         findings.push(at("frame", "active inner slide is missing the active class"));
+      }
+      const rectMessage = rectFailure(slide.activeRect, slide.viewportWidth, slide.viewportHeight);
+      if (rectMessage) {
+        findings.push(at("frame", rectMessage));
       }
     }
 
