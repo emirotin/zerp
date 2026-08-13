@@ -187,7 +187,14 @@ export class StyleResolver {
       return cached;
     }
     let hit: VarHit | null = null;
-    for (let node: DomElement | null = el; node; node = node.parentElement) {
+    // Stop before the document element: `this.vars` already holds :root ∪
+    // theme values in the correct precedence (css-model.ts merges a plain
+    // `:root`/`html` block into both themes, then lets a `:root[data-zerp-
+    // theme=…]` block override it). Walking into <html>'s own declarations
+    // here would re-surface the pre-override plain :root value — html
+    // matches the `:root` selector in linkedom — and that value would win
+    // over the theme-specific one purely because the walk reaches it first.
+    for (let node: DomElement | null = el; node?.parentElement; node = node.parentElement) {
       const declared = this.ownDeclarations(node).get(name);
       if (declared !== undefined) {
         hit = { value: declared, owner: node };
@@ -243,7 +250,11 @@ export class StyleResolver {
       for (const part of inline.split(";")) {
         const idx = part.indexOf(":");
         if (idx > 0) {
-          const property = part.slice(0, idx).trim().toLowerCase();
+          const rawProperty = part.slice(0, idx).trim();
+          // Custom properties are case-sensitive; only fold case for the
+          // fixed CSS property vocabulary, matching css-model.ts's handling
+          // of stylesheet declarations.
+          const property = rawProperty.startsWith("--") ? rawProperty : rawProperty.toLowerCase();
           if (property === "background") {
             merged.delete("background-color");
           }

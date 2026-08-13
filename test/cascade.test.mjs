@@ -157,11 +157,45 @@ test("root and theme custom properties still resolve, and still differ per theme
   assert.equal(pick(setup("light")), "#676973");
 });
 
+test("a plain :root value does not shadow a theme-specific override", () => {
+  // :root rules land in model.rules (css-model.ts seeds themeVars from them
+  // and falls through to a push), and `html.matches(":root")` is true in
+  // linkedom, so an ancestor walk that reaches <html> can find the plain
+  // :root declaration and return before ever consulting the theme map.
+  const localCss = `
+:root { --zerp-text: #aaaaaa; }
+:root[data-zerp-theme="light"] { --zerp-text: #333333; }
+:root[data-zerp-theme="dark"]  { --zerp-text: #eeeeee; }
+p { color: var(--zerp-text); }
+`;
+  const model = parseStylesheets([{ css: localCss, origin: "framework" }]);
+  const { document } = parseHTML("<html><body><p id=t>x</p></body></html>");
+  const p = document.querySelector("#t");
+  const dark = new StyleResolver(model, model.themeVars.dark);
+  const light = new StyleResolver(model, model.themeVars.light);
+  assert.equal(dark.resolveVars(dark.computedFor(p).color), "#eeeeee");
+  assert.equal(light.resolveVars(light.computedFor(p).color), "#333333");
+});
+
 test("an unknown custom property falls back, then to the unresolved sentinel", () => {
   const { resolver } = setup("dark");
   assert.equal(resolver.resolveVars("var(--nope, #abcdef)"), "#abcdef");
   assert.equal(resolver.resolveVars("var(--nope)"), "unresolved");
   assert.equal(resolver.resolveVars("#123456"), "#123456");
+});
+
+test("an inline custom property keeps its case, like stylesheet-declared ones", () => {
+  // Custom properties are case-sensitive; css-model.ts already preserves case
+  // for stylesheet declarations (it only lowercases non-"--" properties).
+  // The inline-style path used to lowercase everything, so `--Foo` was stored
+  // as `--foo` and `var(--Foo)` never found it.
+  const model = parseStylesheets([{ css: "p { color: var(--Foo); }", origin: "framework" }]);
+  const { document } = parseHTML('<html><body><p id=t style="--Foo: #123456">x</p></body></html>');
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+  assert.equal(
+    resolver.resolveVars(resolver.computedFor(document.querySelector("#t")).color),
+    "#123456",
+  );
 });
 
 test("font-family is inherited like color", () => {
