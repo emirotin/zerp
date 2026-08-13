@@ -1,24 +1,37 @@
 import { readFile } from "node:fs/promises";
 
-import type { DeckCodepoints } from "../codepoints.js";
-import { rangesContain, selectedFaces } from "../fonts.js";
+import { parseHTML } from "linkedom";
+
+import { type FontFaceInfo, rangesContain, selectedFaces } from "../fonts.js";
+import { buildPresentationHtml, deckCodepoints } from "../presentation.js";
 import { woff2Codepoints } from "../woff2.js";
+import { StyleResolver } from "./cascade.js";
+import { parseStylesheets, type CssModel, type StyleSheetInput } from "./css-model.js";
+import { parseFontStack, StackResolver } from "./font-stack.js";
+import type { DeckCodepoints } from "../codepoints.js";
+import type { DomElement } from "./types.js";
 
 /**
- * Which characters a built deck has a glyph for, and which it does not.
+ * Slide characters the deck cannot draw *through the stack they render in*.
  *
- * The model is the union of every bundled face: a character is covered if any
- * one of them can draw it. Which face a given font stack would actually reach
- * for is a harder question and deliberately not asked here — the useful
- * warning is "this deck ships no glyph for this character at all", and that is
- * the one that survives being exported.
+ * The check this replaces unioned every bundled face and asked whether any of
+ * them carried the character. That was honest while every element resolved
+ * through one family; with a display role and with author overrides it is not,
+ * and the failure it misses is the silent one — a character drawn by whatever
+ * the viewing machine falls back to, differently on every OS, and re-resolved
+ * again when the deck is exported.
+ *
+ * Selection is untouched: the build still inlines subsets chosen by the FULL
+ * document. Only judging is per-stack, and only slide content is judged.
  */
 
-// Pictographs are exempt. No text font carries them: every platform draws
-// them from its own colour emoji font by design, which is also what an export
+// Pictographs are exempt. No text font carries them: every platform draws them
+// from its own colour emoji font by design, which is also what an export
 // pipeline does, so "uncovered" would be true, universal, and useless. Flag
 // sequences are regional indicators rather than pictographs, hence both.
 const EXEMPT = /[\p{Extended_Pictographic}\p{Regional_Indicator}]/u;
+const NON_RENDERING = /[\s\p{Cc}\p{Cf}]/u;
+const SKIP_TAGS = new Set(["SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT", "TITLE"]);
 
 const cmapCache = new Map<string, Promise<Set<number>>>();
 
@@ -63,6 +76,10 @@ export async function coveredCodepoints(
  * Both scopes of the scan are used and they are not interchangeable: the full
  * document selects the faces, and slide content is what gets judged against
  * them. Framework chrome is zerp's own business.
+ *
+ * @deprecated superseded by {@link uncoveredInSlides}, which judges each
+ * character against the stack the element it sits in actually resolves —
+ * this still exists because `checker.ts` imports it.
  */
 export async function uncoveredCodepoints(
   rootDir: string,
@@ -76,4 +93,177 @@ export async function uncoveredCodepoints(
     }
   }
   return missing.sort((left, right) => left - right);
+}
+
+export interface UncoveredText {
+  /** Zero-based index into the slide list. */
+  slideIndex: number;
+  /** The stack the characters resolved through, as authored. */
+  stack: string[];
+  /** Label of the element the text sits in, e.g. `<h1>`. */
+  element: string;
+  /** Uncovered codepoints, ascending. */
+  codepoints: number[];
+}
+
+/** The slice of a parsed document {@link uncoveredInSlides} needs to walk. */
+export interface DomQueryable {
+  querySelectorAll(selector: string): { length: number; [i: number]: unknown };
+}
+
+export interface UncoveredInput {
+  rootDir: string;
+  /** Reuse the caller's parse when there is one; otherwise it is built here. */
+  document?: DomQueryable;
+  model?: CssModel;
+}
+
+function elementLabel(el: DomElement): string {
+  const cls = el.getAttribute("class");
+  return `<${el.tagName.toLowerCase()}${cls ? ` class="${cls}"` : ""}>`;
+}
+
+async function loadStackResolver(faces: readonly FontFaceInfo[]): Promise<StackResolver> {
+  const cmaps = new Map<string, ReadonlySet<number>>();
+  for (const face of faces) {
+    cmaps.set(face.file, await cmapOf(face.file));
+  }
+  return new StackResolver(faces, cmaps);
+}
+
+/** Uncovered codepoints in `text`, ascending; empty when the stack draws all of it. */
+function judgeText(text: string, stack: readonly string[], stacks: StackResolver): number[] {
+  const missing = new Set<number>();
+  for (const character of text) {
+    if (NON_RENDERING.test(character) || EXEMPT.test(character)) {
+      continue;
+    }
+    const codepoint = character.codePointAt(0);
+    if (codepoint !== undefined && !stacks.resolves(stack, codepoint)) {
+      missing.add(codepoint);
+    }
+  }
+  return [...missing].sort((left, right) => left - right);
+}
+
+/**
+ * Slide characters the deck cannot draw through the stack the element they
+ * sit in actually resolves — see the module doc for why this replaces the
+ * union model. `document`/`model` let a caller that already parsed the built
+ * HTML (checker.ts) pass its pieces through rather than parsing twice.
+ */
+export async function uncoveredInSlides(input: UncoveredInput): Promise<UncoveredText[]> {
+  let document = input.document;
+  let model = input.model;
+  if (!document || !model) {
+    const html = await buildPresentationHtml({ rootDir: input.rootDir });
+    document = parseHTML(html).document as unknown as DomQueryable;
+    const styleNodes = document.querySelectorAll("style");
+    const sheets: StyleSheetInput[] = [];
+    for (let i = 0; i < styleNodes.length; i++) {
+      const node = styleNodes[i] as DomElement;
+      sheets.push({
+        css: node.textContent ?? "",
+        origin: node.getAttribute("data-zerp") ? "framework" : "deck",
+      });
+    }
+    model = parseStylesheets(sheets);
+  }
+
+  const codepoints = await deckCodepoints(input.rootDir);
+  const faces = await selectedFaces(input.rootDir, codepoints.full);
+  const stacks = await loadStackResolver(faces);
+  // font-family does not vary by theme, so one resolver answers for both.
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+
+  const found: UncoveredText[] = [];
+  const slideNodes = document.querySelectorAll(".slide");
+
+  const judge = (el: DomElement, text: string, slideIndex: number): void => {
+    const stack = parseFontStack(resolver.resolveVars(resolver.computedFor(el).fontFamily));
+    const codepoints = judgeText(text, stack, stacks);
+    if (codepoints.length > 0) {
+      found.push({ slideIndex, stack, element: elementLabel(el), codepoints });
+    }
+  };
+
+  const walk = (el: DomElement, slideIndex: number): void => {
+    if (SKIP_TAGS.has(el.tagName) || el.getAttribute("aria-hidden") === "true") {
+      return;
+    }
+    for (let i = 0; i < el.childNodes.length; i++) {
+      const child = el.childNodes[i];
+      if (!child) {
+        continue;
+      }
+      if (child.nodeType === 3) {
+        const text = child.textContent ?? "";
+        if (/\S/.test(text)) {
+          judge(el, text, slideIndex);
+        }
+      } else if (child.nodeType === 1) {
+        walk(child as DomElement, slideIndex);
+      }
+    }
+  };
+
+  for (let i = 0; i < slideNodes.length; i++) {
+    walk(slideNodes[i] as DomElement, i);
+  }
+
+  // `content:` literals have no DOM node, so they are judged from the rules
+  // that declare them: match the originating selector, then resolve the stack
+  // the rule itself sets (zerp's markers name --zerp-font-marker precisely so
+  // `→` resolves) or the element's own if it sets none.
+  for (const rule of model.rules) {
+    if (rule.pseudoElement === null) {
+      continue;
+    }
+    const literal = rule.declarations.get("content");
+    if (!literal || !/["']/.test(literal)) {
+      continue;
+    }
+    const text = literal.replace(/^["']|["']$/g, "");
+    const own = rule.declarations.get("font-family");
+    for (let i = 0; i < slideNodes.length; i++) {
+      const slide = slideNodes[i] as DomElement;
+      let matched: DomElement | null = null;
+      const find = (el: DomElement): void => {
+        if (matched) {
+          return;
+        }
+        try {
+          if (el.matches(rule.selector)) {
+            matched = el;
+            return;
+          }
+        } catch {
+          return;
+        }
+        for (let j = 0; j < el.childNodes.length; j++) {
+          const child = el.childNodes[j];
+          if (child && child.nodeType === 1) {
+            find(child as DomElement);
+          }
+        }
+      };
+      find(slide);
+      if (!matched) {
+        continue;
+      }
+      const raw = own ?? resolver.computedFor(matched).fontFamily;
+      const stack = parseFontStack(resolver.resolveVars(raw));
+      const codepoints = judgeText(text, stack, stacks);
+      if (codepoints.length > 0) {
+        found.push({
+          slideIndex: i,
+          stack,
+          element: `${elementLabel(matched)}${rule.pseudoElement}`,
+          codepoints,
+        });
+      }
+    }
+  }
+
+  return found;
 }
