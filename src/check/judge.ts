@@ -127,8 +127,14 @@ function judgeSurfaceBlend(
         continue;
       }
 
-      // Walk up the element tree to find the backdrop (first opaque ancestor).
-      const backdropResult = backdropFor(slide, el);
+      // Resolve the parent and bail if this element has no parent.
+      const parent = el.parent === null ? undefined : slide.elements[el.parent];
+      if (!parent) {
+        continue;
+      }
+
+      // Measure the element against its parent's background, not against itself.
+      const backdropResult = backdropFor(slide, parent);
       if (backdropResult.kind === "unverifiable") {
         continue;
       }

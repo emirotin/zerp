@@ -40,7 +40,7 @@ const root = {
   snippet: "",
   hasOwnText: false,
   color: "rgb(255,255,255)",
-  backgroundColor: "rgb(18,20,28)",
+  backgroundColor: "rgb(100,100,100)",
   backgroundImage: "none",
   fontSizePx: 16,
   fontWeight: 400,
@@ -53,6 +53,12 @@ const root = {
 };
 
 test("a card that blends into its backdrop is reported", () => {
+  // Card bg (115,115,115) is close to but genuinely different from the
+  // root/parent (100,100,100): dist=15*sqrt3≈25.98 < 30, so they blend
+  // and should be flagged. Crucially the two colours differ (#737373 vs
+  // #646464): if the surface rule ever compared the card against itself
+  // instead of its parent, the message would report the card's own hex
+  // as the backdrop (#737373) rather than the parent's (#646464).
   const findings = judge(
     slideWith([
       root,
@@ -62,7 +68,7 @@ test("a card that blends into its backdrop is reported", () => {
         tag: "div",
         className: "card",
         parent: 0,
-        backgroundColor: "rgb(20, 22, 30)",
+        backgroundColor: "rgb(115, 115, 115)",
         boxShadow: "none",
         borderWidthPx: 0,
       },
@@ -71,9 +77,18 @@ test("a card that blends into its backdrop is reported", () => {
   assert.equal(findings.length, 1);
   assert.equal(findings[0].severity, "warning");
   assert.match(findings[0].message, /blends into/);
+  // The backdrop named in the message must be the parent's colour
+  // (#646464), not the card's own colour (#737373).
+  assert.match(findings[0].message, /#737373 blends into #646464/);
 });
 
 test("a visible border rescues an otherwise blending surface", () => {
+  // Card bg (115,115,115) blends into root (100,100,100): dist≈25.98 < 30.
+  // The border (130,130,130) is chosen so it rescues the surface when
+  // measured against the true parent backdrop (dist to #646464 ≈ 51.96
+  // >= 30) but would NOT rescue it if measured against the card's own
+  // background instead (dist to #737373 ≈ 25.98 < 30). This makes the
+  // test sensitive to comparing against the parent rather than self.
   const findings = judge(
     slideWith([
       root,
@@ -83,9 +98,9 @@ test("a visible border rescues an otherwise blending surface", () => {
         tag: "div",
         className: "card",
         parent: 0,
-        backgroundColor: "rgb(20, 22, 30)",
+        backgroundColor: "rgb(115, 115, 115)",
         borderWidthPx: 1,
-        borderColor: "rgb(200,200,200)",
+        borderColor: "rgb(130,130,130)",
       },
     ]),
   ).filter((f) => f.category === "surface");
