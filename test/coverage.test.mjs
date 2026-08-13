@@ -22,9 +22,23 @@ test("the union model's blind spot is the point of the change", async () => {
   assert.ok(found.length > 0, "still reported despite the subset being present");
 });
 
+test("a content: literal with no font-family of its own is judged against the element's stack", async () => {
+  const found = await uncoveredInSlides({ rootDir: "test/fixtures/stack-coverage-deck" });
+  // .marker::after { content: "Δ" } sets no font-family, so it inherits
+  // .marker's own stack — body's default, Montserrat, which has no greek.
+  // This is the content:/pseudo-element half of the walk; delete it and this
+  // assertion is the one that goes red.
+  const marker = found.find((entry) => entry.element.endsWith("::after"));
+  assert.ok(marker, "the ::after rule's content is judged, not skipped");
+  assert.ok(marker.codepoints.includes(cp("Δ")));
+});
+
 test("an author's font-family override is followed", async () => {
   const found = await uncoveredInSlides({ rootDir: "test/fixtures/stack-override-deck" });
-  assert.deepEqual(found, [], "latin-1 resolves in both families");
+  // h2's text is greek: covered only if `.slide h2 { font-family: var(--zerp-font-mono) }`
+  // is actually honored (Roboto Mono has greek, the inherited Montserrat body
+  // stack does not). Drop that rule locally and this goes red.
+  assert.deepEqual(found, [], "the override is followed, so h2's greek text resolves");
 });
 
 test("a default deck is clean", async () => {

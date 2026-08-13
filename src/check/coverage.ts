@@ -176,15 +176,52 @@ export async function uncoveredInSlides(input: UncoveredInput): Promise<Uncovere
   // font-family does not vary by theme, so one resolver answers for both.
   const resolver = new StyleResolver(model, model.themeVars.dark);
 
-  const found: UncoveredText[] = [];
   const slideNodes = document.querySelectorAll(".slide");
+
+  // A single element can hold several text nodes (e.g. `<p>Inline <code>…</code>
+  // is monospace.</p>` walks the <p> twice, once per side of the <code>) and a
+  // rule's ::before/::after can in principle match more than one node across
+  // slides. Accumulate per (element, pseudo-suffix) and emit one entry each,
+  // rather than one per text node — Task 9 renders one warning per entry, and
+  // a reader should not see the same element flagged twice.
+  interface EntryAcc {
+    slideIndex: number;
+    stack: string[];
+    element: string;
+    codepoints: Set<number>;
+  }
+  const accByElement = new Map<DomElement, Map<string, EntryAcc>>();
+
+  const record = (
+    el: DomElement,
+    pseudoSuffix: string,
+    slideIndex: number,
+    element: string,
+    stack: string[],
+    codepoints: number[],
+  ): void => {
+    if (codepoints.length === 0) {
+      return;
+    }
+    let byPseudo = accByElement.get(el);
+    if (!byPseudo) {
+      byPseudo = new Map();
+      accByElement.set(el, byPseudo);
+    }
+    const existing = byPseudo.get(pseudoSuffix);
+    if (existing) {
+      for (const codepoint of codepoints) {
+        existing.codepoints.add(codepoint);
+      }
+    } else {
+      byPseudo.set(pseudoSuffix, { slideIndex, stack, element, codepoints: new Set(codepoints) });
+    }
+  };
 
   const judge = (el: DomElement, text: string, slideIndex: number): void => {
     const stack = parseFontStack(resolver.resolveVars(resolver.computedFor(el).fontFamily));
     const codepoints = judgeText(text, stack, stacks);
-    if (codepoints.length > 0) {
-      found.push({ slideIndex, stack, element: elementLabel(el), codepoints });
-    }
+    record(el, "", slideIndex, elementLabel(el), stack, codepoints);
   };
 
   const walk = (el: DomElement, slideIndex: number): void => {
@@ -254,16 +291,27 @@ export async function uncoveredInSlides(input: UncoveredInput): Promise<Uncovere
       const raw = own ?? resolver.computedFor(matched).fontFamily;
       const stack = parseFontStack(resolver.resolveVars(raw));
       const codepoints = judgeText(text, stack, stacks);
-      if (codepoints.length > 0) {
-        found.push({
-          slideIndex: i,
-          stack,
-          element: `${elementLabel(matched)}${rule.pseudoElement}`,
-          codepoints,
-        });
-      }
+      record(
+        matched,
+        rule.pseudoElement,
+        i,
+        `${elementLabel(matched)}${rule.pseudoElement}`,
+        stack,
+        codepoints,
+      );
     }
   }
 
+  const found: UncoveredText[] = [];
+  for (const byPseudo of accByElement.values()) {
+    for (const entry of byPseudo.values()) {
+      found.push({
+        slideIndex: entry.slideIndex,
+        stack: entry.stack,
+        element: entry.element,
+        codepoints: [...entry.codepoints].sort((left, right) => left - right),
+      });
+    }
+  }
   return found;
 }
