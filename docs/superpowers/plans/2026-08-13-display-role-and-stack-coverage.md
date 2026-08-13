@@ -691,7 +691,7 @@ export class StackResolver {
 
   /** Whether any family in the stack draws the codepoint. */
   resolves(stack: readonly string[], codepoint: number): boolean {
-    const key = `${stack.join(",")} ${codepoint}`;
+    const key = `${stack.join(",")}-${codepoint}`;
     const cached = this.cache.get(key);
     if (cached !== undefined) {
       return cached;
