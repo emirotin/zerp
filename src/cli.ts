@@ -172,10 +172,18 @@ async function main(): Promise<void> {
       process.stdout.write(formatReport(report, { summaryOnly: true }));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      if (message.includes("No Chrome/Chromium found")) {
+      // Both messages originate solely from resolveBrowserExecutable (no
+      // browser found at all, or CHROME_BIN pointing at something that
+      // doesn't exist/run) — the two ways "build without a browser" happens.
+      // Anything else (a genuinely broken deck, a timeout) keeps the
+      // generic line below.
+      if (
+        message.includes("No Chrome/Chromium found") ||
+        message.includes("CHROME_BIN is set to")
+      ) {
         process.stdout.write(
-          "check skipped: no browser found — run `zerp install-browser`, set CHROME_BIN, " +
-            "or run `zerp check` once a browser is available\n",
+          `check skipped: no browser found — run \`zerp install-browser\`, set CHROME_BIN, ` +
+            `or run \`zerp check\` once a browser is available (${message})\n`,
         );
       } else {
         process.stdout.write(`check skipped: ${message}\n`);

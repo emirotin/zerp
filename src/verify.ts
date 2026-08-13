@@ -234,9 +234,13 @@ function connectBrowser(endpoint: string, timeoutMs: number): Promise<Browser> {
 /**
  * Resolve a Chromium executable for headless work, in priority order:
  *
- *   1. `CHROME_BIN` — an explicit override used verbatim (wrapper scripts that
- *      exec a browser with extra flags are supported); the caller asked for
- *      exactly this binary.
+ *   1. `CHROME_BIN` — an explicit override (wrapper scripts that exec a
+ *      browser with extra flags are supported), validated the same way the
+ *      system candidates in step 3 are: a path-like value must exist, and
+ *      the binary must actually run `--version`. An unvalidated override
+ *      would otherwise surface as a raw Playwright launch failure three
+ *      layers away from the typo that caused it, instead of a clear,
+ *      actionable error naming the bad path right here.
  *   2. playwright-core's own managed chromium, if `zerp install-browser` (or a
  *      prior playwright install) has downloaded it. `executablePath()` computes
  *      a path whether or not it exists — and throws in some builds when nothing
@@ -250,6 +254,17 @@ function connectBrowser(endpoint: string, timeoutMs: number): Promise<Browser> {
 export function resolveBrowserExecutable(): string {
   const override = process.env.CHROME_BIN;
   if (override) {
+    if (override.includes("/") && !existsSync(override)) {
+      throw new Error(
+        `CHROME_BIN is set to "${override}", but no file exists there. Fix the path, or unset CHROME_BIN and run \`zerp install-browser\` to let zerp resolve a browser itself.`,
+      );
+    }
+    const probe = spawnSync(override, ["--version"], { stdio: "ignore" });
+    if (probe.status !== 0) {
+      throw new Error(
+        `CHROME_BIN is set to "${override}", but it did not run ("${override} --version" failed). Fix the path, or unset CHROME_BIN and run \`zerp install-browser\` to let zerp resolve a browser itself.`,
+      );
+    }
     return override;
   }
   try {
