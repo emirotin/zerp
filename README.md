@@ -167,6 +167,7 @@ optional `zerp` key in the deck's own `package.json` can name them:
   "dependencies": { "@fontsource/inter": "^5", "@fontsource/jetbrains-mono": "^5" },
   "zerp": {
     "fonts": {
+      "display": { "family": "Bebas Neue", "weights": ["400"] },
       "body": { "family": "Inter" },
       "mono": { "family": "JetBrains Mono" }
     }
@@ -185,10 +186,18 @@ optional `zerp` key in the deck's own `package.json` can name them:
 - `weights` is optional and defaults to what zerp's own styles ask for: body
   `400 600 700 900 400-italic`, mono `400 700` (fontsource file stems). Weights
   a family does not ship are simply not emitted — browsers synthesize.
+- `display` sets the face for `h1`. Unset, it follows `body` — family, package
+  and weights — so a deck that names only `body` gets that family everywhere.
+- `mono` unset stays Roboto Mono; it never follows `body`, because the nav,
+  code, tables and labels need real monospace metrics.
+- The display face applies to `h1` only. Move others onto it from your own
+  stylesheet — `h2 { font-family: var(--zerp-font-display) }` — or off it with
+  `h1 { font-family: var(--zerp-font-body) }`; zerp's rule carries zero
+  specificity so a plain element selector wins.
 - Subsets are still chosen by the deck's text, so a CJK family is carried a few
   ranges at a time rather than all of it.
 - Everything else is unchanged: the `→` face is always bundled, and each family
-  keeps its role in the four stacks zerp draws with.
+  keeps its role in the five stacks zerp draws with.
 
 ## Library API
 

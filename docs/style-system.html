@@ -354,11 +354,20 @@
       <section>
         <h2><span class="n">02</span>Type</h2>
         <p>
-          Two families, two jobs. <strong>Montserrat</strong> is the voice — headlines, body, labels
-          — in weights 400, 600, 700, and 900 (plus 400&nbsp;italic).
-          <strong>Roboto&nbsp;Mono</strong> (400, 700) is the data voice: code, <code>kbd</code>,
-          stat values, list and step counters, timeline years, the slide counter. If it's a number
-          doing work, it's mono.
+          Three roles, three jobs. <strong>Montserrat</strong> is the body voice — headings other
+          than <code>h1</code>, body text, labels — in weights 400, 600, 700, and 900 (plus
+          400&nbsp;italic). <strong>Roboto&nbsp;Mono</strong> (400, 700) is the data voice: code,
+          <code>kbd</code>, stat values, list and step counters, timeline years, the slide counter.
+          If it's a number doing work, it's mono. A third, optional <strong>display</strong> role
+          applies to <code>h1</code> only — a deck that names a <code>display</code> font in its own
+          <code>package.json</code> gets it there and nowhere else by default. Left unset,
+          <code>h1</code> renders in the body family, because <code>display</code> with no
+          configuration simply follows <code>body</code> — family, package and weights alike, so a
+          deck naming only <code>body</code> gets one consistent voice everywhere. Move other
+          elements onto the display face from your own stylesheet (<code
+            >h2 { font-family: var(--zerp-font-display) }</code
+          >) or move <code>h1</code> off it (<code>h1 { font-family: var(--zerp-font-body) }</code>)
+          — the framework rule carries zero specificity, so a plain element selector wins.
         </p>
         <div class="slide demo type-specimen">
           <p style="font-weight: 400">Montserrat 400 — body text and quiet lines</p>

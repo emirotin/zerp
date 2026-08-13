@@ -269,14 +269,20 @@ A script that builds a diagram at runtime follows the same rule: emit the shapes
 
 ## Characters and glyph coverage
 
-A built deck carries its fonts inside itself, as inlined subsets of Montserrat and Roboto Mono plus a one-glyph face for `→`. That is what makes it a single offline file, and it is also a hard edge: **a character no bundled subset covers is drawn by whatever font the viewing machine falls back to** — a different shape, weight and width on every OS, and re-resolved again by the reader's machine once the deck is exported to a format whose text runs carry one font face. Latin, Latin-Extended, Cyrillic and Vietnamese are available to both families; Greek is available to Roboto Mono only.
+A built deck carries its fonts inside itself, as inlined subsets of Montserrat and Roboto Mono plus a one-glyph face for `→`. That is what makes it a single offline file, and it is also a hard edge: **a character no bundled subset covers is drawn by whatever font the viewing machine falls back to** — a different shape, weight and width on every OS, and re-resolved again by the reader's machine once the deck is exported to a format whose text runs carry one font face. Latin, Latin-Extended, Cyrillic and Vietnamese are available to both the body and display families by default; Greek is available to Roboto Mono only.
 
-`zerp check` reports the characters your slides use and the deck cannot draw, as one `⚠` warning listing them with their codepoints. It reads the actual `cmap` of each bundled woff2, so it knows, for example, that `※` sits inside Montserrat's declared latin range and is still not in the file.
+`zerp check` reports characters your slides use that **the font stack they render in** cannot draw, as one `⚠` per element, naming the slide, the element and the stack. It reads the actual `cmap` of each bundled woff2, so it knows, for example, that `※` sits inside Montserrat's declared latin range and is still not in the file.
+
+This is per-stack, not per-deck: Greek is available to Roboto Mono and not to Montserrat, so `Δ` in a `<code>` block is fine while the same character in an `<h1>` is not. Bundling a subset for one role does not cover another role.
 
 - Latin, Latin-Extended and Cyrillic text is covered. Common typography is covered: `— – … ‘ ’ “ ” · × − ↑ ↓ € ™`.
 - Mathematical and geometric symbols mostly are not: `≈ ≠ ≤ ≥ ▲ ▼ ◆ ★ ✓ ✗`. Say `~`, `<=`, `+`/`−`, or use words.
 - `→` is covered everywhere, because zerp bundles a face for it and its own `ul` markers use it.
 - Emoji are exempt from the warning and safe to use: every platform draws them from its own colour emoji font, in the browser and in exports alike, so they never depended on the deck's fonts.
+- Text a slide script generates at runtime is invisible to the check — it reads static markup and does not execute scripts, the same reason subset selection cannot see it either (below).
+- `<svg>` text is not audited as HTML: `<text>` inside inline SVG gets its own separate warning (see "What to avoid").
+- Every matching `content:` rule is judged, with no cascade override — a deck that overrides a framework marker's glyph can get a finding for text the browser never actually draws.
+
 ### Choosing other typefaces
 
 A deck may name its own families in an optional `zerp` key in **its own package.json** — the only deck-level configuration zerp has. Everything else stays zero-config.
@@ -286,6 +292,7 @@ A deck may name its own families in an optional `zerp` key in **its own package.
   "dependencies": { "@fontsource/inter": "^5" },
   "zerp": {
     "fonts": {
+      "display": { "family": "Bebas Neue", "weights": ["400"] },
       "body": { "family": "Inter" },
       "mono": { "family": "JetBrains Mono", "weights": ["400", "700"] }
     }
@@ -296,7 +303,10 @@ A deck may name its own families in an optional `zerp` key in **its own package.
 - `family` is the name the font declares, exactly as you would write it in `font-family`; zerp compares it with the package and errors if they disagree.
 - `fontsourcePackage` is optional and defaults to `@fontsource/` + the slugified family. **The deck installs that package itself** (`pnpm add @fontsource/inter`) — zerp resolves it from the deck's `node_modules`, and a package it cannot find is a build error that names the install command.
 - `weights` is optional. It defaults to what zerp's styles use — body `400 600 700 900 400-italic`, mono `400 700` — and a weight the family does not ship is simply not emitted.
-- Both roles keep everything else: the `→` face rides along, and subsets are still chosen by the deck's text, which is what makes a CJK family (`@fontsource/noto-sans-jp`) possible at all — it is carried a few ranges at a time.
+- `display` sets the face for `h1`. Unset, it follows `body` — family, package and weights — so a deck that names only `body` gets that family everywhere.
+- `mono` unset stays Roboto Mono; it never follows `body`, because the nav, code, tables and labels need real monospace metrics.
+- The display face applies to `h1` only. Move others onto it from your own stylesheet — `h2 { font-family: var(--zerp-font-display) }` — or off it with `h1 { font-family: var(--zerp-font-body) }`; zerp's rule carries zero specificity so a plain element selector wins.
+- All three roles keep everything else: the `→` face rides along, and subsets are still chosen by the deck's text, which is what makes a CJK family (`@fontsource/noto-sans-jp`) possible at all — it is carried a few ranges at a time.
 - Anything outside the Google Fonts directory, or a family that must not be bundled, is out of scope: this is a swap, not a font pipeline.
 
 **A built deck carries only the subsets its own text needs**, so a latin deck ships no Cyrillic and a deck that types one `№` ships the Cyrillic subset that covers it. This is what keeps a single-file deck small, and it has one consequence for scripts: string literals inside a slide `<script>` do count towards the choice (a script that prints `Ж` still pulls Cyrillic in), but characters a script derives at runtime — from a fetch, a computation, `String.fromCharCode` — appear nowhere in the source and cannot. This is the same reason the existing rule says to build static markup and have the script toggle classes or set `textContent`: if a script can produce characters that appear nowhere in the source, put a sample of them in static markup (a legend, a caption, a `hidden` element) so both the subset selection and this check can see them.
