@@ -54,6 +54,7 @@
     "build:docs": "node ./scripts/build-docs.mjs",
     "demo": "node ./scripts/demo.mjs",
     "shot": "node ./scripts/shot.mjs",
+    "record-probe": "pnpm build && node scripts/record-probe.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
     "prepublishOnly": "pnpm build && pnpm build:docs",
