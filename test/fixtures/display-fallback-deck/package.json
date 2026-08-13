@@ -1,0 +1,9 @@
+{
+  "name": "display-fallback-deck",
+  "private": true,
+  "zerp": {
+    "fonts": {
+      "body": { "family": "Roboto Mono" }
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "display-font-deck",
+  "private": true,
+  "zerp": {
+    "fonts": {
+      "display": { "family": "Roboto Mono", "weights": ["400", "700"] }
+    }
+  }
+}

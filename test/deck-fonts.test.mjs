@@ -153,3 +153,14 @@ test("a package that declares a different family name says so", async () => {
     /declares font-family "Roboto Mono", but zerp.fonts.mono.family says "Roboto Mono Flex"/,
   );
 });
+
+test("a configured display family reaches the built document", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/display-font-deck" });
+  assert.match(html, /--zerp-font-display: "Roboto Mono", "Zerp Symbols", sans-serif;/);
+  assert.match(html, /--zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;/);
+});
+
+test("an unconfigured display role emits body's family, not zerp's", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/display-fallback-deck" });
+  assert.match(html, /--zerp-font-display: "Roboto Mono", "Zerp Symbols", sans-serif;/);
+});
