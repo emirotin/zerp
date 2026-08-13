@@ -57,7 +57,7 @@ test(
         "--theme",
         "dark",
         "--size",
-        "1280x720",
+        "1920x1080",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000 },
@@ -68,10 +68,10 @@ test(
     // proves the wait happened instead of assuming it.
     assert.equal(report.fontsActive, true);
     // An explicitly passed --size is recorded as a deliberate choice.
-    assert.deepEqual(report.viewport, { width: 1280, height: 720, defaulted: false });
+    assert.deepEqual(report.viewport, { width: 1920, height: 1080, defaulted: false });
     for (const slide of report.slides) {
-      assert.equal(slide.viewportWidth, 1280);
-      assert.equal(slide.viewportHeight, 720);
+      assert.equal(slide.viewportWidth, 1920);
+      assert.equal(slide.viewportHeight, 1080);
     }
   },
 );
@@ -87,7 +87,7 @@ test(
     );
     assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
     const [report] = JSON.parse(result.stdout);
-    assert.deepEqual(report.viewport, { width: 1280, height: 720, defaulted: true });
+    assert.deepEqual(report.viewport, { width: 1920, height: 1080, defaulted: true });
   },
 );
 
@@ -115,7 +115,7 @@ test(
         "--theme",
         "both",
         "--size",
-        "1280x720",
+        "1920x1080",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000 },
@@ -168,7 +168,7 @@ test(
         "--theme",
         "dark",
         "--size",
-        "1280x720",
+        "1920x1080",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000, env },
@@ -193,7 +193,7 @@ test(
         "--theme",
         "light",
         "--size",
-        "1280x720",
+        "1920x1080",
         "--json",
       ],
       { encoding: "utf8", timeout: 60_000 },
@@ -212,7 +212,7 @@ test(
         "--theme",
         "light",
         "--size",
-        "1280x720",
+        "1920x1080",
         "--safe-margin",
         "24",
         "--json",

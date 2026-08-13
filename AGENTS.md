@@ -74,7 +74,7 @@ Use the smallest relevant check while iterating, then run the complete checks re
 - `pnpm lint` and `pnpm format:check` validate source and generated-file conventions.
 - `pnpm test:browser` runs browser regression tests and requires Chrome or Chromium.
 - `node dist/cli.js check <deck>` checks APCA text contrast, font-size floors, and surface-blend detection for both themes.
-- `node dist/cli.js verify <deck> --theme both --size 1280x720` uses headless Chrome to check that each slide has exactly one active, visible, full-size frame, and checks viewport geometry, overflow, and browser errors. Chrome or Chromium is required.
+- `node dist/cli.js verify <deck> --theme both --size 1920x1080` uses headless Chrome to check that each slide has exactly one active, visible, full-size frame, and checks viewport geometry, overflow, and browser errors. Chrome or Chromium is required.
 - `pnpm shot <deck> --slide N --theme dark|light|both` captures headless-Chrome screenshots into `shots/`; read the PNGs. Use `--focus ".selector"` to outline an element in magenta, `--scale 2` for close inspection of small elements, and `--setup "js"` to drive interactive state such as stepping reveals or opening the theme popover.
 
 ## Commands
@@ -90,6 +90,6 @@ pnpm format:check
 pnpm test:browser
 node dist/cli.js check test/fixtures/kitchen-sink
 node dist/cli.js check examples/casino
-node dist/cli.js verify examples/casino --theme both --size 1280x720
+node dist/cli.js verify examples/casino --theme both --size 1920x1080
 node dist/cli.js serve examples/casino
 ```

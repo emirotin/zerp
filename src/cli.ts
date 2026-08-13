@@ -116,7 +116,7 @@ function parseVerifySize(raw: string | undefined): {
   height: number;
   defaulted: boolean;
 } {
-  const value = raw ?? "1280x720";
+  const value = raw ?? "1920x1080";
   const match = value.match(/^(\d+)x(\d+)$/);
   if (!match) {
     throw new Error(`Invalid verification size: ${value} (expected WxH)`);

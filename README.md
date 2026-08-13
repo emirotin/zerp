@@ -48,7 +48,7 @@ pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default the
 pnpm exec zerp build --theme light        # write ./index.html (light default)
 pnpm exec zerp check                      # APCA contrast + font-size report (both themes; --theme dark|light|both, --json for tooling)
 pnpm exec zerp slides                     # deck position → source file mapping (--json for tooling)
-pnpm exec zerp verify                     # headless-browser frame/layout check (both themes, 1280x720; --json for tooling)
+pnpm exec zerp verify                     # headless-browser frame/layout check (both themes, 1920x1080; --json for tooling)
 ```
 
 ## Browsers
@@ -119,7 +119,7 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 - Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
 - Fonts are inlined per deck: a build carries the Montserrat and Roboto Mono subsets whose `unicode-range` the deck's own text actually touches (Latin always), plus a one-glyph face for `→`. A latin deck therefore ships no Cyrillic, and a deck that types `№` ships the subset that covers it.
 - `zerp check` also warns about characters the font stack an element renders in cannot draw — it reads the real `cmap` of each inlined woff2 and resolves the actual stack per element (so `display`/`body`/`mono` are each checked on their own terms). Anything outside a stack's coverage (`≈`, `▲`, CJK, …) is drawn by whatever the viewing machine falls back to, which differs per OS and again on export. The warning is one `⚠` per element, naming the slide, the element and the failing stack. Emoji are exempt — every platform draws those from its own colour emoji font.
-- Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and checks that exactly one full-size slide frame is active and visible without page overflow. Overflow is relative to the checked viewport (`--size WxH`, default 1280x720) — verify a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked.
+- Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and checks that exactly one full-size slide frame is active and visible without page overflow. Overflow is relative to the checked viewport (`--size WxH`, default 1920x1080) — verify a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked.
 - `zerp verify --safe-margin px` additionally requires every top-level element of each slide to stay at least that many px inside all page edges — a print-safe inset for decks headed to PDF. Mark intentionally full-bleed elements with `data-zerp-bleed` to exempt them. Off by default; choose a margin below the slide padding so ordinary content never trips it.
 - `zerp verify --timeout ms` (or `ZERP_VERIFY_TIMEOUT_MS`) sets the budget for the whole browser session — launch, navigation, font activation and the probe. The default is 20000ms, which suits a developer machine; raise it on a small or loaded host, or for a deck carrying heavy imagery. A session that runs out of budget produces no report at all, so if you automate `zerp verify`, give it a budget that matches the host it runs on and treat the timeout as a failed check rather than a passed one.
 - The package ships a designer-facing style guide as `docs/style-system.pdf` (resolvable as `@emirotin/zerp/docs/style-system.pdf`): the layers, the type pair, the token table in both themes, the utilities, and every component, with all examples rendered by the framework's own stylesheet. It is reprinted from the current stylesheet for every release, so it describes the version you installed.
@@ -139,16 +139,16 @@ Content that overflows a slide is clipped at the bottom of the page rather than
 spilling onto a second page, so keep slides within the frame (the same as on
 screen — `zerp check`/`zerp verify` catch overflow).
 
-Example: render a deck to PDF at 1280×720 with Playwright:
+Example: render a deck to PDF at 1920×1080 with Playwright:
 
 ```python
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
-    page = browser.new_page(viewport={"width": 1280, "height": 720})
+    page = browser.new_page(viewport={"width": 1920, "height": 1080})
     page.goto("file:///abs/path/to/index.html")
-    page.pdf(path="deck.pdf", width="1280px", height="720px", print_background=True)
+    page.pdf(path="deck.pdf", width="1920px", height="1080px", print_background=True)
     browser.close()
 ```
 

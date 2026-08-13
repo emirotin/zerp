@@ -16,7 +16,7 @@ This is the complete authoring guide for a downstream presentation project using
 
 1. Discover the deck before referring to a slide by number: run `zerp slides . --json` and confirm the source file, in-file ordinal, and heading.
 2. Edit only the relevant `slides/**/*.html`, `slides/**/*.md`, or assets under `slides/`. Prefer built-in classes, Markdown for text-first slides, and HTML for layout-heavy or interactive slides.
-3. Run `zerp check .` after every authoring change and fix every error and warning. Run `zerp verify . --theme both --size 1280x720` after layout or interaction changes.
+3. Run `zerp check .` after every authoring change and fix every error and warning. Run `zerp verify . --theme both --size 1920x1080` after layout or interaction changes.
 4. Use `zerp serve .` for live inspection; use the consuming project's browser or screenshot tooling, when available, for close visual inspection. Check both dark and light themes.
 5. Run `zerp build . --theme system` for the handoff artifact. Never hand-edit the generated `index.html`.
 
@@ -39,7 +39,7 @@ The main commands from the deck directory are:
 ```bash
 zerp slides . --json
 zerp check .
-zerp verify . --theme both --size 1280x720
+zerp verify . --theme both --size 1920x1080
 zerp serve .
 zerp build . --theme system
 ```
@@ -130,7 +130,7 @@ Built decks are print-ready. The same `index.html` paginates for print with no e
 
 - Printing emits **one page per slide, in deck order**. Presentation chrome (nav, counter, progress bar, theme toggle, source badge) is never printed.
 - Steps print in their **final state**: `data-step` content is present, `data-until-step` content is absent. A printed deck shows every reveal.
-- Print with a **page size equal to the presentation viewport** (e.g. 1280×720 CSS px) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
+- Print with a **page size equal to the presentation viewport** (e.g. 1920×1080 CSS px) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
 - **Page capacity is physical**: content that overflows a slide is clipped at the bottom of the page, not reflowed onto a second page. Fix overflow the same way as on screen (trim content, or top-align with `.slide.top`); `zerp check` and `zerp verify` still gate it.
 - If a deck will additionally be exported to PPTX by a downstream pipeline, `llms-pptx.txt` (shipped alongside this file) has the export-specific authoring restrictions; the caller includes it alongside this guide when that target applies.
 
@@ -140,7 +140,7 @@ After authoring or editing slides, ALWAYS run:
 
 ```bash
 zerp check .
-zerp verify . --theme both --size 1280x720
+zerp verify . --theme both --size 1920x1080
 # add --json to check or verify for a machine-readable report (verify's per-slide
 # entries include the source file); --theme dark|light|both narrows either command
 ```
@@ -149,7 +149,7 @@ zerp verify . --theme both --size 1280x720
 
 Fix every `✗` error and `⚠` warning (font too small, text contrast too low, a surface whose background blends into what is behind it, a label sealed inside an `<svg>` where neither can be measured, or characters no bundled font can draw — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
 
-**Verify is viewport-specific.** Overflow and frame geometry are judged against the exact `--size WxH` viewport (default 1280x720) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; verify it with its actual target size. `zerp check` is viewport-independent (static contrast/type analysis, no layout).
+**Verify is viewport-specific.** Overflow and frame geometry are judged against the exact `--size WxH` viewport (default 1920x1080) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; verify it with its actual target size. `zerp check` is viewport-independent (static contrast/type analysis, no layout).
 
 `zerp serve` live-reloads the browser on any change under `slides/` — the page returns to the same slide (URL hash) and replays the steps of every slide you had stepped through. Built decks contain no reload client.
 
@@ -221,7 +221,7 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 2. If a layout truly needs custom CSS, put a `<style>` inside the slide file, use ONLY `var(--zerp-*)` tokens, keep text at 1em+.
 3. A `<style>` block is document-global. For deck-wide styles the convention is a style-only file sorted first (e.g. `slides/00-styles.html` containing just a `<style>` — it contributes no slide).
 4. Re-run `zerp check` — custom CSS is checked too (`:where()` is understood). Selectors it cannot verify are listed as skipped; keep them simple (tag/class selectors).
-5. If the layout changes, run `zerp verify . --theme both --size 1280x720` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
+5. If the layout changes, run `zerp verify . --theme both --size 1920x1080` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
 
 ## Diagrams and inline SVG
 

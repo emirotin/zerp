@@ -101,7 +101,7 @@ function runVerify(args, env) {
         "--theme",
         "dark",
         "--size",
-        "1280x720",
+        "1920x1080",
         "--json",
         ...args,
       ],
@@ -141,7 +141,7 @@ test(
       const [firstReport] = JSON.parse(first.stdout);
       assert.equal(firstReport.fontsActive, true);
       assert.deepEqual(firstReport.failures, []);
-      assert.equal(firstReport.slides[0]?.viewportWidth, 1280);
+      assert.equal(firstReport.slides[0]?.viewportWidth, 1920);
 
       // Still alive after the first run: a borrowed browser is disconnected
       // from, never terminated — otherwise the second run has nothing to reuse.
