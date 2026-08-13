@@ -54,7 +54,7 @@ test(
     assert.match(h1.color, /^rgba?\(/, "computed colors arrive resolved, never var()");
     assert.ok(h1.fontSizePx > 16, "a real laid-out font size, not an em string");
     assert.ok(h1.hasOwnText);
-    assert.equal(h1.fonts.length, 0, "fonts arrive in a later task");
+    assert.ok(h1.fonts.length > 0, "fonts are collected via CDP (see probe-fonts.test.mjs)");
   },
 );
 

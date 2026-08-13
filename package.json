@@ -59,7 +59,7 @@
     "prepare": "husky",
     "prepublishOnly": "pnpm build && pnpm build:docs",
     "test": "pnpm build && node --test test/*.test.mjs",
-    "test:browser": "ZERP_RUN_BROWSER_TEST=1 node --test test/verify.test.mjs test/theme-toggle.test.mjs",
+    "test:browser": "ZERP_RUN_BROWSER_TEST=1 node --test test/verify.test.mjs test/theme-toggle.test.mjs test/probe.test.mjs test/probe-fonts.test.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts test .zed",

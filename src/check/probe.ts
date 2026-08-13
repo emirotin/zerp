@@ -1,7 +1,13 @@
 import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import { type Browser, type BrowserContext, chromium } from "playwright-core";
+import {
+  type Browser,
+  type BrowserContext,
+  chromium,
+  type CDPSession,
+  type Page,
+} from "playwright-core";
 
 import { buildPresentationHtml } from "../presentation.js";
 import { resolveBrowserExecutable } from "../verify.js";
@@ -43,8 +49,11 @@ window.addEventListener("unhandledrejection", function (event) {
 
 // Only the active slide renders, so styles and geometry are collected slide by
 // slide with window.next() between them — the same reason verify's probe steps.
-const SLIDE_EXPRESSION = (safeMargin: number): string => `(async function () {
-  var safeMargin = ${safeMargin};
+// CDP calls (font collection) cannot run inside page.evaluate, so the walk is
+// split: SETUP_EXPRESSION runs once and installs helpers plus the frame list
+// on window; SLIDE_EXPRESSION collects one already-active slide per call, and
+// Node drives window.next() and the CDP font query between calls.
+const SETUP_EXPRESSION = (): string => `(async function () {
   await document.fonts.ready;
   await new Promise(function (r) { requestAnimationFrame(function () { requestAnimationFrame(r); }); });
   var SKIP = { SCRIPT: 1, STYLE: 1, TEMPLATE: 1, NOSCRIPT: 1, TITLE: 1 };
@@ -87,61 +96,76 @@ const SLIDE_EXPRESSION = (safeMargin: number): string => `(async function () {
     walk(root, null);
     return out;
   }
+  window.__zerpSnippet = snippet;
+  window.__zerpCollect = collect;
   var frames = Array.from(document.querySelectorAll("[data-zerp-slide]"));
-  var slides = [];
-  for (var index = 0; index < frames.length; index++) {
-    if (index > 0) { window.next(); }
-    var visible = frames.filter(function (frame) {
-      var style = getComputedStyle(frame);
-      var rect = frame.getBoundingClientRect();
-      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
-    });
-    var active = frames.filter(function (f) { return f.hasAttribute("data-zerp-slide-active"); });
-    var activeFrame = active[0] || null;
-    var activeSlide = activeFrame ? activeFrame.querySelector(".slide") : null;
-    var rect = activeFrame ? activeFrame.getBoundingClientRect() : null;
-    var safeZoneItems = null;
-    if (safeMargin > 0 && activeSlide) {
-      safeZoneItems = Array.from(activeSlide.children)
-        .filter(function (el) { return ["SCRIPT", "STYLE"].indexOf(el.tagName) === -1; })
-        .filter(function (el) { return !el.hasAttribute("data-zerp-bleed"); })
-        .map(function (el) {
-          var r = el.getBoundingClientRect();
-          return { label: el.id || el.getAttribute("class") || el.tagName.toLowerCase(),
-                   left: r.left, top: r.top, right: r.right, bottom: r.bottom,
-                   width: r.width, height: r.height };
-        })
-        .filter(function (item) { return item.width > 0 && item.height > 0; });
-    }
-    var svgTexts = activeSlide
-      ? Array.from(activeSlide.querySelectorAll("svg text")).map(function (t) { return snippet(t.textContent); })
-      : [];
-    slides.push({
-      index: index + 1,
-      src: activeSlide ? activeSlide.getAttribute("data-zerp-src") : null,
-      srcSlide: activeSlide ? activeSlide.getAttribute("data-zerp-src-slide") : null,
-      elements: activeSlide ? collect(activeSlide) : [],
-      activeCount: active.length,
-      visibleCount: visible.length,
-      activeIndex: activeFrame ? frames.indexOf(activeFrame) + 1 : null,
-      bodyHeight: document.body.scrollHeight,
-      viewportWidth: window.innerWidth,
-      viewportHeight: window.innerHeight,
-      activeDisplay: activeSlide ? getComputedStyle(activeSlide).display : null,
-      activeClass: activeSlide ? activeSlide.classList.contains("active") : false,
-      activeRect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
-      safeZoneItems: safeZoneItems,
-      svgTextSnippets: svgTexts
-    });
-  }
+  window.__zerpFrames = frames;
   return {
     frameCount: frames.length,
     slideCount: document.querySelectorAll(".slide").length,
-    innerSlideCount: frames.filter(function (f) { return f.querySelector(".slide") !== null; }).length,
-    slides: slides,
-    browserErrors: window.__zerpVerifyErrors || []
+    innerSlideCount: frames.filter(function (f) { return f.querySelector(".slide") !== null; }).length
   };
 })()`;
+
+// Collects the currently active slide only — the caller has already advanced
+// with window.next() (or is on slide 1, right after SETUP_EXPRESSION).
+const SLIDE_EXPRESSION = (index: number, safeMargin: number): string => `(function () {
+  var index = ${index};
+  var safeMargin = ${safeMargin};
+  var frames = window.__zerpFrames;
+  var snippet = window.__zerpSnippet;
+  var collect = window.__zerpCollect;
+  var visible = frames.filter(function (frame) {
+    var style = getComputedStyle(frame);
+    var rect = frame.getBoundingClientRect();
+    return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+  });
+  var active = frames.filter(function (f) { return f.hasAttribute("data-zerp-slide-active"); });
+  var activeFrame = active[0] || null;
+  var activeSlide = activeFrame ? activeFrame.querySelector(".slide") : null;
+  var rect = activeFrame ? activeFrame.getBoundingClientRect() : null;
+  var safeZoneItems = null;
+  if (safeMargin > 0 && activeSlide) {
+    safeZoneItems = Array.from(activeSlide.children)
+      .filter(function (el) { return ["SCRIPT", "STYLE"].indexOf(el.tagName) === -1; })
+      .filter(function (el) { return !el.hasAttribute("data-zerp-bleed"); })
+      .map(function (el) {
+        var r = el.getBoundingClientRect();
+        return { label: el.id || el.getAttribute("class") || el.tagName.toLowerCase(),
+                 left: r.left, top: r.top, right: r.right, bottom: r.bottom,
+                 width: r.width, height: r.height };
+      })
+      .filter(function (item) { return item.width > 0 && item.height > 0; });
+  }
+  var svgTexts = activeSlide
+    ? Array.from(activeSlide.querySelectorAll("svg text")).map(function (t) { return snippet(t.textContent); })
+    : [];
+  return {
+    index: index + 1,
+    src: activeSlide ? activeSlide.getAttribute("data-zerp-src") : null,
+    srcSlide: activeSlide ? activeSlide.getAttribute("data-zerp-src-slide") : null,
+    elements: activeSlide ? collect(activeSlide) : [],
+    activeCount: active.length,
+    visibleCount: visible.length,
+    activeIndex: activeFrame ? frames.indexOf(activeFrame) + 1 : null,
+    bodyHeight: document.body.scrollHeight,
+    viewportWidth: window.innerWidth,
+    viewportHeight: window.innerHeight,
+    activeDisplay: activeSlide ? getComputedStyle(activeSlide).display : null,
+    activeClass: activeSlide ? activeSlide.classList.contains("active") : false,
+    activeRect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
+    safeZoneItems: safeZoneItems,
+    svgTextSnippets: svgTexts
+  };
+})()`;
+
+const BROWSER_ERRORS_EXPRESSION = "window.__zerpVerifyErrors || []";
+
+interface SetupResult {
+  frameCount: number;
+  slideCount: number;
+  innerSlideCount: number;
+}
 
 interface RawProbeResult {
   frameCount: number;
@@ -149,6 +173,66 @@ interface RawProbeResult {
   innerSlideCount: number;
   slides: ProbeSlide[];
   browserErrors: string[];
+}
+
+/** CDP's DOM.getAttributes returns a flat [name, value, name, value, ...] array. */
+function attributeValue(attributes: string[], name: string): string | null {
+  for (let i = 0; i < attributes.length; i += 2) {
+    if (attributes[i] === name) {
+      return attributes[i + 1] ?? null;
+    }
+  }
+  return null;
+}
+
+// getPlatformFontsForNode is the renderer's own answer to "which fonts drew
+// this text". document.fonts.check cannot be used: it returns true for a
+// family that does not exist, because it reports whether the fonts that WOULD
+// be used are loaded, and fallback fonts always are.
+async function collectFonts(cdp: CDPSession, slide: ProbeSlide): Promise<void> {
+  // Re-sent per slide: window.next() mutates the tree and invalidates node ids
+  // from any earlier DOM.getDocument call.
+  const { root } = await cdp.send("DOM.getDocument", { depth: -1 });
+  const { nodeIds } = await cdp.send("DOM.querySelectorAll", {
+    nodeId: root.nodeId,
+    selector: "[data-zerp-slide-active] [data-zerp-probe]",
+  });
+  for (const nodeId of nodeIds) {
+    const { attributes } = await cdp.send("DOM.getAttributes", { nodeId });
+    const probeIndex = attributeValue(attributes, "data-zerp-probe");
+    const element = probeIndex === null ? undefined : slide.elements[Number(probeIndex)];
+    if (!element) {
+      continue;
+    }
+    const { fonts } = await cdp.send("CSS.getPlatformFontsForNode", { nodeId });
+    element.fonts = fonts.map((font) => ({
+      familyName: font.familyName,
+      glyphCount: font.glyphCount,
+      isCustomFont: font.isCustomFont,
+    }));
+  }
+}
+
+/**
+ * Drive the per-slide walk from Node so CDP font collection can interleave
+ * with it: advance to a slide, evaluate it, collect its fonts, repeat.
+ */
+async function collectSlides(
+  page: Page,
+  cdp: CDPSession,
+  safeMargin: number,
+): Promise<{ setup: SetupResult; slides: ProbeSlide[] }> {
+  const setup = (await page.evaluate(SETUP_EXPRESSION())) as SetupResult;
+  const slides: ProbeSlide[] = [];
+  for (let index = 0; index < setup.frameCount; index++) {
+    if (index > 0) {
+      await page.evaluate("window.next()");
+    }
+    const slide = (await page.evaluate(SLIDE_EXPRESSION(index, safeMargin))) as ProbeSlide;
+    await collectFonts(cdp, slide);
+    slides.push(slide);
+  }
+  return { setup, slides };
 }
 
 interface SessionOptions {
@@ -221,7 +305,12 @@ async function runSlideProbe(options: SessionOptions): Promise<RawProbeResult> {
     const page = await context.newPage();
     await page.addInitScript(COLLECTOR_SOURCE);
     await page.goto(`file://${htmlPath}#1`, { waitUntil: "load" });
-    return (await page.evaluate(SLIDE_EXPRESSION(safeMargin))) as RawProbeResult;
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("DOM.enable");
+    await cdp.send("CSS.enable");
+    const { setup, slides } = await collectSlides(page, cdp, safeMargin);
+    const browserErrors = (await page.evaluate(BROWSER_ERRORS_EXPRESSION)) as string[];
+    return { ...setup, slides, browserErrors };
   });
   try {
     // The budget is named in the message: a timeout is the one failure whose

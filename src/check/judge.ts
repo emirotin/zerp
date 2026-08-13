@@ -99,6 +99,56 @@ function wanted(only: FindingCategory[] | undefined, category: FindingCategory):
   return only === undefined || only.includes(category);
 }
 
+// Every font zerp ships is an inlined @font-face, so a system font drawing
+// glyphs means the renderer fell back — that text looks different on every
+// machine and is re-resolved again on export. Emoji are the one exemption:
+// every platform draws them from its own colour font by design, so they are
+// subtracted from the system glyph count rather than reported.
+const EXEMPT = /[\p{Extended_Pictographic}\p{Regional_Indicator}]/gu;
+
+// `snippet` is truncated to 40 characters (see probe.ts), so for a long,
+// emoji-heavy run the exempt count here is an approximation of the full
+// element text. If that proves to misreport in practice, the fix is to have
+// the probe record the full-text exempt count (where the untruncated string
+// is still available) rather than widening this exemption.
+function fallbackGlyphs(element: ProbeElement): { count: number; families: string[] } {
+  const system = element.fonts.filter((font) => !font.isCustomFont);
+  const drawn = system.reduce((total, font) => total + font.glyphCount, 0);
+  const exempt = (element.snippet.match(EXEMPT) ?? []).length;
+  return { count: Math.max(0, drawn - exempt), families: system.map((f) => f.familyName) };
+}
+
+function judgeGlyphs(
+  probe: DeckProbe,
+  only: FindingCategory[] | undefined,
+  findings: Finding[],
+): void {
+  if (!wanted(only, "glyph")) {
+    return;
+  }
+
+  for (const slide of probe.slides) {
+    for (const el of slide.elements) {
+      const { count, families } = fallbackGlyphs(el);
+      if (count === 0) {
+        continue;
+      }
+      findings.push({
+        severity: "warning",
+        category: "glyph",
+        theme: probe.theme,
+        slideIndex: slide.index,
+        slideSrc: slide.src,
+        slideSrcSlide: slide.srcSlide,
+        snippet: el.snippet,
+        message: `${count} glyph${count === 1 ? "" : "s"} rendered by a system font (${families.join(", ")}), not a bundled one`,
+        suggestion:
+          "use characters covered by the bundled fonts (Montserrat, Roboto Mono), or bundle a face that covers this text",
+      });
+    }
+  }
+}
+
 // Surfaces need either a luminance step (APCA clips small deltas to 0 near
 // the poles, so RGB channel distance carries near-white/near-black cases) or
 // a visible border/shadow to read as a distinct panel.
@@ -314,5 +364,6 @@ export function judge(probe: DeckProbe, options: JudgeOptions = {}): Finding[] {
   judgeContrastAndTypeSize(probe, options.only, options.tokenContrast, findings);
   judgeSurfaceBlend(probe, options.only, findings);
   judgeSvgText(probe, options.only, findings);
+  judgeGlyphs(probe, options.only, findings);
   return findings;
 }

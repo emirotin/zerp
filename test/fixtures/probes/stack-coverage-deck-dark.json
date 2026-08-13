@@ -28,7 +28,18 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": null,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 47,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 1,
@@ -46,7 +57,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
         },
         {
           "id": 2,
@@ -64,7 +81,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 3,
@@ -82,7 +105,18 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 21,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 4,
@@ -100,7 +134,13 @@
           "borderWidthPx": 1,
           "borderColor": "rgb(72, 74, 84)",
           "parent": 3,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 5,
@@ -118,7 +158,18 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 1,
+              "isCustomFont": false
+            }
+          ]
         }
       ],
       "activeCount": 1,
@@ -159,7 +210,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": null,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
         },
         {
           "id": 1,
@@ -177,7 +234,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
         }
       ],
       "activeCount": 1,
@@ -236,7 +299,18 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 1,
+              "isCustomFont": false
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 2,
@@ -254,7 +328,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 1,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 3,
@@ -272,7 +352,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 1,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 4,
@@ -290,7 +376,18 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 1,
+              "isCustomFont": false
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 5,
@@ -308,7 +405,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 4,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
         },
         {
           "id": 6,
@@ -326,7 +429,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 4,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
         }
       ],
       "activeCount": 1,
@@ -367,7 +476,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": null,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Times",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
         },
         {
           "id": 1,
@@ -385,7 +500,13 @@
           "borderWidthPx": 0,
           "borderColor": "rgb(240, 243, 255)",
           "parent": 0,
-          "fonts": []
+          "fonts": [
+            {
+              "familyName": "Times",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
         }
       ],
       "activeCount": 1,
