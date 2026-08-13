@@ -2,11 +2,11 @@ import { readFile } from "node:fs/promises";
 
 import { parseHTML } from "linkedom";
 
-import { buildPresentationHtml, deckCodepoints } from "../presentation.js";
+import { buildPresentationHtml } from "../presentation.js";
 import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./apca.js";
 import { StyleResolver } from "./cascade.js";
 import { blend, parseColor, rgbDistance, toHex } from "./color.js";
-import { uncoveredCodepoints } from "./coverage.js";
+import { uncoveredInSlides } from "./coverage.js";
 import { parseStylesheets, type StyleSheetInput } from "./css-model.js";
 import type { CheckReport, CheckTheme, DomElement, Finding } from "./types.js";
 
@@ -203,31 +203,29 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
     }
   }
 
-  // Glyph coverage: a character no bundled face can draw is not a styling
-  // mistake, it is a promise the deck cannot keep. It renders from whatever
-  // the viewing machine falls back to, and an export re-resolves it on the
-  // reader's machine. Deck-wide and theme-independent, so it is one finding
-  // reported against the first requested theme, not one per character and not
-  // one per theme.
+  // Glyph coverage: a character the stack it renders in cannot draw is not a
+  // styling mistake, it is a promise the deck cannot keep. It renders from
+  // whatever the viewing machine falls back to, and an export re-resolves it on
+  // the reader's machine. Theme-independent, so it is reported once against the
+  // first requested theme rather than duplicated into every theme's group.
   if (structuralTheme) {
-    const missing = await uncoveredCodepoints(
-      options.rootDir,
-      await deckCodepoints(options.rootDir),
-    );
-    if (missing.length > 0) {
-      const shown = missing.slice(0, MAX_LISTED_CODEPOINTS);
+    const uncovered = await uncoveredInSlides({ rootDir: options.rootDir, document, model });
+    for (const entry of uncovered) {
+      const shown = entry.codepoints.slice(0, MAX_LISTED_CODEPOINTS);
       const points = shown.map((code) => `U+${code.toString(16).toUpperCase().padStart(4, "0")}`);
-      const rest = missing.length - shown.length;
+      const rest = entry.codepoints.length - shown.length;
       const suffix = rest > 0 ? `, +${rest} more` : "";
+      const slide = slideNodes[entry.slideIndex] as DomElement | undefined;
+      const count = entry.codepoints.length;
       findings.push({
         severity: "warning",
         theme: structuralTheme,
-        slideIndex: 0,
-        slideSrc: null,
-        slideSrcSlide: null,
+        slideIndex: entry.slideIndex + 1,
+        slideSrc: slide?.getAttribute("data-zerp-src") ?? null,
+        slideSrcSlide: slide?.getAttribute("data-zerp-src-slide") ?? null,
         snippet: shown.map((code) => String.fromCodePoint(code)).join(" "),
-        message: `${missing.length} character${missing.length === 1 ? "" : "s"} (${points.join(", ")}${suffix}) ${missing.length === 1 ? "has" : "have"} no glyph in any bundled font — each renders via system fallback, which looks different on every machine and in exports`,
-        suggestion: "use characters the bundled subsets cover, or drop them",
+        message: `${count} character${count === 1 ? "" : "s"} (${points.join(", ")}${suffix}) in ${entry.element} ${count === 1 ? "has" : "have"} no glyph in ${entry.stack.join(", ") || "the fallback stack"} — ${count === 1 ? "it renders" : "each renders"} via system fallback, which looks different on every machine and in exports`,
+        suggestion: "use characters the stack's families cover, or set a family that covers them",
       });
     }
   }

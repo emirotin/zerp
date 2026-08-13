@@ -2,13 +2,12 @@ import { readFile } from "node:fs/promises";
 
 import { parseHTML } from "linkedom";
 
-import { type FontFaceInfo, rangesContain, selectedFaces } from "../fonts.js";
+import { type FontFaceInfo, selectedFaces } from "../fonts.js";
 import { buildPresentationHtml, deckCodepoints } from "../presentation.js";
 import { woff2Codepoints } from "../woff2.js";
 import { StyleResolver } from "./cascade.js";
 import { parseStylesheets, type CssModel, type StyleSheetInput } from "./css-model.js";
 import { parseFontStack, StackResolver } from "./font-stack.js";
-import type { DeckCodepoints } from "../codepoints.js";
 import type { DomElement } from "./types.js";
 
 /**
@@ -43,56 +42,6 @@ function cmapOf(file: string): Promise<Set<number>> {
   const codepoints = readFile(file).then(woff2Codepoints);
   cmapCache.set(file, codepoints);
   return codepoints;
-}
-
-/**
- * The codepoints a built deck can draw: each selected face's cmap intersected
- * with the `unicode-range` its `@font-face` declares, since the browser never
- * consults a face outside that range however much the file happens to carry.
- *
- * `selection` is the deck's full codepoint set, which is what decides the
- * faces the build inlines — so this reports the deck that will actually ship,
- * not a hypothetical one carrying every subset fontsource offers.
- */
-export async function coveredCodepoints(
-  rootDir: string,
-  selection: ReadonlySet<number>,
-): Promise<Set<number>> {
-  const covered = new Set<number>();
-  for (const face of await selectedFaces(rootDir, selection)) {
-    const cmap = await cmapOf(face.file);
-    for (const codepoint of cmap) {
-      if (rangesContain(face.ranges, codepoint)) {
-        covered.add(codepoint);
-      }
-    }
-  }
-  return covered;
-}
-
-/**
- * Slide characters the built deck has no glyph for, lowest codepoint first.
- *
- * Both scopes of the scan are used and they are not interchangeable: the full
- * document selects the faces, and slide content is what gets judged against
- * them. Framework chrome is zerp's own business.
- *
- * @deprecated superseded by {@link uncoveredInSlides}, which judges each
- * character against the stack the element it sits in actually resolves —
- * this still exists because `checker.ts` imports it.
- */
-export async function uncoveredCodepoints(
-  rootDir: string,
-  deck: DeckCodepoints,
-): Promise<number[]> {
-  const covered = await coveredCodepoints(rootDir, deck.full);
-  const missing: number[] = [];
-  for (const codepoint of deck.slideContent) {
-    if (!covered.has(codepoint) && !EXEMPT.test(String.fromCodePoint(codepoint))) {
-      missing.push(codepoint);
-    }
-  }
-  return missing.sort((left, right) => left - right);
 }
 
 export interface UncoveredText {

@@ -58,29 +58,51 @@ test("svg text is flagged once, and aria-hidden opts out", async () => {
   assert.equal(reportHasFailures(report, true), true);
 });
 
-test("characters no bundled face can draw are reported once, for the deck", async () => {
+test("characters no bundled face can draw are reported once per element, attributed to their slide", async () => {
   const report = await checkPresentation({ rootDir: "test/fixtures/uncovered-glyph-deck" });
   const coverage = report.findings.filter((f) => f.message.includes("no glyph"));
-  // One finding for the whole deck, not one per character and not one per
-  // theme, and it belongs to no single slide.
-  assert.equal(coverage.length, 1);
-  const [finding] = coverage;
-  assert.equal(finding.severity, "warning");
-  assert.equal(finding.slideIndex, 0);
-  // 日本語 from a heading, ※ from a list item, and ≈ from the data-vs
-  // attribute `.compare::after` prints — the attribute is copy too.
-  assert.equal(finding.snippet, "※ ≈ 日 本 語");
-  assert.match(finding.message, /5 characters \(U\+203B, U\+2248, U\+65E5, U\+672C, U\+8A9E\)/);
-  assert.match(finding.message, /system fallback/);
-  // ※ is inside Montserrat's declared latin range (U+2000-206F) and absent
-  // from the subset's cmap: coverage is the file, not the promise.
+  // One finding per offending element, not one per character and not one per
+  // theme: the heading and the list item each fail through the same stack,
+  // so each gets its own finding rather than a single deck-wide bucket.
+  // The data-vs attribute's "≈" is not listed: it only reaches the page via
+  // `attr()` in `content:`, which this check does not evaluate.
+  assert.equal(coverage.length, 2);
+  const heading = coverage.find((f) => f.message.includes("<h2>"));
+  assert.ok(heading);
+  assert.equal(heading.severity, "warning");
+  assert.equal(heading.slideIndex, 1, "attributed to the slide, not the deck");
+  assert.equal(heading.slideSrc, "slides/00-copy.html");
+  assert.equal(heading.snippet, "日 本 語");
+  assert.match(heading.message, /3 characters \(U\+65E5, U\+672C, U\+8A9E\) in <h2>/);
+  assert.match(heading.message, /Montserrat/, "names the stack that failed");
+  assert.match(heading.message, /system fallback/);
+  const item = coverage.find((f) => f.message.includes("<li>"));
+  assert.ok(item);
+  assert.equal(item.slideIndex, 1);
+  assert.equal(item.snippet, "※");
+  assert.match(item.message, /1 character \(U\+203B\) in <li>/);
   // 🚀 is not listed at all — pictographs come from the platform's emoji font
   // everywhere, so warning about them would be true and useless.
-  assert.ok(!finding.message.includes("U+1F680"));
+  assert.ok(!heading.message.includes("U+1F680") && !item.message.includes("U+1F680"));
   // Follows the established severity model: a warning, escalated by --strict.
   assert.equal(reportHasFailures(report, false), false);
   assert.equal(reportHasFailures(report, true), true);
-  assert.match(formatReport(report), /deck \[dark\]/);
+  assert.match(formatReport(report), /slide 1 \(slides\/00-copy\.html\) \[dark\]/);
+});
+
+test("an uncovered character names its slide, its element and its stack", async () => {
+  const report = await checkPresentation({ rootDir: "test/fixtures/stack-coverage-deck" });
+  const finding = report.findings.find((entry) => entry.message.includes("no glyph"));
+  assert.ok(finding);
+  assert.equal(finding.severity, "warning");
+  assert.equal(finding.slideIndex, 1, "attributed to the slide, not the deck");
+  assert.match(finding.message, /Montserrat/, "the stack that failed");
+  assert.match(finding.snippet, /Δ/);
+});
+
+test("a clean deck reports no coverage findings", async () => {
+  const report = await checkPresentation({ rootDir: "test/fixtures/clean-deck" });
+  assert.equal(report.findings.filter((entry) => entry.message.includes("no glyph")).length, 0);
 });
 
 test("the decks that ship stay covered", async () => {
