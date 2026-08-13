@@ -28,7 +28,9 @@ test("a content: literal with no font-family of its own is judged against the el
   // .marker's own stack — body's default, Montserrat, which has no greek.
   // This is the content:/pseudo-element half of the walk; delete it and this
   // assertion is the one that goes red.
-  const marker = found.find((entry) => entry.element.endsWith("::after"));
+  const marker = found.find(
+    (entry) => entry.element.startsWith("<p class=") && entry.element.endsWith("::after"),
+  );
   assert.ok(marker, "the ::after rule's content is judged, not skipped");
   assert.ok(marker.codepoints.includes(cp("Δ")));
 });
@@ -50,6 +52,28 @@ test("a stack naming a family zerp does not bundle is left unjudged, not flagged
   const found = await uncoveredInSlides({ rootDir: "test/fixtures/stack-override-deck" });
   assert.ok(!found.some((entry) => entry.element.startsWith("<h3")), "Georgia is unknowable");
   assert.ok(!found.some((entry) => entry.element.startsWith("<h4")), "unresolved is unknowable");
+});
+
+test("every matching element on a slide is judged, not just the first", async () => {
+  const found = await uncoveredInSlides({ rootDir: "test/fixtures/stack-coverage-deck" });
+  // Two `.compare[data-vs]` rows on 03-compare.html, each with a different
+  // uncovered character. The old `find` walk stopped at the first match per
+  // slide, so ≠ would silently vanish; this pins that both are reported.
+  const approx = found.find((entry) => entry.codepoints.includes(cp("≈")));
+  const notEqual = found.find((entry) => entry.codepoints.includes(cp("≠")));
+  assert.ok(approx, "the first .compare row's ≈ is reported");
+  assert.ok(notEqual, "the second .compare row's ≠ is reported too, not just the first row's");
+});
+
+test("a bare-generic stack (font-family: serif) is still judged", async () => {
+  const found = await uncoveredInSlides({ rootDir: "test/fixtures/stack-coverage-deck" });
+  // font-family: serif parses to an empty family list (no named family, just
+  // a generic), and is still judged rather than skipped like an unknown named
+  // family would be: the deck asked for system fallback outright.
+  const generic = found.find(
+    (entry) => entry.stack.length === 0 && entry.codepoints.includes(cp("Δ")),
+  );
+  assert.ok(generic, "an empty (generic-only) stack is still reported, not silently skipped");
 });
 
 test("a default deck is clean", async () => {

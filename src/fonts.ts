@@ -343,7 +343,7 @@ async function inline(block: FaceBlock): Promise<string> {
 }
 
 /**
- * The four family tokens, or "" when the deck takes zerp's own families.
+ * The five family tokens, or "" when the deck takes zerp's own families.
  *
  * base-styles.css defines these with the defaults, so this is emitted after it
  * and only when it has something to say. A deck that configures nothing gets

@@ -58,7 +58,7 @@ test("a built deck inlines the Zerp Symbols arrow face, scoped to U+2192", async
 
 test("the arrow markers name Zerp Symbols first so exporters pick it up", async () => {
   const css = await readFile("dist/assets/default-styles.css", "utf8");
-  // Four stacks, defined once and read by every rule, so a deck can redefine
+  // Five stacks, defined once and read by every rule, so a deck can redefine
   // them without the framework knowing which rules exist.
   assert.match(css, /--zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;/);
   assert.match(css, /--zerp-font-marker: "Zerp Symbols", "Montserrat", sans-serif;/);

@@ -46,7 +46,7 @@ test("zerp.fonts in the deck's package.json selects the families", async () => {
   assert.ok(!subsetsOf(faces).some((subset) => subset.includes("-900-")));
   // Each woff2 once, though body and mono resolved to the same package.
   assert.equal(new Set(subsetsOf(faces)).size, subsetsOf(faces).length);
-  // The four stacks, rebuilt around the configured family, symbol face intact.
+  // The five stacks, rebuilt around the configured family, symbol face intact.
   assert.match(tokens, /--zerp-font-body: "Roboto Mono", "Zerp Symbols", sans-serif;/);
   assert.match(tokens, /--zerp-font-marker: "Zerp Symbols", "Roboto Mono", sans-serif;/);
   assert.match(tokens, /--zerp-font-nav: "Roboto Mono", monospace;/);

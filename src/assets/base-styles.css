@@ -9,8 +9,8 @@
 /* Tokens are generated from @evilmartians/harmony and prepended at build
    time. Only var(--zerp-*) color references are allowed in this file. */
 
-/* The four font stacks, named once. A deck that configures its own families
-   (zerp.fonts in its package.json) gets these four redefined after this
+/* The five font stacks, named once. A deck that configures its own families
+   (zerp.fonts in its package.json) gets these five redefined after this
    sheet, which is the whole mechanism — every rule below reads a token, so a
    family lives in exactly one place.
 

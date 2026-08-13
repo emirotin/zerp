@@ -280,7 +280,7 @@ This is per-stack, not per-deck: Greek is available to Roboto Mono and not to Mo
 - `→` is covered everywhere, because zerp bundles a face for it and its own `ul` markers use it.
 - Emoji are exempt from the warning and safe to use: every platform draws them from its own colour emoji font, in the browser and in exports alike, so they never depended on the deck's fonts.
 - Text a slide script generates at runtime is invisible to the check — it reads static markup and does not execute scripts, the same reason subset selection cannot see it either (below).
-- `<svg>` text is not audited as HTML: `<text>` inside inline SVG gets its own separate warning (see "What to avoid").
+- `<text>` inside inline SVG is judged for glyph coverage too, through whatever stack it resolves in, in addition to its own separate structural warning about `fill` and `font-size` being invisible to the cascade (see "What to avoid").
 - Every matching `content:` rule is judged, with no cascade override — a deck that overrides a framework marker's glyph can get a finding for text the browser never actually draws.
 - An element whose stack names a family zerp does not bundle (`font-family: Georgia, serif`, your own `@font-face`, an undefined `var()`) is left unjudged: the check has no `cmap` for that family, so it reports nothing rather than everything. Naming a system font opts that text out of the guarantee — it is drawn by the viewing machine, which is the failure this section exists to prevent. A stack of only a generic family (`font-family: serif`) is still reported, character by character.
 

@@ -93,9 +93,8 @@ const CONTENT_TOKEN = /"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|attr\(\s*([\w-]+)
  * `attr()` reference it makes. `.compare[data-vs]::after { content:
  * attr(data-vs) }` is a shipped framework feature whose label is arbitrary
  * author text — the same characters the old union-model check judged (it read
- * them from `DeckCodepoints.slideContent`, which `codepoints.ts` populates
- * from exactly these attribute values), so this reads them the same way
- * rather than losing them going per-stack.
+ * them off the deck's `content:` rules and `attr()` values the same way), so
+ * this reads them the same way rather than losing them going per-stack.
  *
  * Mixed literals like `content: "(" attr(x) ")"` are handled too, since
  * csstree.generate emits tokens back-to-back with nothing between them: the
@@ -267,14 +266,15 @@ export async function uncoveredInSlides(input: UncoveredInput): Promise<Uncovere
     const own = rule.declarations.get("font-family");
     for (let i = 0; i < slideNodes.length; i++) {
       const slide = slideNodes[i] as DomElement;
-      let matched: DomElement | null = null;
+      // Collect every match on the slide, not just the first: a rule like
+      // `.compare[data-vs]::after` can match several rows on one slide, and
+      // `content: attr()` resolves independently per element, so a row with
+      // "≈" and a row with "≠" are two distinct findings, not one.
+      const matches: DomElement[] = [];
       const find = (el: DomElement): void => {
-        if (matched) {
-          return;
-        }
         try {
           if (el.matches(rule.selector)) {
-            matched = el;
+            matches.push(el);
             return;
           }
         } catch {
@@ -288,26 +288,25 @@ export async function uncoveredInSlides(input: UncoveredInput): Promise<Uncovere
         }
       };
       find(slide);
-      if (!matched) {
-        continue;
+      for (const matched of matches) {
+        // Resolved per matched element, not once per rule: attr() reads the
+        // matching element's own attribute, which can differ slide to slide.
+        const text = resolveContentText(literal, matched);
+        if (text === null) {
+          continue;
+        }
+        const raw = own ?? resolver.computedFor(matched).fontFamily;
+        const stack = parseFontStack(resolver.resolveVars(raw));
+        const codepoints = judgeText(text, stack, stacks);
+        record(
+          matched,
+          rule.pseudoElement,
+          i,
+          `${elementLabel(matched)}${rule.pseudoElement}`,
+          stack,
+          codepoints,
+        );
       }
-      // Resolved per matched element, not once per rule: attr() reads the
-      // matching element's own attribute, which can differ slide to slide.
-      const text = resolveContentText(literal, matched);
-      if (text === null) {
-        continue;
-      }
-      const raw = own ?? resolver.computedFor(matched).fontFamily;
-      const stack = parseFontStack(resolver.resolveVars(raw));
-      const codepoints = judgeText(text, stack, stacks);
-      record(
-        matched,
-        rule.pseudoElement,
-        i,
-        `${elementLabel(matched)}${rule.pseudoElement}`,
-        stack,
-        codepoints,
-      );
     }
   }
 

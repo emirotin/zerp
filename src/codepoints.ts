@@ -2,17 +2,16 @@ import * as csstree from "css-tree";
 import { parseHTML } from "linkedom";
 
 /**
- * The characters a deck can put on screen, in two scopes.
+ * The characters the assembled document renders, framework chrome included.
  *
- * `full` is what the assembled document renders, framework chrome included; it
- * decides which font subsets a built deck has to carry. `slideContent` is only
- * what authored slides render; it decides what an author is warned about,
- * because chrome is zerp's own problem (it is `display: none` in print and in
- * every export path, and its `←` is a documented deliberate fallback).
+ * This decides which font subsets a built deck has to carry. It once also
+ * carried a slide-only scope for the glyph-coverage check to warn from, but
+ * that check now judges each element through the font stack it actually
+ * resolves in (see `check/coverage.ts`) rather than against a deck-wide
+ * codepoint set, so only this one scope is still read.
  */
 export interface DeckCodepoints {
   readonly full: ReadonlySet<number>;
-  readonly slideContent: ReadonlySet<number>;
 }
 
 export interface DeckScanInput {
@@ -164,7 +163,7 @@ function collectCssContent(sheets: readonly string[]): CssContent {
   return result;
 }
 
-function addCodepoints(text: string, targets: Set<number>[]): void {
+function addCodepoints(text: string, target: Set<number>): void {
   for (const character of text) {
     if (NON_RENDERING.test(character)) {
       continue;
@@ -173,9 +172,7 @@ function addCodepoints(text: string, targets: Set<number>[]): void {
     if (codepoint === undefined) {
       continue;
     }
-    for (const target of targets) {
-      target.add(codepoint);
-    }
+    target.add(codepoint);
   }
 }
 
@@ -184,7 +181,8 @@ function addCodepoints(text: string, targets: Set<number>[]): void {
  *
  * Four sources feed it, because slide text alone misses most of them:
  *
- * - the assembled deck's own text, markdown already rendered;
+ * - the assembled deck's own text, markdown already rendered, plus framework
+ *   chrome's;
  * - `content:` string literals from the stylesheets that apply to it — the
  *   `"→ "` ul marker and the `"vs"` of `.compare` are drawn by CSS and appear
  *   in no slide file;
@@ -192,39 +190,30 @@ function addCodepoints(text: string, targets: Set<number>[]): void {
  *   `.compare[data-vs]` prints its own label;
  * - the digits, which `counter()` generates at render time.
  *
- * Script source counts towards `full` only, deliberately: a string literal in
- * a slide script is text the deck may well render, and over-selecting a subset
- * costs bytes while under-selecting costs the reader a fallback glyph. It does
- * not count towards `slideContent`, where a comment or an identifier would
- * become a warning about a character nothing ever draws.
+ * Script source counts too, deliberately: a string literal in a slide script
+ * is text the deck may well render, and over-selecting a subset costs bytes
+ * while under-selecting costs the reader a fallback glyph.
  */
 export function scanDeckCodepoints(input: DeckScanInput): DeckCodepoints {
   const full = new Set<number>();
-  const slideContent = new Set<number>();
-  const both = [full, slideContent];
 
   const slides = scanHtml(input.slidesHtml);
   const chrome = scanHtml(input.chromeHtml ?? "");
 
-  addCodepoints(DIGITS, both);
-  addCodepoints(slides.text, both);
-  addCodepoints(slides.scriptText, [full]);
-  addCodepoints(chrome.text, [full]);
-  addCodepoints(chrome.scriptText, [full]);
+  addCodepoints(DIGITS, full);
+  addCodepoints(slides.text, full);
+  addCodepoints(slides.scriptText, full);
+  addCodepoints(chrome.text, full);
+  addCodepoints(chrome.scriptText, full);
 
-  // Every `content:` literal zerp declares is slide-scope; chrome draws its
-  // own labels as markup. A deck's own CSS is slide-scope by definition.
   const content = collectCssContent([...(input.css ?? []), ...slides.styleCss, ...chrome.styleCss]);
-  addCodepoints(content.literals, both);
+  addCodepoints(content.literals, full);
 
   for (const name of content.attrNames) {
-    for (const element of slides.elements) {
-      addCodepoints(element.getAttribute(name) ?? "", both);
-    }
-    for (const element of chrome.elements) {
-      addCodepoints(element.getAttribute(name) ?? "", [full]);
+    for (const element of [...slides.elements, ...chrome.elements]) {
+      addCodepoints(element.getAttribute(name) ?? "", full);
     }
   }
 
-  return { full, slideContent };
+  return { full };
 }
