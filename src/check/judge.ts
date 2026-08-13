@@ -1,41 +1,36 @@
-import { readFileSync } from "node:fs";
-
 import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./apca.js";
 import { blend, parseColor, toHex, type Rgba } from "./color.js";
 import type { DeckProbe, ProbeElement, ProbeSlide } from "./probe-types.js";
 import type { Finding, FindingCategory } from "./types.js";
 
-export interface JudgeOptions {
-  only?: FindingCategory[];
-  safeMargin?: number;
-}
-
-interface ThemeContrastData {
+export interface ThemeContrastData {
   bg: Record<string, string>;
   fg: Record<string, string>;
   lc: Record<string, Record<string, number>>;
 }
 
-interface TokenContrast {
+export interface TokenContrast {
   dark: ThemeContrastData;
   light: ThemeContrastData;
 }
 
-type BackgroundResult = { kind: "color"; color: Rgba } | { kind: "unverifiable"; reason: string };
-
-// judge() is a pure, synchronous function of a DeckProbe (see module doc
-// below), so the token-contrast table — a small asset generated at build
-// time from the theme palette, not deck input — is loaded synchronously and
-// cached, the same way a compiled-in constant would be if TS allowed JSON
-// import attributes across this package's build layout.
-let tokenContrastCache: TokenContrast | null = null;
-
-function loadTokenContrast(): TokenContrast {
-  tokenContrastCache ??= JSON.parse(
-    readFileSync(new URL("./token-contrast.json", import.meta.url), "utf8"),
-  ) as TokenContrast;
-  return tokenContrastCache;
+export interface JudgeOptions {
+  only?: FindingCategory[];
+  safeMargin?: number;
+  // A JSON module import of token-contrast.json (`with { type: "json" }`) was
+  // tried first: it fails tsc, because the file lives only under dist/ once
+  // scripts/build.mjs generates it at build time — src/check has no sibling
+  // JSON for the compiler to resolve. readFileSync was rejected too: it is a
+  // syscall in judge()'s call path that can fail for reasons unrelated to the
+  // DeckProbe argument, and it assumes judge.js keeps a JSON file next to it
+  // on disk, which breaks under bundling. So the table is optional input:
+  // the caller (the CLI, in a later task) loads it once and passes it in.
+  // Without it, contrast/type-size findings still fire; only the "use this
+  // token instead" suggestion is omitted.
+  tokenContrast?: TokenContrast;
 }
+
+type BackgroundResult = { kind: "color"; color: Rgba } | { kind: "unverifiable"; reason: string };
 
 function suggestionFor(
   data: ThemeContrastData,
@@ -107,6 +102,7 @@ function wanted(only: FindingCategory[] | undefined, category: FindingCategory):
 function judgeContrastAndTypeSize(
   probe: DeckProbe,
   only: FindingCategory[] | undefined,
+  tokenContrast: TokenContrast | undefined,
   findings: Finding[],
 ): void {
   const wantsContrast = wanted(only, "contrast");
@@ -114,8 +110,9 @@ function judgeContrastAndTypeSize(
   if (!wantsContrast && !wantsTypeSize) {
     return;
   }
-  const tokenContrast = loadTokenContrast();
-  const themeContrast = tokenContrast[probe.theme];
+  const themeContrast = tokenContrast?.[probe.theme];
+  const suggest = (bgHex: string, sizePx: number, weight: number): string | null =>
+    themeContrast ? suggestionFor(themeContrast, bgHex, sizePx, weight) : null;
 
   for (const slide of probe.slides) {
     for (const el of slide.elements) {
@@ -181,7 +178,7 @@ function judgeContrastAndTypeSize(
           "error",
           "contrast",
           `contrast Lc ${lcAbs} (${pair}) is unusable for text at any size`,
-          suggestionFor(themeContrast, toHex(bg.color), sizePx, weight),
+          suggest(toHex(bg.color), sizePx, weight),
         );
       } else if (sizePx < req) {
         const target = neededLc(sizePx, weight);
@@ -189,7 +186,7 @@ function judgeContrastAndTypeSize(
           "error",
           "contrast",
           `${sizePx}px/${weight} text has contrast Lc ${lcAbs} (${pair}); needs ≥${req}px at this contrast${target === null ? "" : ` or Lc ≥ ${target} at this size`}`,
-          suggestionFor(themeContrast, toHex(bg.color), sizePx, weight),
+          suggest(toHex(bg.color), sizePx, weight),
         );
       }
     }
@@ -204,6 +201,6 @@ function judgeContrastAndTypeSize(
  */
 export function judge(probe: DeckProbe, options: JudgeOptions = {}): Finding[] {
   const findings: Finding[] = [];
-  judgeContrastAndTypeSize(probe, options.only, findings);
+  judgeContrastAndTypeSize(probe, options.only, options.tokenContrast, findings);
   return findings;
 }
