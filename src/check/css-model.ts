@@ -136,7 +136,14 @@ export function parseStylesheets(sheets: StyleSheetInput[]): CssModel {
             }
           }
           const { origin, pseudo } = splitPseudoElement(selector);
-          if (!isSupportedSelector(origin)) {
+          // The unsupported-syntax gate exists for the cascade resolver, which
+          // never sees pseudo-element rules at all (cascade.ts's ownDeclarations
+          // skips every rule.pseudoElement !== null). Their only consumer is
+          // coverage.ts's content: matcher, which calls the DOM's own
+          // Element#matches and already tolerates a throw — so `.compare[data-vs]`
+          // reaches it real rather than being silently dropped (framework
+          // origin) or reported as an unaudited selector (deck origin).
+          if (pseudo === null && !isSupportedSelector(origin)) {
             if (sheet.origin === "deck") {
               skipped.add(selector);
             }

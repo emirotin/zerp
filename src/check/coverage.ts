@@ -67,9 +67,12 @@ export interface UncoveredInput {
   model?: CssModel;
 }
 
+// Matches checker.ts's own elementLabel: a long class list inlines into the
+// finding's message body, where the rest of the report already clamps it.
 function elementLabel(el: DomElement): string {
   const cls = el.getAttribute("class");
-  return `<${el.tagName.toLowerCase()}${cls ? ` class="${cls}"` : ""}>`;
+  const label = `<${el.tagName.toLowerCase()}${cls ? ` class="${cls}"` : ""}>`;
+  return label.length > 40 ? `${label.slice(0, 37)}…>` : label;
 }
 
 async function loadStackResolver(faces: readonly FontFaceInfo[]): Promise<StackResolver> {
@@ -78,6 +81,47 @@ async function loadStackResolver(faces: readonly FontFaceInfo[]): Promise<StackR
     cmaps.set(face.file, await cmapOf(face.file));
   }
   return new StackResolver(faces, cmaps);
+}
+
+// Quoted literals and attr() references are the two ways a content: value
+// contributes actual text; counter(), url(), open-quote and the like are not
+// text this scan can resolve at all, so a rule using them is left unjudged.
+const CONTENT_TOKEN = /"((?:[^"\\]|\\.)*)"|'((?:[^'\\]|\\.)*)'|attr\(\s*([\w-]+)\s*\)/g;
+
+/**
+ * The text a `content:` declaration renders, resolved against `el` for any
+ * `attr()` reference it makes. `.compare[data-vs]::after { content:
+ * attr(data-vs) }` is a shipped framework feature whose label is arbitrary
+ * author text — the same characters the old union-model check judged (it read
+ * them from `DeckCodepoints.slideContent`, which `codepoints.ts` populates
+ * from exactly these attribute values), so this reads them the same way
+ * rather than losing them going per-stack.
+ *
+ * Mixed literals like `content: "(" attr(x) ")"` are handled too, since
+ * csstree.generate emits tokens back-to-back with nothing between them: the
+ * whole declaration must parse as a run of quoted strings and attr() calls,
+ * or this returns null and the rule is left unjudged, same as an unsupported
+ * function always was.
+ */
+function resolveContentText(literal: string, el: DomElement): string | null {
+  let result = "";
+  let consumed = 0;
+  CONTENT_TOKEN.lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = CONTENT_TOKEN.exec(literal)) !== null) {
+    if (match.index !== consumed) {
+      return null;
+    }
+    if (match[1] !== undefined) {
+      result += match[1].replace(/\\(.)/g, "$1");
+    } else if (match[2] !== undefined) {
+      result += match[2].replace(/\\(.)/g, "$1");
+    } else if (match[3] !== undefined) {
+      result += el.getAttribute(match[3]) ?? "";
+    }
+    consumed = CONTENT_TOKEN.lastIndex;
+  }
+  return consumed === literal.length && consumed > 0 ? result : null;
 }
 
 /** Uncovered codepoints in `text`, ascending; empty when the stack draws all of it. */
@@ -206,10 +250,9 @@ export async function uncoveredInSlides(input: UncoveredInput): Promise<Uncovere
       continue;
     }
     const literal = rule.declarations.get("content");
-    if (!literal || !/["']/.test(literal)) {
+    if (!literal) {
       continue;
     }
-    const text = literal.replace(/^["']|["']$/g, "");
     const own = rule.declarations.get("font-family");
     for (let i = 0; i < slideNodes.length; i++) {
       const slide = slideNodes[i] as DomElement;
@@ -235,6 +278,12 @@ export async function uncoveredInSlides(input: UncoveredInput): Promise<Uncovere
       };
       find(slide);
       if (!matched) {
+        continue;
+      }
+      // Resolved per matched element, not once per rule: attr() reads the
+      // matching element's own attribute, which can differ slide to slide.
+      const text = resolveContentText(literal, matched);
+      if (text === null) {
         continue;
       }
       const raw = own ?? resolver.computedFor(matched).fontFamily;

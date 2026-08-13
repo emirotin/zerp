@@ -62,11 +62,10 @@ test("characters no bundled face can draw are reported once per element, attribu
   const report = await checkPresentation({ rootDir: "test/fixtures/uncovered-glyph-deck" });
   const coverage = report.findings.filter((f) => f.message.includes("no glyph"));
   // One finding per offending element, not one per character and not one per
-  // theme: the heading and the list item each fail through the same stack,
-  // so each gets its own finding rather than a single deck-wide bucket.
-  // The data-vs attribute's "≈" is not listed: it only reaches the page via
-  // `attr()` in `content:`, which this check does not evaluate.
-  assert.equal(coverage.length, 2);
+  // theme: the heading, the list item, and the data-vs label each fail
+  // through the same stack, so each gets its own finding rather than a
+  // single deck-wide bucket.
+  assert.equal(coverage.length, 3);
   const heading = coverage.find((f) => f.message.includes("<h2>"));
   assert.ok(heading);
   assert.equal(heading.severity, "warning");
@@ -81,9 +80,21 @@ test("characters no bundled face can draw are reported once per element, attribu
   assert.equal(item.slideIndex, 1);
   assert.equal(item.snippet, "※");
   assert.match(item.message, /1 character \(U\+203B\) in <li>/);
+  // "≈" reaches the page only via `.compare[data-vs]::after { content:
+  // attr(data-vs) }` — an attribute value, not a literal anywhere in the
+  // slide markup or the stylesheet. Judging it requires reading the
+  // attribute off the matched element, which is what restores this case.
+  const label = coverage.find((f) => f.message.includes("::after"));
+  assert.ok(label, "content: attr() text is judged, not silently dropped");
+  assert.equal(label.slideIndex, 1);
+  assert.equal(label.snippet, "≈");
+  assert.match(label.message, /1 character \(U\+2248\) in <div class="compare">::after/);
   // 🚀 is not listed at all — pictographs come from the platform's emoji font
   // everywhere, so warning about them would be true and useless.
-  assert.ok(!heading.message.includes("U+1F680") && !item.message.includes("U+1F680"));
+  assert.ok(
+    ![heading, item, label].some((f) => f.message.includes("U+1F680")),
+    "pictographs are exempt everywhere, not just in the elements checked above",
+  );
   // Follows the established severity model: a warning, escalated by --strict.
   assert.equal(reportHasFailures(report, false), false);
   assert.equal(reportHasFailures(report, true), true);
@@ -92,12 +103,25 @@ test("characters no bundled face can draw are reported once per element, attribu
 
 test("an uncovered character names its slide, its element and its stack", async () => {
   const report = await checkPresentation({ rootDir: "test/fixtures/stack-coverage-deck" });
-  const finding = report.findings.find((entry) => entry.message.includes("no glyph"));
-  assert.ok(finding);
-  assert.equal(finding.severity, "warning");
-  assert.equal(finding.slideIndex, 1, "attributed to the slide, not the deck");
-  assert.match(finding.message, /Montserrat/, "the stack that failed");
-  assert.match(finding.snippet, /Δ/);
+  const coverage = report.findings.filter((entry) => entry.message.includes("no glyph"));
+  const first = coverage.find(
+    (entry) => entry.snippet.includes("Δ") && entry.message.includes("<h1>"),
+  );
+  assert.ok(first);
+  assert.equal(first.severity, "warning");
+  assert.equal(first.slideIndex, 1, "attributed to the slide, not the deck");
+  assert.match(first.message, /Montserrat/, "the stack that failed");
+  assert.match(first.snippet, /Δ/);
+  // A second offending slide, further down the deck: pins that attribution
+  // follows the actual slide the text sits on rather than always landing on
+  // slide 1 — a bug that hardcoded the first slide would still pass the
+  // assertion above.
+  const second = coverage.find(
+    (entry) => entry.snippet.includes("Ω") && entry.message.includes("<h1>"),
+  );
+  assert.ok(second, "a later slide's uncovered text is reported too, not just the first offender");
+  assert.equal(second.slideIndex, 2, "attributed to its own slide, not the first one");
+  assert.equal(second.slideSrc, "slides/02-omega.html");
 });
 
 test("a clean deck reports no coverage findings", async () => {
