@@ -17,7 +17,7 @@ neither, run `zerp install-browser` once.
 
 Nothing in a deck needs to change. 0.6 is additive: built decks are now
 print-ready (one page per slide, chrome hidden, steps in their final state).
-Print at a page size equal to the presentation viewport (e.g. 1280×720 CSS px)
+Print at a page size equal to the presentation viewport (e.g. 1920×1080 CSS px)
 with backgrounds enabled.
 
 The one deliberate rendering change is where an _overflowing_ slide clips. The
@@ -26,7 +26,7 @@ slide whose content exceeds the frame clips at the bottom only, instead of at
 both ends (which previously hid the top of the overflow). Slides that fit the
 frame are unchanged. The remedy for overflow is the same as before — trim
 content or top-align with `.slide.top`, then re-run `zerp check .` and
-`zerp verify . --theme both --size 1280x720`.
+`zerp verify . --theme both --size 1920x1080`.
 
 # Migrating from a pre-frame zerp build
 
@@ -45,7 +45,7 @@ Run both static and browser validation after upgrading:
 
 ```bash
 zerp check .
-zerp verify . --theme both --size 1280x720
+zerp verify . --theme both --size 1920x1080
 ```
 
 The browser check requires Chrome or Chromium. `htmlparser2` is a direct
