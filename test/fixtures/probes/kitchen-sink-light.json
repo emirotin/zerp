@@ -4047,11 +4047,11 @@
     }
   ],
   "browserErrors": [
-    "file:///Users/emirotin/work/zerp/test/fixtures/kitchen-sink/slides/images/missing-pin.png",
-    "file:///Users/emirotin/work/zerp/test/fixtures/kitchen-sink/slides/images/missing-ok.png",
-    "file:///Users/emirotin/work/zerp/test/fixtures/kitchen-sink/slides/images/missing-left.png",
-    "file:///Users/emirotin/work/zerp/test/fixtures/kitchen-sink/slides/images/missing-right.png",
-    "file:///Users/emirotin/work/zerp/test/fixtures/kitchen-sink/slides/images/missing-a.png",
-    "file:///Users/emirotin/work/zerp/test/fixtures/kitchen-sink/slides/images/missing-b.png"
+    "slides/images/missing-pin.png",
+    "slides/images/missing-ok.png",
+    "slides/images/missing-left.png",
+    "slides/images/missing-right.png",
+    "slides/images/missing-a.png",
+    "slides/images/missing-b.png"
   ]
 }

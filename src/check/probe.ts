@@ -272,6 +272,34 @@ export async function probeDeck(options: ProbeOptions): Promise<DeckProbe> {
       timeoutMs: options.timeoutMs,
       ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
     });
+    // Strip absolute file:// paths to make them deck-relative. This prevents
+    // fixture churn and leaking local paths across machines. Normalize both
+    // browser errors and computed backgroundImage values in elements.
+    const filePrefix = `file://${rootDir}/`;
+    const deckRelativeErrors = result.browserErrors.map((error) =>
+      error.startsWith(filePrefix) ? error.slice(filePrefix.length) : error,
+    );
+
+    // Also normalize backgroundImage URLs in element computed styles.
+    // url("file:///absolute/path/image.png") becomes url("image.png") relative to deck.
+    const deckRelativeSlides = result.slides.map((slide) => ({
+      ...slide,
+      elements: slide.elements.map((el) => {
+        const bg = el.backgroundImage;
+        if (bg && bg.startsWith("url(")) {
+          const urlMatch = bg.match(/^url\("file:\/\/([^"]+)"\)$/);
+          if (urlMatch && urlMatch[1]) {
+            const fullPath = urlMatch[1];
+            if (fullPath.startsWith(rootDir)) {
+              const deckRelativePath = fullPath.slice(rootDir.length + 1);
+              return { ...el, backgroundImage: `url("${deckRelativePath}")` };
+            }
+          }
+        }
+        return el;
+      }),
+    }));
+
     return {
       theme: options.theme,
       width: options.width,
@@ -280,8 +308,8 @@ export async function probeDeck(options: ProbeOptions): Promise<DeckProbe> {
       frameCount: result.frameCount,
       slideCount: result.slideCount,
       innerSlideCount: result.innerSlideCount,
-      slides: result.slides,
-      browserErrors: result.browserErrors,
+      slides: deckRelativeSlides,
+      browserErrors: deckRelativeErrors,
     };
   } finally {
     rmSync(htmlPath, { force: true });

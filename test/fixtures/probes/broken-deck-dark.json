@@ -110,7 +110,7 @@
           "hasOwnText": false,
           "color": "rgb(240, 243, 255)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
-          "backgroundImage": "url(\"file:///Users/emirotin/work/zerp/test/fixtures/broken-deck/img.png\")",
+          "backgroundImage": "url(\"img.png\")",
           "fontSizePx": 16,
           "fontWeight": 400,
           "opacity": 1,
