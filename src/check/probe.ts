@@ -1,22 +1,13 @@
 import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-import {
-  type Browser,
-  type BrowserContext,
-  chromium,
-  type CDPSession,
-  type Page,
-} from "playwright-core";
+import type { CDPSession, Page } from "playwright-core";
 
 import { buildPresentationHtml } from "../presentation.js";
-import { resolveBrowserExecutable } from "../verify.js";
+import { resolveBrowserExecutable, runBrowserSession } from "../verify.js";
 import type { DeckProbe, ProbeOptions, ProbeSlide } from "./probe-types.js";
 
 let probeSequence = 0;
-
-/** How long a shared browser gets to take its context back before we give up on it. */
-const CONTEXT_CLEANUP_TIMEOUT_MS = 5_000;
 
 /**
  * Convert an absolute filesystem path to a deck-relative path.
@@ -30,22 +21,6 @@ export function normalizePathToDeckRelative(absolutePath: string, rootDir: strin
   }
   return null;
 }
-
-// Installed at document start so resource and script errors are collected from
-// the first byte of the deck, before any slide markup runs. Kept as a local
-// copy of verify.ts's collector script rather than an import — only
-// `resolveBrowserExecutable` is exported from verify.ts for reuse here.
-const COLLECTOR_SOURCE = `
-window.__zerpVerifyErrors = [];
-window.addEventListener("error", function (event) {
-  var target = event.target;
-  var message = event.message || (target && (target.src || target.href)) || "browser error";
-  window.__zerpVerifyErrors.push(String(message));
-}, true);
-window.addEventListener("unhandledrejection", function (event) {
-  window.__zerpVerifyErrors.push(String(event.reason || "unhandled rejection"));
-});
-`;
 
 // Only the active slide renders, so styles and geometry are collected slide by
 // slide with window.next() between them — the same reason verify's probe steps.
@@ -247,102 +222,31 @@ interface SessionOptions {
   browserEndpoint?: string;
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
-  let timer: ReturnType<typeof setTimeout>;
-  const timeout = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => reject(new Error(message)), ms);
-  });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
-}
-
 /**
- * Attach to a browser someone else is running. CDP is the interoperable
- * transport (the browser's own protocol, no matching playwright build
- * required); `ws://` is for a server started by a matching
- * `chromium.launchServer()`, typically the same application that spawns
- * this CLI. Mirrors verify.ts's connectBrowser, which is not exported.
- */
-function connectBrowser(endpoint: string, timeoutMs: number): Promise<Browser> {
-  return endpoint.startsWith("http")
-    ? chromium.connectOverCDP(endpoint, { timeout: timeoutMs })
-    : chromium.connect(endpoint, { timeout: timeoutMs });
-}
-
-/**
- * Drive Chromium through playwright-core, following the same session shape as
- * verify.ts's `runProbe`: set an exact layout viewport on the context,
- * install the error collector before the first byte, navigate, wait for
- * load, then evaluate the per-slide walk (which itself awaits
- * `document.fonts.ready` and a paint before measuring).
+ * Drive Chromium through the shared session lifecycle in verify.ts: set an
+ * exact layout viewport on the context, install the error collector before
+ * the first byte, navigate, wait for load, then evaluate the per-slide walk
+ * (which itself awaits `document.fonts.ready` and a paint before measuring).
  */
 async function runSlideProbe(options: SessionOptions): Promise<RawProbeResult> {
-  const { htmlPath, width, height, safeMargin, timeoutMs, browserEndpoint } = options;
-  // A supplied browser is borrowed; a launched one is ours to terminate. The
-  // distinction decides the whole teardown below.
-  const borrowed = browserEndpoint !== undefined;
-  const opening = borrowed
-    ? connectBrowser(browserEndpoint, timeoutMs)
-    : // playwright-core defaults `chromiumSandbox: false`, so this stays root-safe
-      // without extra flags; the launch is bounded so a wedged browser cannot hang.
-      chromium.launch({
-        ...(options.executablePath === undefined ? {} : { executablePath: options.executablePath }),
-        headless: true,
-        timeout: timeoutMs,
-      });
-  let browser: Browser | undefined;
-  // Held as a promise, not a value: if the session times out while the context
-  // is still being created, the value assignment never happens and a borrowed
-  // browser would keep the context forever.
-  let opened: Promise<BrowserContext> | undefined;
-  const session = opening.then(async (connected) => {
-    browser = connected;
-    // An exact layout viewport, unlike `--window-size`, whose delivered
-    // innerWidth/innerHeight vary by platform and required calibration.
-    opened = connected.newContext({
-      viewport: { width, height },
-      deviceScaleFactor: 1,
-    });
-    const context = await opened;
-    const page = await context.newPage();
-    await page.addInitScript(COLLECTOR_SOURCE);
-    await page.goto(`file://${htmlPath}#1`, { waitUntil: "load" });
-    const cdp = await context.newCDPSession(page);
-    await cdp.send("DOM.enable");
-    await cdp.send("CSS.enable");
-    const { setup, slides } = await collectSlides(page, cdp, safeMargin);
-    const browserErrors = (await page.evaluate(BROWSER_ERRORS_EXPRESSION)) as string[];
-    return { ...setup, slides, browserErrors };
-  });
-  try {
-    // The budget is named in the message: a timeout is the one failure whose
-    // fix is a configuration change, and the operator cannot make it without
-    // knowing which value ran out.
-    return await withTimeout(
-      session,
-      timeoutMs,
-      `Chrome probe timed out after ${timeoutMs}ms (raise the probe timeout)`,
-    );
-  } finally {
-    // The context is closed explicitly rather than left to the browser: a
-    // borrowed browser survives this process, so an abandoned context is a leak
-    // that accumulates over every probe the host runs. Bounded, because
-    // teardown must not outlive the run it is cleaning up after.
-    if (opened) {
-      await withTimeout(
-        opened.then((context) => context.close()),
-        CONTEXT_CLEANUP_TIMEOUT_MS,
-        "closing the probe context timed out",
-      ).catch(() => {});
-    }
-    // Also close the browser even if the race above rejected: if it already
-    // resolved, `browser` holds the handle; if it is still settling, await it
-    // so a late-arriving browser is not leaked. On a borrowed browser this
-    // severs our connection and leaves the browser itself running.
-    const connected = browser ?? (await opening.catch(() => undefined));
-    if (connected) {
-      await connected.close().catch(() => {});
-    }
-  }
+  const { safeMargin, timeoutMs } = options;
+  return runBrowserSession(
+    {
+      ...options,
+      // The budget is named in the message: a timeout is the one failure
+      // whose fix is a configuration change, and the operator cannot make it
+      // without knowing which value ran out.
+      timeoutMessage: `Chrome probe timed out after ${timeoutMs}ms (raise the probe timeout)`,
+    },
+    async (page, context) => {
+      const cdp = await context.newCDPSession(page);
+      await cdp.send("DOM.enable");
+      await cdp.send("CSS.enable");
+      const { setup, slides } = await collectSlides(page, cdp, safeMargin);
+      const browserErrors = (await page.evaluate(BROWSER_ERRORS_EXPRESSION)) as string[];
+      return { ...setup, slides, browserErrors };
+    },
+  );
 }
 
 /**

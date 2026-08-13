@@ -54,17 +54,21 @@ function canResolveWithoutChromeBin() {
 // ported onto probeDeck directly in probe.test.mjs, which is the layer that
 // still owns those facts.
 
-test("verify measures after fonts settle over a playwright-core session", async () => {
+test("the probe measures after fonts settle over a playwright-core session", async () => {
   const { readFile } = await import("node:fs/promises");
-  const source = await readFile("dist/verify.js", "utf8");
+  const source = await readFile("dist/check/probe.js", "utf8");
   // Guard the two load-bearing transport properties: the probe must wait for
   // font activation (font-dependent overflow was invisible without it), and
   // the transport must be playwright-core — the battle-tested driver that
-  // retired the hand-rolled `--remote-debugging-pipe` CDP client. verify.ts's
-  // own probe plumbing is unused by the CLI now (probe.ts reimplements it),
-  // but it stays exported and this still pins its properties.
+  // retired the hand-rolled `--remote-debugging-pipe` CDP client. Task 8
+  // deleted verify.ts's own copy of this browser session (its old
+  // `verifyPresentation`/`runProbe` command, superseded by `zerp check`);
+  // probe.ts now drives the one shared session verify.ts exports
+  // (`runBrowserSession`), so this pins the properties on the file that
+  // actually runs them.
   assert.match(source, /document\.fonts\.ready/);
-  assert.match(source, /playwright-core/);
+  const verifySource = await readFile("dist/verify.js", "utf8");
+  assert.match(verifySource, /playwright-core/);
 });
 
 // wrapper-deck's frame/visibility/custom-root-display regression coverage
