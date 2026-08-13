@@ -4,7 +4,7 @@ import type { DomElement } from "./types.js";
 
 export interface ComputedText {
   color: string;
-  /** Unresolved declaration value; expand with resolveVars before parsing. */
+  /** Already var()-substituted, at the element that declared it. */
   fontFamily: string;
   fontSizePx: number;
   fontWeight: number;
@@ -20,6 +20,12 @@ export interface SurfaceInfo {
   hasShadow: boolean;
   borderWidthPx: number;
   borderColor: Rgba | null;
+}
+
+/** A custom property's winning declaration; `owner` undefined means :root. */
+interface VarHit {
+  value: string;
+  owner: DomElement | undefined;
 }
 
 const ROOT_PX = 16;
@@ -113,21 +119,44 @@ export class StyleResolver {
   private readonly vars: Map<string, string>;
   private readonly computedCache = new Map<DomElement, ComputedText>();
   private readonly ownCache = new Map<DomElement, Map<string, string>>();
+  private readonly varCache = new Map<DomElement, Map<string, VarHit | null>>();
 
   constructor(model: CssModel, vars: Map<string, string>) {
     this.model = model;
     this.vars = vars;
   }
 
-  resolveVars(value: string): string {
+  /**
+   * Substitute every `var()` in `value`. Pass the element the declaration
+   * applies to, so custom properties declared anywhere in its ancestor chain
+   * are visible; without one only `:root`/`html`/theme values are. A value
+   * with no `var()` comes back untouched, so callers holding an already
+   * substituted string can call this harmlessly.
+   */
+  resolveVars(value: string, el?: DomElement): string {
+    return this.substitute(value, el, 0);
+  }
+
+  private substitute(value: string, el: DomElement | undefined, depth: number): string {
     let out = value;
+    // The iteration cap is what stops a cyclic custom property (--a: var(--a))
+    // from spinning; it bounds the nesting depth too, via `depth`.
     for (let i = 0; i < 8 && /var\(/.test(out); i++) {
       let changed = false;
       out = out.replace(
         /var\(\s*(--[A-Za-z0-9_-]+)\s*(?:,\s*([^()]*))?\)/g,
         (_whole, name: string, fallback: string | undefined) => {
           changed = true;
-          return this.vars.get(name) ?? fallback?.trim() ?? "unresolved";
+          const hit = this.lookupVar(el, name);
+          if (!hit) {
+            return fallback?.trim() ?? "unresolved";
+          }
+          if (depth >= 8) {
+            return "unresolved";
+          }
+          // A custom property's own value substitutes at the element that
+          // declared it, not at whoever reads it further down the tree.
+          return this.substitute(hit.value, hit.owner, depth + 1);
         },
       );
       if (!changed) {
@@ -135,6 +164,39 @@ export class StyleResolver {
       }
     }
     return out;
+  }
+
+  /**
+   * The winning declaration of a custom property for `el`: its own matched
+   * declarations first, then each ancestor's (custom properties inherit),
+   * then the `:root`/`html`/theme map. Memoized per element like the other
+   * walks — decks read the same tokens on almost every element.
+   */
+  private lookupVar(el: DomElement | undefined, name: string): VarHit | null {
+    if (!el) {
+      const root = this.vars.get(name);
+      return root === undefined ? null : { value: root, owner: undefined };
+    }
+    let cache = this.varCache.get(el);
+    if (!cache) {
+      cache = new Map();
+      this.varCache.set(el, cache);
+    }
+    const cached = cache.get(name);
+    if (cached !== undefined) {
+      return cached;
+    }
+    let hit: VarHit | null = null;
+    for (let node: DomElement | null = el; node; node = node.parentElement) {
+      const declared = this.ownDeclarations(node).get(name);
+      if (declared !== undefined) {
+        hit = { value: declared, owner: node };
+        break;
+      }
+    }
+    hit ??= this.lookupVar(undefined, name);
+    cache.set(name, hit);
+    return hit;
   }
 
   private ownDeclarations(el: DomElement): Map<string, string> {
@@ -202,8 +264,8 @@ export class StyleResolver {
     const parentComputed: ComputedText = parent
       ? this.computedFor(parent)
       : {
-          color: this.vars.get("--zerp-text") ?? "#000000",
-          fontFamily: this.vars.get("--zerp-font-body") ?? "sans-serif",
+          color: this.resolveVars(this.vars.get("--zerp-text") ?? "#000000"),
+          fontFamily: this.resolveVars(this.vars.get("--zerp-font-body") ?? "sans-serif"),
           fontSizePx: ROOT_PX,
           fontWeight: 400,
           opacity: 1,
@@ -211,18 +273,25 @@ export class StyleResolver {
     const own = this.ownDeclarations(el);
     const sizeRaw = own.get("font-size");
     const fontSizePx = sizeRaw
-      ? (parseSize(this.resolveVars(sizeRaw), parentComputed.fontSizePx) ??
+      ? (parseSize(this.resolveVars(sizeRaw, el), parentComputed.fontSizePx) ??
         parentComputed.fontSizePx)
       : parentComputed.fontSizePx;
     const weightRaw = own.get("font-weight");
     const fontWeight = weightRaw
       ? parseWeight(weightRaw, parentComputed.fontWeight)
       : parentComputed.fontWeight;
+    // Substitution happens here, on the element the declaration applies to;
+    // what inherits from the parent is its already substituted value, so a
+    // descendant redefining the same custom property cannot reach back and
+    // change it.
     const colorRaw = own.get("color");
-    const color = !colorRaw || colorRaw === "inherit" ? parentComputed.color : colorRaw;
+    const color =
+      !colorRaw || colorRaw === "inherit" ? parentComputed.color : this.resolveVars(colorRaw, el);
     const familyRaw = own.get("font-family");
     const fontFamily =
-      !familyRaw || familyRaw === "inherit" ? parentComputed.fontFamily : familyRaw;
+      !familyRaw || familyRaw === "inherit"
+        ? parentComputed.fontFamily
+        : this.resolveVars(familyRaw, el);
     const opacityRaw = Number.parseFloat(own.get("opacity") ?? "1");
     const opacity =
       parentComputed.opacity *
@@ -244,7 +313,9 @@ export class StyleResolver {
       if (!raw) {
         continue;
       }
-      const resolved = this.resolveVars(raw);
+      // Against `node`, not `el`: the declaration being read is this
+      // ancestor's, so its custom properties resolve from where it sits.
+      const resolved = this.resolveVars(raw, node);
       if (/url\(|gradient\(/i.test(resolved)) {
         return { kind: "unverifiable", reason: "background image/gradient" };
       }
@@ -271,26 +342,26 @@ export class StyleResolver {
     const hasBackground =
       backgroundRaw !== undefined &&
       backgroundRaw.trim() !== "none" &&
-      this.resolveVars(backgroundRaw).trim() !== "transparent";
+      this.resolveVars(backgroundRaw, el).trim() !== "transparent";
     const shadow = own.get("box-shadow");
     const hasShadow = shadow !== undefined && shadow.trim() !== "none";
     const borderRaw = own.get("border");
     let borderWidthPx = 0;
     let borderColor: Rgba | null = null;
     if (borderRaw && borderRaw.trim() !== "none" && borderRaw.trim() !== "0") {
-      const resolved = this.resolveVars(borderRaw);
+      const resolved = this.resolveVars(borderRaw, el);
       const widthMatch = resolved.match(/(\d+(?:\.\d+)?)px/);
       borderWidthPx = widthMatch ? Number.parseFloat(widthMatch[1] ?? "0") : 1;
       borderColor = extractColor(resolved);
     }
     const borderColorRaw = own.get("border-color");
     if (borderColorRaw) {
-      borderColor = extractColor(this.resolveVars(borderColorRaw)) ?? borderColor;
+      borderColor = extractColor(this.resolveVars(borderColorRaw, el)) ?? borderColor;
       borderWidthPx = Math.max(borderWidthPx, 1);
     }
     const borderWidthRaw = own.get("border-width");
     if (borderWidthRaw) {
-      const widthMatch = this.resolveVars(borderWidthRaw).match(/(\d+(?:\.\d+)?)px/);
+      const widthMatch = this.resolveVars(borderWidthRaw, el).match(/(\d+(?:\.\d+)?)px/);
       if (widthMatch) {
         borderWidthPx = Number.parseFloat(widthMatch[1] ?? "0");
       }

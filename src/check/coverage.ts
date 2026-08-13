@@ -296,7 +296,9 @@ export async function uncoveredInSlides(input: UncoveredInput): Promise<Uncovere
           continue;
         }
         const raw = own ?? resolver.computedFor(matched).fontFamily;
-        const stack = parseFontStack(resolver.resolveVars(raw));
+        // A pseudo-element inherits its originating element's custom
+        // properties, so the rule's own declaration resolves against `matched`.
+        const stack = parseFontStack(resolver.resolveVars(raw, matched));
         const codepoints = judgeText(text, stack, stacks);
         record(
           matched,

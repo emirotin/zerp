@@ -37,6 +37,21 @@ test("clean deck passes with no findings", async () => {
   assert.match(formatReport(report), /all clear/);
 });
 
+test("a deck-scoped colour variable gets a real contrast verdict", async () => {
+  const report = await checkPresentation({ rootDir: "test/fixtures/scoped-var-deck" });
+  // `.slide { --deck-ink: #808080 }` is declared outside :root, so the old flat
+  // var map never saw it and every consumer of it was written off as
+  // unverifiable instead of being judged.
+  assert.deepEqual(
+    report.findings.filter((f) => f.severity === "unverifiable"),
+    [],
+  );
+  const judged = report.findings.filter(
+    (f) => f.severity === "error" && f.message.includes("#808080"),
+  );
+  assert.equal(judged.length, 2, "grey-on-grey is judged for real, in both themes");
+});
+
 test("svg text is flagged once, and aria-hidden opts out", async () => {
   const report = await checkPresentation({ rootDir: "test/fixtures/svg-text-deck" });
   const svgFindings = report.findings.filter((f) => f.message.includes("<svg>"));

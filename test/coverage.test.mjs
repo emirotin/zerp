@@ -76,6 +76,18 @@ test("a bare-generic stack (font-family: serif) is still judged", async () => {
   assert.ok(generic, "an empty (generic-only) stack is still reported, not silently skipped");
 });
 
+test("a font family named through a deck-scoped custom property is still judged", async () => {
+  // `.slide { --deck-font: "Montserrat", … }` is declared outside :root. While
+  // that was invisible to the cascade the h2's stack resolved to the literal
+  // "unresolved", which judgeText skips as unknowable — the deck's greek was
+  // dropped from the glyph audit with no trace. This is that silent skip.
+  const found = await uncoveredInSlides({ rootDir: "test/fixtures/scoped-var-deck" });
+  const heading = found.find((entry) => entry.element.startsWith("<h2"));
+  assert.ok(heading, "the h2 resolves through the deck-scoped Montserrat stack");
+  assert.ok(heading.codepoints.includes(cp("Δ")));
+  assert.match(heading.stack.join(","), /Montserrat/);
+});
+
 test("a default deck is clean", async () => {
   assert.deepEqual(await uncoveredInSlides({ rootDir: "test/fixtures/clean-deck" }), []);
 });

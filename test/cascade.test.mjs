@@ -114,6 +114,56 @@ test("later background-color longhand overrides earlier background shorthand", (
   assert.equal(toHex(result.color), "#0000ff");
 });
 
+test("a custom property declared outside :root resolves for a descendant", () => {
+  const model = parseStylesheets([
+    {
+      css: `.slide { --deck-font: "Roboto Mono", monospace; }
+            .slide h2 { font-family: var(--deck-font); }`,
+      origin: "deck",
+    },
+  ]);
+  const { document } = parseHTML("<body><div class=slide><h2>T</h2></div></body>");
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+  assert.equal(
+    resolver.computedFor(document.querySelector("h2")).fontFamily,
+    '"Roboto Mono", monospace',
+  );
+});
+
+test("a descendant redefining a custom property does not change what it inherited", () => {
+  // CSS substitutes var() on the element the declaration applies to, and the
+  // SUBSTITUTED value is what inherits. Resolving lazily at the consuming
+  // element would hand #333333 back here, which is what this pins against.
+  const model = parseStylesheets([
+    {
+      css: `:root { --x: #111111; }
+            .outer { --x: #222222; color: var(--x); }
+            .inner { --x: #333333; }`,
+      origin: "deck",
+    },
+  ]);
+  const { document } = parseHTML(
+    '<body><div class="outer"><div class="inner"><span id="t">x</span></div></div></body>',
+  );
+  const resolver = new StyleResolver(model, model.themeVars.dark);
+  assert.equal(resolver.computedFor(document.querySelector("#t")).color, "#222222");
+  assert.equal(resolver.computedFor(document.querySelector(".inner")).color, "#222222");
+});
+
+test("root and theme custom properties still resolve, and still differ per theme", () => {
+  const pick = ({ resolver, document }) =>
+    resolver.computedFor(document.querySelector("span")).color;
+  assert.equal(pick(setup("dark")), "#cbceda");
+  assert.equal(pick(setup("light")), "#676973");
+});
+
+test("an unknown custom property falls back, then to the unresolved sentinel", () => {
+  const { resolver } = setup("dark");
+  assert.equal(resolver.resolveVars("var(--nope, #abcdef)"), "#abcdef");
+  assert.equal(resolver.resolveVars("var(--nope)"), "unresolved");
+  assert.equal(resolver.resolveVars("#123456"), "#123456");
+});
+
 test("font-family is inherited like color", () => {
   const model = parseStylesheets([
     {
