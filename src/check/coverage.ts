@@ -126,6 +126,17 @@ function resolveContentText(literal: string, el: DomElement): string | null {
 
 /** Uncovered codepoints in `text`, ascending; empty when the stack draws all of it. */
 function judgeText(text: string, stack: readonly string[], stacks: StackResolver): number[] {
+  // A stack naming a family zerp does not bundle cannot be judged: the check
+  // has no cmap for it and so can neither confirm nor deny any character. The
+  // shapes this catches are `font-family: Georgia, serif`, an author
+  // `@font-face`, and the literal "unresolved" the cascade substitutes for a
+  // var() it never collected — each of which otherwise reports EVERY character
+  // in the element, which is noise rather than a finding. An empty stack is a
+  // different fact and stays judged: it means the deck asked for a generic
+  // family outright, and system fallback is exactly what it gets.
+  if (stack.some((family) => !stacks.knows(family))) {
+    return [];
+  }
   const missing = new Set<number>();
   for (const character of text) {
     if (NON_RENDERING.test(character) || EXEMPT.test(character)) {

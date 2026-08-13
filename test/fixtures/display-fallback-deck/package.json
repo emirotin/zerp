@@ -3,7 +3,9 @@
   "private": true,
   "zerp": {
     "fonts": {
-      "body": { "family": "Roboto Mono" }
+      "body": {
+        "family": "Roboto Mono"
+      }
     }
   }
 }

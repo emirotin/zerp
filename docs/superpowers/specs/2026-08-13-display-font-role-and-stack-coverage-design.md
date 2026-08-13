@@ -89,7 +89,7 @@ not, and applies it:
 author can undo it with a plain `h1 { font-family: var(--zerp-font-body) }` in
 `slides/00-styles.html`. With the natural `.slide h1 { … }` an author would have
 to match `.slide h1` to opt out, which makes the feature awkward to decline.
-Opting *in* elsewhere (`h2 { font-family: var(--zerp-font-display) }`) works
+Opting _in_ elsewhere (`h2 { font-family: var(--zerp-font-display) }`) works
 either way, since a rule targeting `h2` directly beats the value it inherits
 from `.slide`.
 
@@ -116,7 +116,7 @@ as a card title at 1.4em, where a true display face reads as weak or cramped.
 ### The problem
 
 `coveredCodepoints` (`src/check/coverage.ts:44`) unions every bundled face: a
-character is covered if *any* face can draw it. The existing comment concedes
+character is covered if _any_ face can draw it. The existing comment concedes
 this ("which face a given font stack would actually reach for is a harder
 question and deliberately not asked here"), and today the concession is nearly
 free, because headings and body text resolve to the same family.
@@ -161,7 +161,7 @@ union to decide what ships; only judging becomes stack-aware.
 4. **Character resolution.** For a character and a stack: for each named family
    in order, if any of its faces has the codepoint in both its declared
    `unicode-range` and its real cmap, the character resolves — stop. If the
-   stack is exhausted, the character is uncovered *for that stack*.
+   stack is exhausted, the character is uncovered _for that stack_.
    Weight is ignored: fontsource subsets share a cmap across weights, so
    family-level resolution is sufficient for coverage.
 
@@ -171,7 +171,7 @@ union to decide what ships; only judging becomes stack-aware.
    (stack, codepoint); decks repeat both heavily.
 
 6. **Pseudo-element `content`.** `collectCssContent` (`codepoints.ts:136`)
-   already extracts `content:` literals for *selection*, but a literal has no
+   already extracts `content:` literals for _selection_, but a literal has no
    DOM node, so the walk above cannot judge it. Handle it from the CSS model
    instead: for each rule declaring `content`, strip the pseudo-element from the
    selector, match elements against the remainder, and resolve the stack for the
@@ -223,12 +223,12 @@ and `@fontsource/roboto-mono`, already in `dependencies` — cross-assigning rol
 gives two genuinely different families with different subset coverage, so **no
 new dependencies are needed**.
 
-| Fixture | Configures | Asserts |
-|---|---|---|
-| `display-font-deck` | `display: Roboto Mono`, body default | Display token emitted; `h1` resolves to Roboto Mono; body unaffected |
-| `display-fallback-deck` | `body: Roboto Mono` only | `--zerp-font-display` mirrors body; no extra faces inlined |
-| `stack-coverage-deck` | nothing — defaults suffice | Greek `<h1>` is **uncovered** (Montserrat ships no Greek) while the same character in `<code>` is covered by Roboto Mono — the case the union model gets wrong. Demonstrable on 0.10, so it doubles as the regression proof |
-| `stack-override-deck` | no font config | Author CSS in `00-styles.html` moves `h2` onto the mono stack; a character only body ships becomes uncovered |
+| Fixture                 | Configures                           | Asserts                                                                                                                                                                                                                     |
+| ----------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `display-font-deck`     | `display: Roboto Mono`, body default | Display token emitted; `h1` resolves to Roboto Mono; body unaffected                                                                                                                                                        |
+| `display-fallback-deck` | `body: Roboto Mono` only             | `--zerp-font-display` mirrors body; no extra faces inlined                                                                                                                                                                  |
+| `stack-coverage-deck`   | nothing — defaults suffice           | Greek `<h1>` is **uncovered** (Montserrat ships no Greek) while the same character in `<code>` is covered by Roboto Mono — the case the union model gets wrong. Demonstrable on 0.10, so it doubles as the regression proof |
+| `stack-override-deck`   | no font config                       | Author CSS in `00-styles.html` moves `h2` onto the mono stack; a character only body ships becomes uncovered                                                                                                                |
 
 Existing fixtures keep their current expectations: `custom-font-deck`,
 `missing-font-deck` and `uncovered-glyph-deck` all still assert what they assert
@@ -276,4 +276,4 @@ Kept current as part of this change, not after it:
 - Fonts outside the Google Fonts / fontsource directory. This stays a swap, not
   a font pipeline.
 - Applying the display face beyond `h1` by default.
-- Resolving *which weight* a face would match; coverage is family-level.
+- Resolving _which weight_ a face would match; coverage is family-level.

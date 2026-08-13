@@ -4,7 +4,7 @@
 
 **Goal:** Add a third configurable font role (`display`) that defaults to body, and replace `zerp check`'s union-based glyph coverage with a check that resolves the font stack each character actually renders through.
 
-**Architecture:** Part 1 threads a third role through the existing two-role pipeline: `deck-config.ts` validates it, `fonts.ts` plans it (falling back to the *resolved body plan*), `familyTokenCss` emits `--zerp-font-display`, and `base-styles.css` applies it to `h1` via a zero-specificity `:where()` rule so deck authors can opt out. Part 2 adds `font-family` to the existing `StyleResolver` cascade, then adds a new `src/check/font-stack.ts` that resolves a character against an ordered stack using the real cmaps `coverage.ts` already reads; `coverage.ts` changes from a set-in/set-out function to a DOM walk driven by the resolver.
+**Architecture:** Part 1 threads a third role through the existing two-role pipeline: `deck-config.ts` validates it, `fonts.ts` plans it (falling back to the _resolved body plan_), `familyTokenCss` emits `--zerp-font-display`, and `base-styles.css` applies it to `h1` via a zero-specificity `:where()` rule so deck authors can opt out. Part 2 adds `font-family` to the existing `StyleResolver` cascade, then adds a new `src/check/font-stack.ts` that resolves a character against an ordered stack using the real cmaps `coverage.ts` already reads; `coverage.ts` changes from a set-in/set-out function to a DOM walk driven by the resolver.
 
 **Tech Stack:** TypeScript (ESM, `dist/` build via `scripts/build.mjs`), `node:test` with `node:assert/strict`, linkedom (DOM), css-tree (CSS parsing), fontsource woff2 subsets, oxlint/oxfmt.
 
@@ -20,7 +20,7 @@
 - A deck that configures no fonts must produce a **byte-identical** document to 0.10. This is asserted in Task 3 and must not regress.
 - `test/fixtures/kitchen-sink` and `examples/casino` must pass `node dist/cli.js check <deck>` cleanly in both themes before handoff (Task 11).
 - Fixtures use only `@fontsource/montserrat` and `@fontsource/roboto-mono`, already in `dependencies`. **Do not add dependencies.**
-- Follow existing comment style: comments explain *why*, not *what*. Match the density of surrounding code.
+- Follow existing comment style: comments explain _why_, not _what_. Match the density of surrounding code.
 - Commit after every task. Pre-commit runs Husky → `lint-staged` + a build check.
 
 ---
@@ -28,10 +28,12 @@
 ### Task 1: The `display` role in deck config
 
 **Files:**
+
 - Modify: `src/deck-config.ts:23-30` (`DeckConfig`), `:30` (`FONT_ROLES`)
 - Test: `test/deck-fonts.test.mjs:72-84`
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: `DeckConfig.fonts.display?: DeckFontConfig`; `FONT_ROLES = ["body", "display", "mono"]`. Task 2 reads `config.fonts?.display`.
 
@@ -100,14 +102,16 @@ git commit -m "Accept a display font role in deck config"
 ### Task 2: Plan and token the display family
 
 **Files:**
+
 - Modify: `src/fonts.ts:181-189` (`FamilyPlan`), `:195-209` (`familyPlan`), `:293-296` (`planFamilies`), `:336-349` (`familyTokenCss`)
 - Test: `test/deck-fonts.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `DeckConfig.fonts.display` (Task 1).
 - Produces: `FamilyPlan.role` widens to `"body" | "display" | "mono"`; `familyTokenCss` emits `--zerp-font-display`. Task 3's CSS and Task 8's coverage both depend on the token name.
 
-**Key design point:** `display` unset falls back to the **resolved body plan** (family, package *and* weights), not to the `BODY` constant. So `planFamilies` must resolve body first and pass it in, rather than mapping three roles independently.
+**Key design point:** `display` unset falls back to the **resolved body plan** (family, package _and_ weights), not to the `BODY` constant. So `planFamilies` must resolve body first and pass it in, rather than mapping three roles independently.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -130,8 +134,14 @@ test("a configured display family is independent of body", async () => {
   const { faces, tokens } = await fontCss(dir, latin);
   assert.match(tokens, /--zerp-font-display: "Roboto Mono", "Zerp Symbols", sans-serif;/);
   assert.match(tokens, /--zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;/);
-  assert.ok(subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin")), "body");
-  assert.ok(subsetsOf(faces).some((subset) => subset.startsWith("roboto-mono-latin")), "display");
+  assert.ok(
+    subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin")),
+    "body",
+  );
+  assert.ok(
+    subsetsOf(faces).some((subset) => subset.startsWith("roboto-mono-latin")),
+    "display",
+  );
 });
 
 test("an unresolvable display package names the display role", async () => {
@@ -249,11 +259,13 @@ git commit -m "Plan and emit a display family that inherits body"
 ### Task 3: Apply the display face to `h1`
 
 **Files:**
+
 - Modify: `src/assets/base-styles.css:26-29` (`:root` tokens), and a new rule near `:157`
 - Modify: `test/build-output.test.mjs:63-70`
 - Regenerate: `test/fixtures/clean-deck/index.html`
 
 **Interfaces:**
+
 - Consumes: `--zerp-font-display` (Task 2).
 - Produces: `:where(.slide h1) { font-family: var(--zerp-font-display) }` — Task 8's fixtures rely on `h1` resolving through the display stack.
 
@@ -264,8 +276,8 @@ git commit -m "Plan and emit a display family that inherits body"
 In `test/build-output.test.mjs`, add alongside the existing token assertions:
 
 ```js
-  assert.match(css, /--zerp-font-display: "Montserrat", "Zerp Symbols", sans-serif;/);
-  assert.match(css, /:where\(\.slide h1\) \{\s*font-family: var\(--zerp-font-display\)/);
+assert.match(css, /--zerp-font-display: "Montserrat", "Zerp Symbols", sans-serif;/);
+assert.match(css, /:where\(\.slide h1\) \{\s*font-family: var\(--zerp-font-display\)/);
 ```
 
 And add a new test asserting the byte-identical invariant:
@@ -293,7 +305,7 @@ Expected: FAIL — no `--zerp-font-display` in the built stylesheet.
 In `src/assets/base-styles.css`, add to the `:root` block after `--zerp-font-body` (keep the existing explanatory comment above it intact):
 
 ```css
-  --zerp-font-display: "Montserrat", "Zerp Symbols", sans-serif;
+--zerp-font-display: "Montserrat", "Zerp Symbols", sans-serif;
 ```
 
 Then add immediately above the existing `.slide h1` rule at `:157`:
@@ -337,11 +349,13 @@ git commit -m "Set h1 in the display face at zero specificity"
 ### Task 4: Display-role fixtures and end-to-end assertions
 
 **Files:**
+
 - Create: `test/fixtures/display-font-deck/package.json`, `test/fixtures/display-font-deck/slides/01-intro.html`
 - Create: `test/fixtures/display-fallback-deck/package.json`, `test/fixtures/display-fallback-deck/slides/01-intro.html`
 - Test: `test/deck-fonts.test.mjs`
 
 **Interfaces:**
+
 - Consumes: Tasks 1-3.
 - Produces: two fixtures. Task 11 screenshots `display-font-deck`.
 
@@ -437,10 +451,12 @@ git commit -m "Add display-role fixtures"
 ### Task 5: Resolve `font-family` through the cascade
 
 **Files:**
+
 - Modify: `src/check/cascade.ts:5-10` (`ComputedText`), `:188-221` (`computedFor`)
 - Test: `test/cascade.test.mjs`
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: `ComputedText.fontFamily: string` — the **unresolved** declaration value (e.g. `var(--zerp-font-display)`). Callers expand it with `resolver.resolveVars(...)`, matching how `color` is handled at `checker.ts:278`. Task 8 consumes this.
 
@@ -464,10 +480,7 @@ test("font-family is inherited like color", () => {
   const resolver = new StyleResolver(model, model.themeVars.dark);
   const h1 = document.querySelector("h1");
   const em = document.querySelector("em");
-  assert.equal(
-    resolver.resolveVars(resolver.computedFor(h1).fontFamily),
-    '"Bebas", sans-serif',
-  );
+  assert.equal(resolver.resolveVars(resolver.computedFor(h1).fontFamily), '"Bebas", sans-serif');
   // Inherited through <p> from .slide, two levels up.
   assert.equal(
     resolver.resolveVars(resolver.computedFor(em).fontFamily),
@@ -505,9 +518,8 @@ In `computedFor`, add to the root defaults object:
 and, next to the `color` handling:
 
 ```ts
-    const familyRaw = own.get("font-family");
-    const fontFamily =
-      !familyRaw || familyRaw === "inherit" ? parentComputed.fontFamily : familyRaw;
+const familyRaw = own.get("font-family");
+const fontFamily = !familyRaw || familyRaw === "inherit" ? parentComputed.fontFamily : familyRaw;
 ```
 
 then include `fontFamily` in the `computed` object literal.
@@ -529,15 +541,17 @@ git commit -m "Compute font-family in the check cascade"
 ### Task 6: Resolve a character against a font stack
 
 **Files:**
+
 - Create: `src/check/font-stack.ts`
 - Test: `test/font-stack.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `FontFaceInfo` and `rangesContain` from `src/fonts.ts`.
 - Produces:
   - `parseFontStack(value: string): string[]` — ordered family names, quotes stripped, truncated at the first generic family.
   - `class StackResolver` with `constructor(faces: readonly FontFaceInfo[], cmaps: ReadonlyMap<string, ReadonlySet<number>>)` and `resolves(stack: readonly string[], codepoint: number): boolean`.
-  Task 8 consumes both.
+    Task 8 consumes both.
 
 **Key design point:** generic families terminate the stack — reaching `sans-serif` means the browser falls back to the viewing machine, which is exactly the failure being reported. Weight is ignored: fontsource subsets share a cmap across weights, so family-level resolution is sufficient.
 
@@ -640,7 +654,10 @@ const GENERIC = new Set([
 export function parseFontStack(value: string): string[] {
   const families: string[] = [];
   for (const part of value.split(",")) {
-    const family = part.trim().replace(/^["']|["']$/g, "").trim();
+    const family = part
+      .trim()
+      .replace(/^["']|["']$/g, "")
+      .trim();
     if (!family) {
       continue;
     }
@@ -658,10 +675,7 @@ export class StackResolver {
   private readonly cmaps: ReadonlyMap<string, ReadonlySet<number>>;
   private readonly cache = new Map<string, boolean>();
 
-  constructor(
-    faces: readonly FontFaceInfo[],
-    cmaps: ReadonlyMap<string, ReadonlySet<number>>,
-  ) {
+  constructor(faces: readonly FontFaceInfo[], cmaps: ReadonlyMap<string, ReadonlySet<number>>) {
     this.cmaps = cmaps;
     for (const face of faces) {
       const key = face.family.toLowerCase();
@@ -726,10 +740,12 @@ git commit -m "Resolve a character against an ordered font stack"
 ### Task 7: Keep pseudo-element rules in the CSS model
 
 **Files:**
+
 - Modify: `src/check/css-model.ts:5-21` (`StyleRule`, `CssModel`), `:25-33` (`isSupportedSelector`), `:112-123` (rule push)
 - Test: `test/css-model.test.mjs`
 
 **Interfaces:**
+
 - Consumes: nothing.
 - Produces: `StyleRule.pseudoElement: string | null` and `StyleRule.selector` holding the **originating** selector with the pseudo-element stripped. Task 8 filters `model.rules` for `pseudoElement !== null` to find `content:` declarations.
 
@@ -742,7 +758,10 @@ Add to `test/css-model.test.mjs`:
 ```js
 test("a ::before rule is kept, keyed to the element it originates from", () => {
   const model = parseStylesheets([
-    { css: '.slide ul li::before { content: "→ "; font-family: var(--zerp-font-marker); }', origin: "framework" },
+    {
+      css: '.slide ul li::before { content: "→ "; font-family: var(--zerp-font-marker); }',
+      origin: "framework",
+    },
   ]);
   const rule = model.rules.find((candidate) => candidate.pseudoElement === "::before");
   assert.ok(rule, "the rule survives parsing");
@@ -811,20 +830,20 @@ function splitPseudoElement(selector: string): { origin: string; pseudo: string 
 In the `prelude.children.forEach` body, split before the support test and carry the result through. The theme-block and `:root` handling stays keyed on the raw `selector`; only the rule push changes:
 
 ```ts
-          const { origin, pseudo } = splitPseudoElement(selector);
-          if (!isSupportedSelector(origin)) {
-            if (sheet.origin === "deck") {
-              skipped.add(selector);
-            }
-            return;
-          }
-          rules.push({
-            selector: origin,
-            pseudoElement: pseudo,
-            specificity: specificityOf(origin),
-            order: order++,
-            declarations,
-          });
+const { origin, pseudo } = splitPseudoElement(selector);
+if (!isSupportedSelector(origin)) {
+  if (sheet.origin === "deck") {
+    skipped.add(selector);
+  }
+  return;
+}
+rules.push({
+  selector: origin,
+  pseudoElement: pseudo,
+  specificity: specificityOf(origin),
+  order: order++,
+  declarations,
+});
 ```
 
 Then in `src/check/cascade.ts`, `ownDeclarations` must ignore pseudo-element rules — a `::before` rule styles the pseudo-element, not the element:
@@ -853,12 +872,14 @@ git commit -m "Keep ::before/::after rules in the CSS model"
 ### Task 8: Stack-aware coverage
 
 **Files:**
+
 - Rewrite: `src/check/coverage.ts`
 - Create: `test/fixtures/stack-coverage-deck/slides/01-greek.html`
 - Create: `test/fixtures/stack-override-deck/slides/00-styles.html`, `test/fixtures/stack-override-deck/slides/01-override.html`
 - Modify: `test/coverage.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `ComputedText.fontFamily` (Task 5), `parseFontStack`/`StackResolver` (Task 6), `StyleRule.pseudoElement` (Task 7).
 - Produces:
   ```ts
@@ -872,7 +893,7 @@ git commit -m "Keep ::before/::after rules in the CSS model"
     /** Uncovered codepoints, ascending. */
     codepoints: number[];
   }
-  export function uncoveredInSlides(input: UncoveredInput): Promise<UncoveredText[]>
+  export function uncoveredInSlides(input: UncoveredInput): Promise<UncoveredText[]>;
   ```
   Task 9 consumes `uncoveredInSlides`.
 
@@ -909,7 +930,7 @@ git commit -m "Keep ::before/::after rules in the CSS model"
 </div>
 ```
 
-Note: `Æ` and `ø` are latin-1; both families cover them, so this fixture asserts the *override is seen and still resolves*. The genuinely-uncovered assertion lives in `stack-coverage-deck`. If a character covered by exactly one of the two families is needed later, prefer Greek — it is the only clean split between them.
+Note: `Æ` and `ø` are latin-1; both families cover them, so this fixture asserts the _override is seen and still resolves_. The genuinely-uncovered assertion lives in `stack-coverage-deck`. If a character covered by exactly one of the two families is needed later, prefer Greek — it is the only clean split between them.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -1202,11 +1223,13 @@ git commit -m "Judge glyph coverage against the stack each character renders in"
 ### Task 9: Report stack-aware findings
 
 **Files:**
+
 - Modify: `src/check/checker.ts:9` (import), `:206-233` (the coverage finding)
 - Modify: `src/check/coverage.ts` (delete the superseded exports)
 - Test: `test/checker.test.mjs`
 
 **Interfaces:**
+
 - Consumes: `uncoveredInSlides`, `UncoveredText` (Task 8).
 - Produces: `Finding`s with real `slideIndex` attribution. No `types.ts` change — the existing `Finding` shape carries it.
 
@@ -1247,32 +1270,32 @@ import { uncoveredInSlides } from "./coverage.js";
 and replace the whole coverage block at `:206-233`:
 
 ```ts
-  // Glyph coverage: a character the stack it renders in cannot draw is not a
-  // styling mistake, it is a promise the deck cannot keep. It renders from
-  // whatever the viewing machine falls back to, and an export re-resolves it on
-  // the reader's machine. Theme-independent, so it is reported once against the
-  // first requested theme rather than duplicated into every theme's group.
-  if (structuralTheme) {
-    const uncovered = await uncoveredInSlides({ rootDir: options.rootDir, document, model });
-    for (const entry of uncovered) {
-      const shown = entry.codepoints.slice(0, MAX_LISTED_CODEPOINTS);
-      const points = shown.map((code) => `U+${code.toString(16).toUpperCase().padStart(4, "0")}`);
-      const rest = entry.codepoints.length - shown.length;
-      const suffix = rest > 0 ? `, +${rest} more` : "";
-      const slide = slideNodes[entry.slideIndex] as DomElement | undefined;
-      const count = entry.codepoints.length;
-      findings.push({
-        severity: "warning",
-        theme: structuralTheme,
-        slideIndex: entry.slideIndex + 1,
-        slideSrc: slide?.getAttribute("data-zerp-src") ?? null,
-        slideSrcSlide: slide?.getAttribute("data-zerp-src-slide") ?? null,
-        snippet: shown.map((code) => String.fromCodePoint(code)).join(" "),
-        message: `${count} character${count === 1 ? "" : "s"} (${points.join(", ")}${suffix}) in ${entry.element} ${count === 1 ? "has" : "have"} no glyph in ${entry.stack.join(", ") || "the fallback stack"} — ${count === 1 ? "it renders" : "each renders"} via system fallback, which looks different on every machine and in exports`,
-        suggestion: "use characters the stack's families cover, or set a family that covers them",
-      });
-    }
+// Glyph coverage: a character the stack it renders in cannot draw is not a
+// styling mistake, it is a promise the deck cannot keep. It renders from
+// whatever the viewing machine falls back to, and an export re-resolves it on
+// the reader's machine. Theme-independent, so it is reported once against the
+// first requested theme rather than duplicated into every theme's group.
+if (structuralTheme) {
+  const uncovered = await uncoveredInSlides({ rootDir: options.rootDir, document, model });
+  for (const entry of uncovered) {
+    const shown = entry.codepoints.slice(0, MAX_LISTED_CODEPOINTS);
+    const points = shown.map((code) => `U+${code.toString(16).toUpperCase().padStart(4, "0")}`);
+    const rest = entry.codepoints.length - shown.length;
+    const suffix = rest > 0 ? `, +${rest} more` : "";
+    const slide = slideNodes[entry.slideIndex] as DomElement | undefined;
+    const count = entry.codepoints.length;
+    findings.push({
+      severity: "warning",
+      theme: structuralTheme,
+      slideIndex: entry.slideIndex + 1,
+      slideSrc: slide?.getAttribute("data-zerp-src") ?? null,
+      slideSrcSlide: slide?.getAttribute("data-zerp-src-slide") ?? null,
+      snippet: shown.map((code) => String.fromCodePoint(code)).join(" "),
+      message: `${count} character${count === 1 ? "" : "s"} (${points.join(", ")}${suffix}) in ${entry.element} ${count === 1 ? "has" : "have"} no glyph in ${entry.stack.join(", ") || "the fallback stack"} — ${count === 1 ? "it renders" : "each renders"} via system fallback, which looks different on every machine and in exports`,
+      suggestion: "use characters the stack's families cover, or set a family that covers them",
+    });
   }
+}
 ```
 
 Then delete `coveredCodepoints` and `uncoveredCodepoints` from `src/check/coverage.ts`, along with the now-unused `DeckCodepoints` import. Check for other importers first:
@@ -1298,6 +1321,7 @@ git commit -m "Report uncovered characters with slide, element and stack"
 ### Task 10: Documentation
 
 **Files:**
+
 - Modify: `README.md:159-190`
 - Modify: `llms.txt:270-300`
 - Modify: `docs/style-system.html` (type section)
@@ -1305,6 +1329,7 @@ git commit -m "Report uncovered characters with slide, element and stack"
 - Regenerate: `docs/style-system.pdf`
 
 **Interfaces:**
+
 - Consumes: everything above.
 - Produces: nothing code-facing.
 
@@ -1383,11 +1408,13 @@ git commit -m "Document the display role and stack-aware coverage"
 ### Task 11: Full verification, fixture tuning, version bump
 
 **Files:**
+
 - Modify: `package.json` (version)
 - Modify (as needed): `test/fixtures/kitchen-sink/slides/**`, `examples/casino/slides/**`
 - Regenerate (as needed): `examples/**/index.html`
 
 **Interfaces:**
+
 - Consumes: everything above.
 - Produces: a green tree.
 

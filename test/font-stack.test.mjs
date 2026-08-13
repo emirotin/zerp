@@ -37,6 +37,14 @@ test("family matching ignores case, as font-family does", () => {
   assert.ok(resolver.resolves(["alpha"], cp("A")));
 });
 
+test("a family with no bundled face is unknown rather than empty", () => {
+  const resolver = new StackResolver(faces, cmaps);
+  assert.ok(resolver.knows("Alpha"));
+  assert.ok(resolver.knows("beta"), "case-insensitive, as font-family is");
+  assert.ok(!resolver.knows("Georgia"));
+  assert.ok(!resolver.knows("unresolved"), "the cascade's stand-in for an unknown var()");
+});
+
 test("a codepoint outside the declared range does not resolve, cmap or not", () => {
   // 'B' is in Alpha's cmap and inside its range; 0x2192 is in neither. A face
   // whose file carries a glyph the @font-face range excludes is never consulted

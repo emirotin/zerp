@@ -81,6 +81,19 @@ export class StackResolver {
     return false;
   }
 
+  /**
+   * Whether this resolver has any face for the family at all.
+   *
+   * A family zerp does not bundle — `Georgia`, an author `@font-face`, or the
+   * literal `unresolved` the cascade substitutes for an unknown `var()` — is
+   * not a family that draws nothing; it is a family whose coverage this check
+   * cannot know. Callers use this to leave such a stack unjudged rather than
+   * report every character in it as missing.
+   */
+  knows(family: string): boolean {
+    return this.byFamily.has(family.toLowerCase());
+  }
+
   /** Whether any family in the stack draws the codepoint. */
   resolves(stack: readonly string[], codepoint: number): boolean {
     const key = `${stack.join(",")}-${codepoint}`;

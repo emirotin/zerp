@@ -41,6 +41,17 @@ test("an author's font-family override is followed", async () => {
   assert.deepEqual(found, [], "the override is followed, so h2's greek text resolves");
 });
 
+test("a stack naming a family zerp does not bundle is left unjudged, not flagged wholesale", async () => {
+  // The same greek the h2 needs an override to draw sits in an <h3> set to
+  // `Georgia, serif` and an <h4> set to an undefined var() (which the cascade
+  // renders as the literal "unresolved"). Neither family has a cmap here, so
+  // the check cannot know what they draw. Report them and EVERY character in
+  // the element lights up — the noisiest possible false positive.
+  const found = await uncoveredInSlides({ rootDir: "test/fixtures/stack-override-deck" });
+  assert.ok(!found.some((entry) => entry.element.startsWith("<h3")), "Georgia is unknowable");
+  assert.ok(!found.some((entry) => entry.element.startsWith("<h4")), "unresolved is unknowable");
+});
+
 test("a default deck is clean", async () => {
   assert.deepEqual(await uncoveredInSlides({ rootDir: "test/fixtures/clean-deck" }), []);
 });
