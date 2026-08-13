@@ -1,6 +1,13 @@
 # Browser-backed `check`, merged with `verify`
 
-Target: 0.12.0. Breaking. Branch to be taken from the 0.11 line.
+Target: **0.11.0-rc.2**. This ships as part of the unreleased 0.11 line, not a
+later minor — the version is bumped from `0.11.0-rc.1` only once this phase is
+complete, audited and its fallout fixed. Breaking, as 0.11 already is.
+
+Branch: `feat/browser-backed-check`, taken from
+`feat/display-role-and-stack-coverage` so that branch's open PR stays
+reviewable on its own. `CHANGELOG.md`'s existing `0.11.0` heading absorbs this
+work rather than gaining a new section.
 
 `zerp check` currently audits a deck with a hand-written partial CSS cascade
 (~550 lines across `src/check/cascade.ts` and `src/check/css-model.ts`), while
