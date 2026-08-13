@@ -104,18 +104,64 @@ function wanted(only: FindingCategory[] | undefined, category: FindingCategory):
 // machine and is re-resolved again on export. Emoji are the one exemption:
 // every platform draws them from its own colour font by design, so they are
 // subtracted from the system glyph count rather than reported.
-const EXEMPT = /[\p{Extended_Pictographic}\p{Regional_Indicator}]/gu;
-
+//
 // `snippet` is truncated to 40 characters (see probe.ts), so for a long,
 // emoji-heavy run the exempt count here is an approximation of the full
 // element text. If that proves to misreport in practice, the fix is to have
 // the probe record the full-text exempt count (where the untruncated string
-// is still available) rather than widening this exemption.
-function fallbackGlyphs(element: ProbeElement): { count: number; families: string[] } {
-  const system = element.fonts.filter((font) => !font.isCustomFont);
-  const drawn = system.reduce((total, font) => total + font.glyphCount, 0);
+// is still available) rather than widening this exemption. Multi-codepoint
+// sequences (e.g. a ZWJ family emoji, which is 3 Extended_Pictographic-ish
+// codepoints drawing 1 glyph) also make this an overcount of exempt
+// characters relative to glyphs — harmless in the direction it errs, since
+// it can only suppress a real finding, never invent one.
+const EXEMPT = /[\p{Extended_Pictographic}\p{Regional_Indicator}]/gu;
+
+type FontCount = { count: number; isCustomFont: boolean };
+
+// CSS.getPlatformFontsForNode aggregates over the node's entire subtree (see
+// collectFonts in probe.ts), so an element's own reported `fonts` double-count
+// every descendant's fonts on top of whatever the element's own text (or
+// generated content, e.g. ::after) drew. Subtracting each direct child's
+// aggregate from the parent's, per family, isolates what this element alone
+// is responsible for — recursively correct, because each child's own `fonts`
+// was itself already aggregated over its subtree the same way.
+function ownFontCounts(slide: ProbeSlide, element: ProbeElement): Map<string, FontCount> {
+  const counts = new Map<string, FontCount>();
+  for (const font of element.fonts) {
+    const entry = counts.get(font.familyName) ?? { count: 0, isCustomFont: font.isCustomFont };
+    entry.count += font.glyphCount;
+    counts.set(font.familyName, entry);
+  }
+  for (const child of slide.elements) {
+    if (child.parent !== element.id) {
+      continue;
+    }
+    for (const font of child.fonts) {
+      const entry = counts.get(font.familyName);
+      if (entry) {
+        entry.count = Math.max(0, entry.count - font.glyphCount);
+      }
+    }
+  }
+  return counts;
+}
+
+function fallbackGlyphs(
+  slide: ProbeSlide,
+  element: ProbeElement,
+): { count: number; families: string[] } {
+  const counts = ownFontCounts(slide, element);
+  let drawn = 0;
+  const families: string[] = [];
+  for (const [family, { count, isCustomFont }] of counts) {
+    if (isCustomFont || count === 0) {
+      continue;
+    }
+    drawn += count;
+    families.push(family);
+  }
   const exempt = (element.snippet.match(EXEMPT) ?? []).length;
-  return { count: Math.max(0, drawn - exempt), families: system.map((f) => f.familyName) };
+  return { count: Math.max(0, drawn - exempt), families };
 }
 
 function judgeGlyphs(
@@ -129,7 +175,20 @@ function judgeGlyphs(
 
   for (const slide of probe.slides) {
     for (const el of slide.elements) {
-      const { count, families } = fallbackGlyphs(el);
+      // Gate on hasOwnText, not just a nonzero count: `snippet` collapses to
+      // "" for an element whose own direct children are whitespace-only text
+      // nodes (see probe.ts's walk), which is exactly the case where an
+      // element's only own contribution is generated content (e.g. a
+      // ::after character) rather than real, quotable text. Reporting those
+      // would point the author at nothing locatable. This does mean a
+      // fallback glyph drawn purely by ::after/::before content on an
+      // element with no real text of its own goes unreported — a known gap,
+      // not silently absorbed: such content is rare, and the alternative
+      // (reporting against an empty snippet) is worse for the deck author.
+      if (!el.hasOwnText) {
+        continue;
+      }
+      const { count, families } = fallbackGlyphs(slide, el);
       if (count === 0) {
         continue;
       }
