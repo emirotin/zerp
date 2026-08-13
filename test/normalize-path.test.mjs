@@ -1,18 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-/**
- * Convert an absolute filesystem path to a deck-relative path.
- * Returns the relative path if it's genuinely under rootDir, null otherwise.
- * Uses a trailing-slash boundary to avoid matching sibling directories.
- */
-export function normalizePathToDeckRelative(absolutePath, rootDir) {
-  const prefix = `${rootDir}/`;
-  if (absolutePath.startsWith(prefix)) {
-    return absolutePath.slice(prefix.length);
-  }
-  return null;
-}
+import { normalizePathToDeckRelative } from "../dist/check/probe.js";
 
 test("normalizePathToDeckRelative: path genuinely under root", () => {
   const result = normalizePathToDeckRelative("/a/b/image.png", "/a/b");

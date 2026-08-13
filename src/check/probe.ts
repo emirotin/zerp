@@ -17,7 +17,7 @@ const CONTEXT_CLEANUP_TIMEOUT_MS = 5_000;
  * Returns the relative path if it's genuinely under rootDir, null otherwise.
  * Uses a trailing-slash boundary to avoid matching sibling directories.
  */
-function normalizePathToDeckRelative(absolutePath: string, rootDir: string): string | null {
+export function normalizePathToDeckRelative(absolutePath: string, rootDir: string): string | null {
   const prefix = `${rootDir}/`;
   if (absolutePath.startsWith(prefix)) {
     return absolutePath.slice(prefix.length);
