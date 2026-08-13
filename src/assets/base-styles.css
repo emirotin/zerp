@@ -24,6 +24,7 @@
    see .nav button. */
 :root {
   --zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;
+  --zerp-font-display: "Montserrat", "Zerp Symbols", sans-serif;
   --zerp-font-marker: "Zerp Symbols", "Montserrat", sans-serif;
   --zerp-font-mono: "Roboto Mono", "Zerp Symbols", monospace;
   --zerp-font-nav: "Roboto Mono", monospace;
@@ -152,6 +153,16 @@ hr {
   [data-until-step].swap.step-done {
     display: none;
   }
+}
+
+/* Headings are display type, and a deck may set a face for them alone. Zero
+   specificity via :where() so `h1 { font-family: var(--zerp-font-body) }` in a
+   deck's own stylesheet is enough to opt out — with `.slide h1` an author would
+   have to match the framework's own selector to decline the feature. Opting
+   other elements in works either way: a rule naming h2 directly beats the
+   family h2 inherits from .slide. */
+:where(.slide h1) {
+  font-family: var(--zerp-font-display);
 }
 
 .slide h1 {
