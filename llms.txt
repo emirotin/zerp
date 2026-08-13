@@ -289,7 +289,11 @@ A deck may name its own families in an optional `zerp` key in **its own package.
 
 ```json
 {
-  "dependencies": { "@fontsource/inter": "^5" },
+  "dependencies": {
+    "@fontsource/bebas-neue": "^5",
+    "@fontsource/inter": "^5",
+    "@fontsource/jetbrains-mono": "^5"
+  },
   "zerp": {
     "fonts": {
       "display": { "family": "Bebas Neue", "weights": ["400"] },

@@ -118,7 +118,7 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 - The page title comes from the first slide's top heading (override via the `title` build option; folder name as fallback).
 - Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
 - Fonts are inlined per deck: a build carries the Montserrat and Roboto Mono subsets whose `unicode-range` the deck's own text actually touches (Latin always), plus a one-glyph face for `→`. A latin deck therefore ships no Cyrillic, and a deck that types `№` ships the subset that covers it.
-- `zerp check` also warns about characters no bundled font can draw — it reads the real `cmap` of each inlined woff2. Anything outside them (`≈`, `▲`, CJK, …) is drawn by whatever the viewing machine falls back to, which differs per OS and again on export. The warning lists the characters and their codepoints. Emoji are exempt — every platform draws those from its own colour emoji font.
+- `zerp check` also warns about characters the font stack an element renders in cannot draw — it reads the real `cmap` of each inlined woff2 and resolves the actual stack per element (so `display`/`body`/`mono` are each checked on their own terms). Anything outside a stack's coverage (`≈`, `▲`, CJK, …) is drawn by whatever the viewing machine falls back to, which differs per OS and again on export. The warning is one `⚠` per element, naming the slide, the element and the failing stack. Emoji are exempt — every platform draws those from its own colour emoji font.
 - Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and checks that exactly one full-size slide frame is active and visible without page overflow. Overflow is relative to the checked viewport (`--size WxH`, default 1280x720) — verify a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked.
 - `zerp verify --safe-margin px` additionally requires every top-level element of each slide to stay at least that many px inside all page edges — a print-safe inset for decks headed to PDF. Mark intentionally full-bleed elements with `data-zerp-bleed` to exempt them. Off by default; choose a margin below the slide padding so ordinary content never trips it.
 - `zerp verify --timeout ms` (or `ZERP_VERIFY_TIMEOUT_MS`) sets the budget for the whole browser session — launch, navigation, font activation and the probe. The default is 20000ms, which suits a developer machine; raise it on a small or loaded host, or for a deck carrying heavy imagery. A session that runs out of budget produces no report at all, so if you automate `zerp verify`, give it a budget that matches the host it runs on and treat the timeout as a failed check rather than a passed one.
@@ -164,7 +164,11 @@ optional `zerp` key in the deck's own `package.json` can name them:
 
 ```json
 {
-  "dependencies": { "@fontsource/inter": "^5", "@fontsource/jetbrains-mono": "^5" },
+  "dependencies": {
+    "@fontsource/bebas-neue": "^5",
+    "@fontsource/inter": "^5",
+    "@fontsource/jetbrains-mono": "^5"
+  },
   "zerp": {
     "fonts": {
       "display": { "family": "Bebas Neue", "weights": ["400"] },
