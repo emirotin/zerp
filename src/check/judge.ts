@@ -1,6 +1,6 @@
 import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./apca.js";
 import { blend, parseColor, rgbDistance, toHex, type Rgba } from "./color.js";
-import type { DeckProbe, ProbeElement, ProbeSlide } from "./probe-types.js";
+import type { DeckProbe, ProbeElement, ProbeSlide, SafeZoneItem } from "./probe-types.js";
 import type { Finding, FindingCategory } from "./types.js";
 
 export interface ThemeContrastData {
@@ -412,6 +412,162 @@ function judgeContrastAndTypeSize(
   }
 }
 
+// Ported from src/verify.ts's safeZoneFailureMessage. Kept as a local, pure
+// copy rather than imported: verify.ts pulls in playwright-core and node:fs
+// at module scope, and judge.ts must stay importable with none of that in
+// its graph.
+function safeZoneFailureMessage(
+  item: SafeZoneItem,
+  viewportWidth: number,
+  viewportHeight: number,
+  safeMargin: number,
+): string | null {
+  const edges: [string, number][] = [
+    ["left", item.left],
+    ["top", item.top],
+    ["right", viewportWidth - item.right],
+    ["bottom", viewportHeight - item.bottom],
+  ];
+  const intrusions = edges
+    .filter(([, distance]) => distance < safeMargin)
+    .map(([edge, distance]) => `${edge} (${Math.round(Math.max(0, distance))}px)`);
+  if (intrusions.length === 0) {
+    return null;
+  }
+  return `${item.label} enters the ${safeMargin}px print safe margin: ${intrusions.join(", ")}`;
+}
+
+// Deck-level structural findings (no slide of their own to attribute to) sit
+// on slideIndex 1, mirroring how the CLI's later merge step will surface them.
+function deckFinding(probe: DeckProbe, category: FindingCategory, message: string): Finding {
+  return {
+    severity: "error",
+    category,
+    theme: probe.theme,
+    slideIndex: 1,
+    slideSrc: null,
+    slideSrcSlide: null,
+    snippet: "",
+    message,
+    suggestion: null,
+  };
+}
+
+/**
+ * Ports every assertion `zerp verify` makes today (src/verify.ts's
+ * `validateProbe`, roughly lines 483-537) onto the probe/judge split: frame
+ * count and identity, body overflow, the active inner slide's display and
+ * class, the print safe-zone, and collected browser errors. All fire at
+ * `error` severity — these are hard contract violations, not style advice.
+ * Safe-zone checking stays off unless `safeMargin` is supplied, matching
+ * `verify`'s `safeMargin > 0` gate on the probe side.
+ */
+function judgeStructural(
+  probe: DeckProbe,
+  only: FindingCategory[] | undefined,
+  safeMargin: number | undefined,
+  findings: Finding[],
+): void {
+  const wantsFrame = wanted(only, "frame");
+  const wantsOverflow = wanted(only, "overflow");
+  const wantsSafeZone = wanted(only, "safe-zone");
+  const wantsConsole = wanted(only, "console");
+  if (!wantsFrame && !wantsOverflow && !wantsSafeZone && !wantsConsole) {
+    return;
+  }
+
+  if (wantsConsole) {
+    // Headless Chrome can fire the same window error twice (once from the
+    // event, once from an unhandled-rejection echo); dedupe by message so a
+    // single real fault does not read as a pile of findings.
+    const seen = new Set<string>();
+    for (const error of probe.browserErrors) {
+      const message = `browser error: ${error}`;
+      if (seen.has(message)) {
+        continue;
+      }
+      seen.add(message);
+      findings.push(deckFinding(probe, "console", message));
+    }
+  }
+
+  if (wantsFrame) {
+    if (probe.frameCount === 0) {
+      findings.push(deckFinding(probe, "frame", "deck has no slide frames"));
+    }
+    if (probe.slideCount !== probe.frameCount) {
+      findings.push(
+        deckFinding(
+          probe,
+          "frame",
+          `deck has ${probe.slideCount} .slide elements for ${probe.frameCount} slide frames`,
+        ),
+      );
+    }
+    if (probe.innerSlideCount !== probe.frameCount) {
+      findings.push(
+        deckFinding(
+          probe,
+          "frame",
+          `deck has ${probe.innerSlideCount} framed slide roots for ${probe.frameCount} slide frames`,
+        ),
+      );
+    }
+  }
+
+  for (const slide of probe.slides) {
+    // Failures carry the source file when known, mirroring zerp check's file
+    // attribution so a failure maps straight to the file to edit.
+    const at = (category: FindingCategory, message: string): Finding => ({
+      severity: "error",
+      category,
+      theme: probe.theme,
+      slideIndex: slide.index,
+      slideSrc: slide.src,
+      slideSrcSlide: slide.srcSlide,
+      snippet: "",
+      message,
+      suggestion: null,
+    });
+
+    if (wantsFrame) {
+      if (slide.activeCount !== 1) {
+        findings.push(at("frame", `expected one active frame, got ${slide.activeCount}`));
+      }
+      if (slide.visibleCount !== 1) {
+        findings.push(at("frame", `expected one visible frame, got ${slide.visibleCount}`));
+      }
+      if (slide.activeIndex !== slide.index) {
+        findings.push(at("frame", `active frame is ${slide.activeIndex ?? "missing"}`));
+      }
+      if (slide.activeDisplay === "none") {
+        findings.push(at("frame", "active inner slide is display:none"));
+      }
+      if (!slide.activeClass) {
+        findings.push(at("frame", "active inner slide is missing the active class"));
+      }
+    }
+
+    if (wantsOverflow && slide.bodyHeight > slide.viewportHeight + 1) {
+      findings.push(at("overflow", `body height is ${slide.bodyHeight}px`));
+    }
+
+    if (wantsSafeZone && safeMargin !== undefined) {
+      for (const item of slide.safeZoneItems ?? []) {
+        const message = safeZoneFailureMessage(
+          item,
+          slide.viewportWidth,
+          slide.viewportHeight,
+          safeMargin,
+        );
+        if (message) {
+          findings.push(at("safe-zone", message));
+        }
+      }
+    }
+  }
+}
+
 /**
  * Pure judgement over a recorded `DeckProbe`: no browser, no network, no
  * deck-directory filesystem access. Every rule category (contrast,
@@ -424,5 +580,6 @@ export function judge(probe: DeckProbe, options: JudgeOptions = {}): Finding[] {
   judgeSurfaceBlend(probe, options.only, findings);
   judgeSvgText(probe, options.only, findings);
   judgeGlyphs(probe, options.only, findings);
+  judgeStructural(probe, options.only, options.safeMargin, findings);
   return findings;
 }
