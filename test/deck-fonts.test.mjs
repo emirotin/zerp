@@ -120,6 +120,22 @@ test("a configured display family is independent of body", async () => {
   );
 });
 
+test("display inherits body's resolved weights, not zerp's defaults", async () => {
+  // Body stays Montserrat (so mono's own default Roboto Mono weights can't
+  // muddy the assertion) but is restricted to 700 only. If display fell back
+  // to the BODY constant's weights instead of body's resolved plan, it would
+  // carry the other four Montserrat faces too — this is the one assertion
+  // that tells the two apart.
+  const dir = await writeTempDeck({
+    fonts: { body: { family: "Montserrat", weights: ["700"] } },
+  });
+  const { faces } = await fontCss(dir, latin);
+  assert.ok(subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-700-")));
+  assert.ok(!subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-400-")));
+  assert.ok(!subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-600-")));
+  assert.ok(!subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-900-")));
+});
+
 test("an unresolvable display package names the display role", async () => {
   const dir = await writeTempDeck({ fonts: { display: { family: "Not Installed" } } });
   await assert.rejects(
