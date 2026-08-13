@@ -36,8 +36,12 @@ function splitPseudoElement(selector: string): { origin: string; pseudo: string 
   if (!match) {
     return { origin: selector, pseudo: null };
   }
+  const trimmed = selector.slice(0, match.index ?? selector.length).trim();
   return {
-    origin: selector.slice(0, match.index ?? selector.length).trim(),
+    // A bare `::before`/`::after` (no compound selector in front of it) means
+    // "every element" in CSS; `""` is not a valid argument to Element#matches,
+    // so translate it to the selector that carries the same meaning.
+    origin: trimmed === "" ? "*" : trimmed,
     // Normalize the legacy one-colon form so consumers compare one spelling.
     // The capture group always matches when the outer pattern does.
     pseudo: `::${(match[1] ?? "").replace(/^:+/, "").toLowerCase()}`,

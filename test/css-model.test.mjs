@@ -65,6 +65,20 @@ test("a pseudo-element rule does not style the originating element", () => {
   assert.equal(own[0].declarations.get("color"), "blue");
 });
 
+test("a bare ::before/:before with no compound selector in front matches every element", () => {
+  const model = parseStylesheets([
+    { css: '::before { content: "x"; } :before { content: "y"; }', origin: "framework" },
+  ]);
+  const rules = model.rules.filter((candidate) => candidate.pseudoElement === "::before");
+  assert.equal(rules.length, 2);
+  for (const rule of rules) {
+    assert.equal(rule.selector, "*", "empty origin is normalized to the universal selector");
+    assert.notEqual(rule.selector, "", "must be a valid, matchable selector");
+  }
+  assert.equal(rules[0]?.declarations.get("content"), '"x"');
+  assert.equal(rules[1]?.declarations.get("content"), '"y"');
+});
+
 test("an unsupported selector is still skipped", () => {
   const model = parseStylesheets([{ css: "a:hover + b { color: red; }", origin: "deck" }]);
   // css-tree's generator drops whitespace around combinators; the model
