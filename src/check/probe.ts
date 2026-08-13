@@ -12,6 +12,19 @@ let probeSequence = 0;
 /** How long a shared browser gets to take its context back before we give up on it. */
 const CONTEXT_CLEANUP_TIMEOUT_MS = 5_000;
 
+/**
+ * Convert an absolute filesystem path to a deck-relative path.
+ * Returns the relative path if it's genuinely under rootDir, null otherwise.
+ * Uses a trailing-slash boundary to avoid matching sibling directories.
+ */
+function normalizePathToDeckRelative(absolutePath: string, rootDir: string): string | null {
+  const prefix = `${rootDir}/`;
+  if (absolutePath.startsWith(prefix)) {
+    return absolutePath.slice(prefix.length);
+  }
+  return null;
+}
+
 // Installed at document start so resource and script errors are collected from
 // the first byte of the deck, before any slide markup runs. Kept as a local
 // copy of verify.ts's collector script rather than an import — only
@@ -273,14 +286,20 @@ export async function probeDeck(options: ProbeOptions): Promise<DeckProbe> {
       ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
     });
     // Strip absolute file:// paths to make them deck-relative. This prevents
-    // fixture churn and leaking local paths across machines. Normalize both
-    // browser errors and computed backgroundImage values in elements.
-    const filePrefix = `file://${rootDir}/`;
-    const deckRelativeErrors = result.browserErrors.map((error) =>
-      error.startsWith(filePrefix) ? error.slice(filePrefix.length) : error,
-    );
+    // fixture churn and leaking local paths across machines. Use a common helper
+    // for browser errors and computed backgroundImage URLs to ensure consistent
+    // path boundary matching.
+    const deckRelativeErrors = result.browserErrors.map((error) => {
+      // Extract path from file:// URLs in error messages.
+      if (error.startsWith("file://")) {
+        const filePath = error.slice("file://".length);
+        const deckRelativePath = normalizePathToDeckRelative(filePath, rootDir);
+        return deckRelativePath ?? error;
+      }
+      return error;
+    });
 
-    // Also normalize backgroundImage URLs in element computed styles.
+    // Normalize backgroundImage URLs in element computed styles.
     // url("file:///absolute/path/image.png") becomes url("image.png") relative to deck.
     const deckRelativeSlides = result.slides.map((slide) => ({
       ...slide,
@@ -289,9 +308,9 @@ export async function probeDeck(options: ProbeOptions): Promise<DeckProbe> {
         if (bg && bg.startsWith("url(")) {
           const urlMatch = bg.match(/^url\("file:\/\/([^"]+)"\)$/);
           if (urlMatch && urlMatch[1]) {
-            const fullPath = urlMatch[1];
-            if (fullPath.startsWith(rootDir)) {
-              const deckRelativePath = fullPath.slice(rootDir.length + 1);
+            const filePath = urlMatch[1];
+            const deckRelativePath = normalizePathToDeckRelative(filePath, rootDir);
+            if (deckRelativePath) {
               return { ...el, backgroundImage: `url("${deckRelativePath}")` };
             }
           }
