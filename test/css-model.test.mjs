@@ -42,3 +42,33 @@ test("comma selectors split; specificity computed; unsupported deck selectors re
   assert.equal(p.declarations.get("font-size"), "1.25em");
   assert.deepEqual(model.skippedSelectors, [".door:hover"]);
 });
+
+test("a ::before rule is kept, keyed to the element it originates from", () => {
+  const model = parseStylesheets([
+    {
+      css: '.slide ul li::before { content: "→ "; font-family: var(--zerp-font-marker); }',
+      origin: "framework",
+    },
+  ]);
+  const rule = model.rules.find((candidate) => candidate.pseudoElement === "::before");
+  assert.ok(rule, "the rule survives parsing");
+  assert.equal(rule.selector, ".slide ul li", "matchable against a real element");
+  assert.equal(rule.declarations.get("content"), '"→ "');
+});
+
+test("a pseudo-element rule does not style the originating element", () => {
+  const model = parseStylesheets([
+    { css: "p::before { color: red; } p { color: blue; }", origin: "framework" },
+  ]);
+  const own = model.rules.filter((rule) => rule.selector === "p" && rule.pseudoElement === null);
+  assert.equal(own.length, 1);
+  assert.equal(own[0].declarations.get("color"), "blue");
+});
+
+test("an unsupported selector is still skipped", () => {
+  const model = parseStylesheets([{ css: "a:hover + b { color: red; }", origin: "deck" }]);
+  // css-tree's generator drops whitespace around combinators; the model
+  // records whatever it produces, so assert against that serialization
+  // rather than the original source text.
+  assert.deepEqual(model.skippedSelectors, ["a:hover+b"]);
+});

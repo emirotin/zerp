@@ -144,6 +144,12 @@ export class StyleResolver {
     }
     const matched: StyleRule[] = [];
     for (const rule of this.model.rules) {
+      // A ::before/::after rule styles the pseudo-element it renders, not the
+      // originating element itself; letting it through here would tint every
+      // matching element's computed style with content the DOM never shows.
+      if (rule.pseudoElement !== null) {
+        continue;
+      }
       let ok = false;
       try {
         ok = el.matches(rule.selector);

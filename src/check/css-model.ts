@@ -3,7 +3,10 @@ import * as csstree from "css-tree";
 import type { CheckTheme } from "./types.js";
 
 export interface StyleRule {
+  /** The originating element's selector, pseudo-element stripped. */
   selector: string;
+  /** "::before"/"::after" when the rule targets a pseudo-element, else null. */
+  pseudoElement: string | null;
   specificity: readonly [number, number, number];
   order: number;
   declarations: ReadonlyMap<string, string>;
@@ -21,6 +24,25 @@ export interface CssModel {
 }
 
 const THEME_BLOCK = /^:root\[data-zerp-theme=(?:"(dark|light)"|(dark|light))\]$/;
+
+// Only the two pseudo-elements that can carry `content:`. They are split off
+// rather than dropped because zerp draws its own markers with them, and a
+// marker's glyph coverage is as real as any other character's. The originating
+// selector is what a DOM element can be matched against.
+const PSEUDO_ELEMENT = /(::?(?:before|after))\s*$/i;
+
+function splitPseudoElement(selector: string): { origin: string; pseudo: string | null } {
+  const match = selector.match(PSEUDO_ELEMENT);
+  if (!match) {
+    return { origin: selector, pseudo: null };
+  }
+  return {
+    origin: selector.slice(0, match.index ?? selector.length).trim(),
+    // Normalize the legacy one-colon form so consumers compare one spelling.
+    // The capture group always matches when the outer pattern does.
+    pseudo: `::${(match[1] ?? "").replace(/^:+/, "").toLowerCase()}`,
+  };
+}
 
 function isSupportedSelector(selector: string): boolean {
   if (selector === ":root" || selector === "html") {
@@ -109,15 +131,17 @@ export function parseStylesheets(sheets: StyleSheetInput[]): CssModel {
               }
             }
           }
-          if (!isSupportedSelector(selector)) {
+          const { origin, pseudo } = splitPseudoElement(selector);
+          if (!isSupportedSelector(origin)) {
             if (sheet.origin === "deck") {
               skipped.add(selector);
             }
             return;
           }
           rules.push({
-            selector,
-            specificity: specificityOf(selector),
+            selector: origin,
+            pseudoElement: pseudo,
+            specificity: specificityOf(origin),
             order: order++,
             declarations,
           });
