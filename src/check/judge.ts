@@ -1,5 +1,5 @@
 import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./apca.js";
-import { blend, parseColor, toHex, type Rgba } from "./color.js";
+import { blend, parseColor, rgbDistance, toHex, type Rgba } from "./color.js";
 import type { DeckProbe, ProbeElement, ProbeSlide } from "./probe-types.js";
 import type { Finding, FindingCategory } from "./types.js";
 
@@ -99,6 +99,110 @@ function wanted(only: FindingCategory[] | undefined, category: FindingCategory):
   return only === undefined || only.includes(category);
 }
 
+// Surfaces need either a luminance step (APCA clips small deltas to 0 near
+// the poles, so RGB channel distance carries near-white/near-black cases) or
+// a visible border/shadow to read as a distinct panel.
+const SURFACE_MIN_RGB_DIST = 30;
+const SURFACE_MIN_LC = 15;
+
+function judgeSurfaceBlend(
+  probe: DeckProbe,
+  only: FindingCategory[] | undefined,
+  findings: Finding[],
+): void {
+  if (!wanted(only, "surface")) {
+    return;
+  }
+
+  for (const slide of probe.slides) {
+    for (const el of slide.elements) {
+      // Skip the slide root and elements with shadows, which need no separator.
+      if (el.id === 0 || el.boxShadow !== "none") {
+        continue;
+      }
+
+      // We need an actual background color on the element itself.
+      const ownBgParsed = parseColor(el.backgroundColor);
+      if (!ownBgParsed) {
+        continue;
+      }
+
+      // Walk up the element tree to find the backdrop (first opaque ancestor).
+      const backdropResult = backdropFor(slide, el);
+      if (backdropResult.kind === "unverifiable") {
+        continue;
+      }
+
+      const ownBg = ownBgParsed;
+      const behindBg = backdropResult.color;
+
+      // Check if the surface blends into its backdrop.
+      const dist = rgbDistance(ownBg, behindBg);
+      const lcSurface = Math.abs(contrastLc(ownBg, behindBg));
+
+      // If the surface is distinct enough, no warning needed.
+      if (dist >= SURFACE_MIN_RGB_DIST || lcSurface >= SURFACE_MIN_LC) {
+        continue;
+      }
+
+      // Check if a visible border rescues the surface.
+      if (
+        el.borderWidthPx >= 1 &&
+        el.borderColor &&
+        rgbDistance(
+          blend(parseColor(el.borderColor) || { r: 0, g: 0, b: 0, a: 1 }, behindBg),
+          behindBg,
+        ) >= SURFACE_MIN_RGB_DIST
+      ) {
+        continue;
+      }
+
+      findings.push({
+        severity: "warning",
+        category: "surface",
+        theme: probe.theme,
+        slideIndex: slide.index,
+        slideSrc: slide.src,
+        slideSrcSlide: slide.srcSlide,
+        snippet: el.snippet,
+        message: `surface ${toHex(ownBg)} blends into ${toHex(behindBg)} behind it (Δ${Math.round(dist)})`,
+        suggestion: "use a stronger tint, or add a visible border or shadow",
+      });
+    }
+  }
+}
+
+function judgeSvgText(
+  probe: DeckProbe,
+  only: FindingCategory[] | undefined,
+  findings: Finding[],
+): void {
+  if (!wanted(only, "svg-text")) {
+    return;
+  }
+
+  for (const slide of probe.slides) {
+    if (slide.svgTextSnippets.length === 0) {
+      continue;
+    }
+
+    // Report once per slide with the first SVG text snippet.
+    const snippet = slide.svgTextSnippets[0]!;
+    findings.push({
+      severity: "warning",
+      category: "svg-text",
+      theme: probe.theme,
+      slideIndex: slide.index,
+      slideSrc: slide.src,
+      slideSrcSlide: slide.srcSlide,
+      snippet,
+      message:
+        "<text> in <svg> is audited as HTML — its fill and font-size attributes are invisible here",
+      suggestion: "put the label in HTML positioned over the svg and keep the svg to shapes",
+    });
+  }
+}
+
 function judgeContrastAndTypeSize(
   probe: DeckProbe,
   only: FindingCategory[] | undefined,
@@ -195,12 +299,14 @@ function judgeContrastAndTypeSize(
 
 /**
  * Pure judgement over a recorded `DeckProbe`: no browser, no network, no
- * deck-directory filesystem access. Every rule category (contrast and
- * type-size so far; more land in later tasks) is gated behind
- * `options.only` so the CLI can narrow which checks run.
+ * deck-directory filesystem access. Every rule category (contrast,
+ * type-size, surface, svg-text, etc.) is gated behind `options.only` so
+ * the CLI can narrow which checks run.
  */
 export function judge(probe: DeckProbe, options: JudgeOptions = {}): Finding[] {
   const findings: Finding[] = [];
   judgeContrastAndTypeSize(probe, options.only, options.tokenContrast, findings);
+  judgeSurfaceBlend(probe, options.only, findings);
+  judgeSvgText(probe, options.only, findings);
   return findings;
 }
