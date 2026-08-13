@@ -17,7 +17,7 @@
     "url": "git+ssh://git@github.com/emirotin/zerp.git"
   },
   "bin": {
-    "zerp": "./dist/cli.js"
+    "zerp": "dist/cli.js"
   },
   "files": [
     "dist",
