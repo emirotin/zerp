@@ -1,7 +1,18 @@
 export type CheckTheme = "dark" | "light";
 export type Severity = "error" | "warning" | "unverifiable";
+export type FindingCategory =
+  | "contrast"
+  | "type-size"
+  | "surface"
+  | "glyph"
+  | "svg-text"
+  | "frame"
+  | "overflow"
+  | "safe-zone"
+  | "console";
 export interface Finding {
   severity: Severity;
+  category: FindingCategory;
   theme: CheckTheme;
   slideIndex: number;
   slideSrc: string | null;

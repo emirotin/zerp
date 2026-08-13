@@ -190,6 +190,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
         }
         findings.push({
           severity: "warning",
+          category: "svg-text",
           theme: structuralTheme,
           slideIndex: slideIndex + 1,
           slideSrc: slide.getAttribute("data-zerp-src"),
@@ -219,6 +220,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
       const count = entry.codepoints.length;
       findings.push({
         severity: "warning",
+        category: "glyph",
         theme: structuralTheme,
         slideIndex: entry.slideIndex + 1,
         slideSrc: slide?.getAttribute("data-zerp-src") ?? null,
@@ -246,11 +248,13 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
         const snippet = snippetOf(text);
         const push = (
           severity: Finding["severity"],
+          category: Finding["category"],
           message: string,
           suggestion: string | null = null,
         ): void => {
           findings.push({
             severity,
+            category,
             theme,
             slideIndex: slideIndex + 1,
             slideSrc,
@@ -264,18 +268,26 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
         const sizePx = Math.round(computed.fontSizePx * 10) / 10;
         const weight = computed.fontWeight;
         if (sizePx < MIN_ERROR_PX) {
-          push("error", `${sizePx}px text is below the ${MIN_ERROR_PX}px hard minimum`);
+          push(
+            "error",
+            "type-size",
+            `${sizePx}px text is below the ${MIN_ERROR_PX}px hard minimum`,
+          );
         } else if (sizePx < MIN_WARN_PX) {
-          push("warning", `${sizePx}px text is below the ${MIN_WARN_PX}px recommended minimum`);
+          push(
+            "warning",
+            "type-size",
+            `${sizePx}px text is below the ${MIN_WARN_PX}px recommended minimum`,
+          );
         }
         const bg = resolver.backgroundFor(parentEl);
         if (bg.kind === "unverifiable") {
-          push("unverifiable", `${bg.reason} — verify contrast manually`);
+          push("unverifiable", "contrast", `${bg.reason} — verify contrast manually`);
           return;
         }
         const fgParsed = parseColor(resolver.resolveVars(computed.color));
         if (!fgParsed) {
-          push("unverifiable", `could not parse text color "${computed.color}"`);
+          push("unverifiable", "contrast", `could not parse text color "${computed.color}"`);
           return;
         }
         const fgEffective = blend({ ...fgParsed, a: fgParsed.a * computed.opacity }, bg.color);
@@ -286,6 +298,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
         if (req === null) {
           push(
             "error",
+            "contrast",
             `contrast Lc ${lcAbs} (${pair}) is unusable for text at any size`,
             suggestionFor(tokenContrast[theme], toHex(bg.color), sizePx, weight),
           );
@@ -293,6 +306,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
           const target = neededLc(sizePx, weight);
           push(
             "error",
+            "contrast",
             `${sizePx}px/${weight} text has contrast Lc ${lcAbs} (${pair}); needs ≥${req}px at this contrast${target === null ? "" : ` or Lc ≥ ${target} at this size`}`,
             suggestionFor(tokenContrast[theme], toHex(bg.color), sizePx, weight),
           );
@@ -332,6 +346,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
         }
         findings.push({
           severity: "warning",
+          category: "surface",
           theme,
           slideIndex: slideIndex + 1,
           slideSrc,
