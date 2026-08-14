@@ -159,18 +159,19 @@ test(
   "browser errors report deck-relative paths, not absolute file:// URLs",
   { skip: !browserTestsEnabled || !canFindChrome() },
   async () => {
-    // kitchen-sink intentionally references missing images that generate 404 errors.
-    // The probe should report these as deck-relative paths (slides/...) not as
-    // file:///absolute/path URLs, so fixtures remain portable across machines.
+    // missing-asset-deck references an image that does not exist, so loading it
+    // raises a browser error. The probe should report it as a deck-relative
+    // path (slides/...) not as a file:///absolute/path URL, so fixtures remain
+    // portable across machines.
     const probe = await probeDeck({
-      rootDir: "test/fixtures/kitchen-sink",
+      rootDir: "test/fixtures/missing-asset-deck",
       theme: "dark",
       width: 1920,
       height: 1080,
       safeMargin: 0,
       timeoutMs: 30000,
     });
-    assert.ok(probe.browserErrors.length > 0, "kitchen-sink has intentional missing assets");
+    assert.ok(probe.browserErrors.length > 0, "the deck's missing asset is reported");
     assert.ok(
       probe.browserErrors.every((err) => !err.startsWith("file://")),
       "no error starts with file:// (all are deck-relative)",
