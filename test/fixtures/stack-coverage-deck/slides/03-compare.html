@@ -1,0 +1,14 @@
+<div class="slide">
+  <!-- Two rows using the shipped .compare[data-vs]::after feature, each with a
+       different uncovered character. Regression coverage for the "find" walk
+       that used to stop at the first match per slide: with that bug, only ≈
+       was ever reported and ≠ silently vanished. -->
+  <div class="compare" data-vs="≈">
+    <div>A</div>
+    <div>B</div>
+  </div>
+  <div class="compare" data-vs="≠">
+    <div>C</div>
+    <div>D</div>
+  </div>
+</div>

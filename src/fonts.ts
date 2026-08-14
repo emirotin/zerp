@@ -178,8 +178,10 @@ function resolveFaceCss(deckRequire: NodeRequire, pkg: string, face: string): st
   return null;
 }
 
+type FontRole = "body" | "display" | "mono";
+
 interface FamilyPlan {
-  role: "body" | "mono";
+  role: FontRole;
   /** The family name the emitted stacks will use. */
   family: string;
   pkg: string;
@@ -192,10 +194,18 @@ function slugify(family: string): string {
   return family.toLowerCase().replaceAll(/\s+/g, "-");
 }
 
-function familyPlan(role: "body" | "mono", config: DeckFontConfig | undefined): FamilyPlan {
-  const fallback = role === "body" ? BODY : MONO;
+// The fallback is a resolved plan, not a constant, because `display` inherits
+// the family the DECK chose for body — a deck that sets body to Inter and says
+// nothing about display gets Inter headings, not Montserrat ones.
+function familyPlan(
+  role: FontRole,
+  config: DeckFontConfig | undefined,
+  fallback: Omit<FamilyPlan, "role" | "configured">,
+): FamilyPlan {
   if (!config) {
-    return { role, ...fallback, configured: false };
+    // fallback's own `role` (e.g. body's, when display inherits it) must not
+    // leak into this plan's role, so it is spread first and overridden after.
+    return { ...fallback, role, configured: false };
   }
   return {
     role,
@@ -292,15 +302,13 @@ async function selectFaceBlocks(
 
 async function planFamilies(rootDir: string): Promise<FamilyPlan[]> {
   const config = await readDeckConfig(rootDir);
-  return (["body", "mono"] as const).map((role) => familyPlan(role, config.fonts?.[role]));
-}
-
-/** The faces a deck's own text selects — see {@link selectFaceBlocks}. */
-export async function selectedFaces(
-  rootDir: string,
-  codepoints: ReadonlySet<number>,
-): Promise<FontFaceInfo[]> {
-  return selectFaceBlocks(rootDir, await planFamilies(rootDir), codepoints);
+  // Body first: display falls back to it, so it has to exist to be inherited.
+  const body = familyPlan("body", config.fonts?.body, BODY);
+  return [
+    body,
+    familyPlan("display", config.fonts?.display, body),
+    familyPlan("mono", config.fonts?.mono, MONO),
+  ];
 }
 
 // Base64-encoding a woff2 is the expensive half of a build and the same file
@@ -327,7 +335,7 @@ async function inline(block: FaceBlock): Promise<string> {
 }
 
 /**
- * The four family tokens, or "" when the deck takes zerp's own families.
+ * The five family tokens, or "" when the deck takes zerp's own families.
  *
  * base-styles.css defines these with the defaults, so this is emitted after it
  * and only when it has something to say. A deck that configures nothing gets
@@ -337,11 +345,15 @@ function familyTokenCss(plans: FamilyPlan[]): string {
   if (!plans.some((plan) => plan.configured)) {
     return "";
   }
-  const body = plans.find((plan) => plan.role === "body")?.family ?? BODY.family;
-  const mono = plans.find((plan) => plan.role === "mono")?.family ?? MONO.family;
+  const familyOf = (role: FontRole, fallback: string): string =>
+    plans.find((plan) => plan.role === role)?.family ?? fallback;
+  const body = familyOf("body", BODY.family);
+  const display = familyOf("display", BODY.family);
+  const mono = familyOf("mono", MONO.family);
   const symbols = `"${SYMBOL_FACE.family}"`;
   return `:root {
   --zerp-font-body: "${body}", ${symbols}, sans-serif;
+  --zerp-font-display: "${display}", ${symbols}, sans-serif;
   --zerp-font-marker: ${symbols}, "${body}", sans-serif;
   --zerp-font-mono: "${mono}", ${symbols}, monospace;
   --zerp-font-nav: "${mono}", monospace;

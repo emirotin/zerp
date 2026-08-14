@@ -23,11 +23,12 @@ export interface DeckFontConfig {
 export interface DeckConfig {
   fonts?: {
     body?: DeckFontConfig;
+    display?: DeckFontConfig;
     mono?: DeckFontConfig;
   };
 }
 
-const FONT_ROLES = ["body", "mono"];
+const FONT_ROLES = ["body", "display", "mono"];
 const FONT_KEYS = ["family", "fontsourcePackage", "weights"];
 
 function fail(message: string): never {

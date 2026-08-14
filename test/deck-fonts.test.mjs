@@ -46,7 +46,7 @@ test("zerp.fonts in the deck's package.json selects the families", async () => {
   assert.ok(!subsetsOf(faces).some((subset) => subset.includes("-900-")));
   // Each woff2 once, though body and mono resolved to the same package.
   assert.equal(new Set(subsetsOf(faces)).size, subsetsOf(faces).length);
-  // The four stacks, rebuilt around the configured family, symbol face intact.
+  // The five stacks, rebuilt around the configured family, symbol face intact.
   assert.match(tokens, /--zerp-font-body: "Roboto Mono", "Zerp Symbols", sans-serif;/);
   assert.match(tokens, /--zerp-font-marker: "Zerp Symbols", "Roboto Mono", sans-serif;/);
   assert.match(tokens, /--zerp-font-nav: "Roboto Mono", monospace;/);
@@ -74,6 +74,8 @@ test("config mistakes are named, not ignored", async () => {
     [{ fonts: { body: { fontsourcePackage: "@fontsource/inter" } } }, /family must be/],
     [{ fonts: { body: { family: "Inter", weight: ["400"] } } }, /unknown key "weight"/],
     [{ fonts: { body: { family: "Inter", weights: "400" } } }, /weights must be an array/],
+    [{ fonts: { display: { fontsourcePackage: "@fontsource/inter" } } }, /family must be/],
+    [{ fonts: { display: { family: "Inter", weight: ["400"] } } }, /unknown key "weight"/],
     [{ fonts: { heading: { family: "Inter" } } }, /unknown key "heading"/],
     [{ font: {} }, /unknown key "font"/],
   ];
@@ -81,6 +83,65 @@ test("config mistakes are named, not ignored", async () => {
     const dir = await writeTempDeck(zerp);
     await assert.rejects(readDeckConfig(dir), expected);
   }
+});
+
+test("display is a role of its own", async () => {
+  const dir = await writeTempDeck({
+    fonts: { display: { family: "Roboto Mono", weights: ["400"] } },
+  });
+  assert.deepEqual(await readDeckConfig(dir), {
+    fonts: { display: { family: "Roboto Mono", weights: ["400"] } },
+  });
+});
+
+test("display defaults to whatever body resolved to", async () => {
+  // custom-font-deck sets body to Roboto Mono and says nothing about display.
+  const { faces, tokens } = await fontCss("test/fixtures/custom-font-deck", latin);
+  assert.match(tokens, /--zerp-font-display: "Roboto Mono", "Zerp Symbols", sans-serif;/);
+  // Inheriting body's plan wholesale means no second family and no extra file.
+  assert.equal(new Set(subsetsOf(faces)).size, subsetsOf(faces).length);
+  assert.ok(subsetsOf(faces).every((subset) => !subset.startsWith("montserrat")));
+});
+
+test("a configured display family is independent of body", async () => {
+  const dir = await writeTempDeck({
+    fonts: { display: { family: "Roboto Mono", weights: ["400", "700"] } },
+  });
+  const { faces, tokens } = await fontCss(dir, latin);
+  assert.match(tokens, /--zerp-font-display: "Roboto Mono", "Zerp Symbols", sans-serif;/);
+  assert.match(tokens, /--zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;/);
+  assert.ok(
+    subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin")),
+    "body",
+  );
+  assert.ok(
+    subsetsOf(faces).some((subset) => subset.startsWith("roboto-mono-latin")),
+    "display",
+  );
+});
+
+test("display inherits body's resolved weights, not zerp's defaults", async () => {
+  // Body stays Montserrat (so mono's own default Roboto Mono weights can't
+  // muddy the assertion) but is restricted to 700 only. If display fell back
+  // to the BODY constant's weights instead of body's resolved plan, it would
+  // carry the other four Montserrat faces too — this is the one assertion
+  // that tells the two apart.
+  const dir = await writeTempDeck({
+    fonts: { body: { family: "Montserrat", weights: ["700"] } },
+  });
+  const { faces } = await fontCss(dir, latin);
+  assert.ok(subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-700-")));
+  assert.ok(!subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-400-")));
+  assert.ok(!subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-600-")));
+  assert.ok(!subsetsOf(faces).some((subset) => subset.startsWith("montserrat-latin-900-")));
+});
+
+test("an unresolvable display package names the display role", async () => {
+  const dir = await writeTempDeck({ fonts: { display: { family: "Not Installed" } } });
+  await assert.rejects(
+    fontCss(dir, latin),
+    /Cannot resolve "@fontsource\/not-installed" for the display font/,
+  );
 });
 
 test("a package that declares a different family name says so", async () => {
@@ -91,4 +152,15 @@ test("a package that declares a different family name says so", async () => {
     fontCss(dir, latin),
     /declares font-family "Roboto Mono", but zerp.fonts.mono.family says "Roboto Mono Flex"/,
   );
+});
+
+test("a configured display family reaches the built document", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/display-font-deck" });
+  assert.match(html, /--zerp-font-display: "Roboto Mono", "Zerp Symbols", sans-serif;/);
+  assert.match(html, /--zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;/);
+});
+
+test("an unconfigured display role emits body's family, not zerp's", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/display-fallback-deck" });
+  assert.match(html, /--zerp-font-display: "Roboto Mono", "Zerp Symbols", sans-serif;/);
 });

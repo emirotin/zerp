@@ -8,4 +8,8 @@ test/**/index.html
 shots/
 .zerp-shot*.html
 .zerp-verify-*.html
+.zerp-probe-*.html
 *.tgz
+
+# Agent scratch space (SDD ledgers, task briefs, review packages)
+.superpowers/

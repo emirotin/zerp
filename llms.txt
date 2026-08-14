@@ -16,7 +16,7 @@ This is the complete authoring guide for a downstream presentation project using
 
 1. Discover the deck before referring to a slide by number: run `zerp slides . --json` and confirm the source file, in-file ordinal, and heading.
 2. Edit only the relevant `slides/**/*.html`, `slides/**/*.md`, or assets under `slides/`. Prefer built-in classes, Markdown for text-first slides, and HTML for layout-heavy or interactive slides.
-3. Run `zerp check .` after every authoring change and fix every error and warning. Run `zerp verify . --theme both --size 1280x720` after layout or interaction changes.
+3. Run `zerp check .` after every authoring change and fix every error and warning. Run `zerp check . --theme both --size 1920x1080` (an explicit target size) after layout or interaction changes — the same command also gates frame/layout geometry, so there is nothing further to run.
 4. Use `zerp serve .` for live inspection; use the consuming project's browser or screenshot tooling, when available, for close visual inspection. Check both dark and light themes.
 5. Run `zerp build . --theme system` for the handoff artifact. Never hand-edit the generated `index.html`.
 
@@ -39,7 +39,7 @@ The main commands from the deck directory are:
 ```bash
 zerp slides . --json
 zerp check .
-zerp verify . --theme both --size 1280x720
+zerp check . --theme both --size 1920x1080
 zerp serve .
 zerp build . --theme system
 ```
@@ -130,8 +130,8 @@ Built decks are print-ready. The same `index.html` paginates for print with no e
 
 - Printing emits **one page per slide, in deck order**. Presentation chrome (nav, counter, progress bar, theme toggle, source badge) is never printed.
 - Steps print in their **final state**: `data-step` content is present, `data-until-step` content is absent. A printed deck shows every reveal.
-- Print with a **page size equal to the presentation viewport** (e.g. 1280×720 CSS px) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
-- **Page capacity is physical**: content that overflows a slide is clipped at the bottom of the page, not reflowed onto a second page. Fix overflow the same way as on screen (trim content, or top-align with `.slide.top`); `zerp check` and `zerp verify` still gate it.
+- Print with a **page size equal to the presentation viewport** (e.g. 1920×1080 CSS px) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
+- **Page capacity is physical**: content that overflows a slide is clipped at the bottom of the page, not reflowed onto a second page. Fix overflow the same way as on screen (trim content, or top-align with `.slide.top`); `zerp check` still gates it.
 - If a deck will additionally be exported to PPTX by a downstream pipeline, `llms-pptx.txt` (shipped alongside this file) has the export-specific authoring restrictions; the caller includes it alongside this guide when that target applies.
 
 ## Validation loop (required)
@@ -140,16 +140,16 @@ After authoring or editing slides, ALWAYS run:
 
 ```bash
 zerp check .
-zerp verify . --theme both --size 1280x720
-# add --json to check or verify for a machine-readable report (verify's per-slide
-# entries include the source file); --theme dark|light|both narrows either command
+zerp check . --theme both --size 1920x1080  # your deck's actual target screen
+# add --json for a machine-readable report (per-slide entries include the
+# source file); --theme dark|light|both and --only category,... narrow it
 ```
 
-`zerp verify` needs a Chromium-class browser: run `zerp install-browser` once to download a managed Chromium, or set `CHROME_BIN` to an existing Chrome/Chromium. The whole session (launch, navigation, font activation, probe) is bounded by `--timeout ms` / `ZERP_VERIFY_TIMEOUT_MS`, 20000ms by default — raise it on a slow or loaded host. A timed-out session yields no report, which is a check that did not run, not a check that passed. To skip the per-run browser launch entirely, point `--browser-endpoint url` / `ZERP_BROWSER_ENDPOINT` at an already-running browser (`http(s)://` CDP, `ws(s)://` playwright); verify borrows it and never closes it.
+`zerp check` opens each theme in a real headless browser and needs a Chromium-class one: run `zerp install-browser` once to download a managed Chromium, or set `CHROME_BIN` to an existing Chrome/Chromium. Without one, `zerp check` errors and names the remedy — `zerp install-browser`, or the `CHROME_BIN` path if that is the problem. The whole session (launch, navigation, font activation, probe) is bounded by `--timeout ms` / `ZERP_VERIFY_TIMEOUT_MS`, 20000ms by default — raise it on a slow or loaded host. A timed-out session yields no report, which is a check that did not run, not a check that passed. To skip the per-run browser launch entirely, point `--browser-endpoint url` / `ZERP_BROWSER_ENDPOINT` at an already-running browser (`http(s)://` CDP, `ws(s)://` playwright); check borrows it and never closes it.
 
-Fix every `✗` error and `⚠` warning (font too small, text contrast too low, a surface whose background blends into what is behind it, a label sealed inside an `<svg>` where neither can be measured, or characters no bundled font can draw — the report names the slide file, the element, and suggests fixes). Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp verify` additionally checks both themes in a real browser: one active/visible frame per slide, full viewport dimensions, no body overflow, and no browser errors. `zerp build` prints the same static summary.
+Fix every `✗` error and `⚠` warning (font too small, text contrast too low, a surface whose background blends into what is behind it, a label sealed inside an `<svg>` where neither can be measured, text rendered by a font the deck does not bundle, one active/visible frame per slide missing or wrong size, page overflow, a print-safe-margin violation, or a browser console error — the report names the slide file, the element, and suggests fixes where there is a fix to suggest). Each line is prefixed with its category (`[contrast]`, `[type-size]`, `[surface]`, `[glyph]`, `[svg-text]`, `[frame]`, `[overflow]`, `[safe-zone]`, `[console]`); `--only` takes a comma-separated subset of those names. Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp build` prints the same summary after writing, and — if no browser is available — a one-line notice that the check was skipped and `zerp check` runs it; the build itself still succeeds.
 
-**Verify is viewport-specific.** Overflow and frame geometry are judged against the exact `--size WxH` viewport (default 1280x720) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; verify it with its actual target size. `zerp check` is viewport-independent (static contrast/type analysis, no layout).
+**Layout findings are viewport-specific.** Overflow, frame geometry and safe-margin are judged against the exact `--size WxH` viewport (default 1920x1080) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; check it with its actual target size. Contrast, type-size and glyph findings are viewport-independent.
 
 `zerp serve` live-reloads the browser on any change under `slides/` — the page returns to the same slide (URL hash) and replays the steps of every slide you had stepped through. Built decks contain no reload client.
 
@@ -220,14 +220,14 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 1. Reach for built-in classes and styled elements first — they cover title, list, column, stat, comparison, flow, step, timeline, quote, table, and image slides.
 2. If a layout truly needs custom CSS, put a `<style>` inside the slide file, use ONLY `var(--zerp-*)` tokens, keep text at 1em+.
 3. A `<style>` block is document-global. For deck-wide styles the convention is a style-only file sorted first (e.g. `slides/00-styles.html` containing just a `<style>` — it contributes no slide).
-4. Re-run `zerp check` — custom CSS is checked too (`:where()` is understood). Selectors it cannot verify are listed as skipped; keep them simple (tag/class selectors).
-5. If the layout changes, run `zerp verify . --theme both --size 1280x720` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
+4. Re-run `zerp check` — it judges the browser's own computed styles, so custom CSS is checked exactly like built-in styles regardless of selector shape, specificity, `@media` blocks, or `!important`; nothing is skipped.
+5. If the layout changes, run `zerp check . --theme both --size 1920x1080` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
 
 ## Diagrams and inline SVG
 
 Inline `<svg>` is the right tool for the shapes of a diagram — paths, arcs, connectors, fills, wheels, boards. It is the wrong place for the words. **Draw with SVG; label with HTML positioned over it.**
 
-- `zerp check` audits HTML text. An `<svg><text>` label is not skipped so much as mismeasured: SVG paints with a `fill` and a `font-size` attribute, neither of which is CSS the cascade can see, so a label that is really 8px in `--zerp-faint` is scored as inherited 16px in `--zerp-text` and passes clean. `zerp check` emits a `⚠` warning for `<text>` inside `<svg>` for exactly this reason.
+- `zerp check` audits HTML text. An `<svg><text>` label is excluded from element-level judging rather than mismeasured: Chrome still resolves a computed `color` for it (inherited from the surrounding HTML) even though the glyph is painted with `fill`, and computed `font-size` is in the svg's own user-unit space, unscaled by `viewBox`, so neither value describes what actually got painted. `zerp check` emits a separate `[svg-text]` `⚠` warning for any non-`aria-hidden` `<svg>` containing `<text>` instead. The one gap this leaves: HTML placed inside `<foreignObject>` gets no compensating warning, so keep labels as siblings of the `<svg>`, not nested inside it.
 - Export and rasterization pipelines treat an SVG as its own document and do not reliably hand it the deck's inlined fonts. HTML text keeps Montserrat and Roboto Mono everywhere; SVG text re-resolves to whatever the consuming machine happens to have.
 - Once the words live in HTML the graphic is decoration: mark the `<svg>` `aria-hidden="true"`, and both screen readers and `zerp check` skip it.
 - Numerals that are part of a depicted object rather than slide copy — a roulette wheel's pocket numbers, a die's pips, a keyboard's legends — are drawing, and stay in the SVG. The test is whether a reader who cannot see them loses information: if they would, that information belongs in HTML next to the graphic, and the `<svg>` then goes `aria-hidden`.
@@ -269,23 +269,42 @@ A script that builds a diagram at runtime follows the same rule: emit the shapes
 
 ## Characters and glyph coverage
 
-A built deck carries its fonts inside itself, as inlined subsets of Montserrat and Roboto Mono plus a one-glyph face for `→`. That is what makes it a single offline file, and it is also a hard edge: **a character no bundled subset covers is drawn by whatever font the viewing machine falls back to** — a different shape, weight and width on every OS, and re-resolved again by the reader's machine once the deck is exported to a format whose text runs carry one font face. Latin, Latin-Extended, Cyrillic and Vietnamese are available to both families; Greek is available to Roboto Mono only.
+A built deck carries its fonts inside itself, as inlined subsets of Montserrat and Roboto Mono plus a one-glyph face for `→`. That is what makes it a single offline file, and it is also a hard edge: **a character no bundled subset covers is drawn by whatever font the viewing machine falls back to** — a different shape, weight and width on every OS, and re-resolved again by the reader's machine once the deck is exported to a format whose text runs carry one font face. Latin, Latin-Extended, Cyrillic and Vietnamese are available to both the body and display families by default; Greek is available to Roboto Mono only.
 
-`zerp check` reports the characters your slides use and the deck cannot draw, as one `⚠` warning listing them with their codepoints. It reads the actual `cmap` of each bundled woff2, so it knows, for example, that `※` sits inside Montserrat's declared latin range and is still not in the file.
+`zerp check` finds fallback text by asking the browser itself what font painted each glyph (Chrome DevTools Protocol `CSS.getPlatformFontsForNode`), not by consulting a static coverage table. Since zerp inlines every font it ships as an `@font-face`, any font the browser reports as not custom (`isCustomFont: false`) means it fell back — that is a direct answer, not an inference from a `unicode-range`. The finding is one `[glyph]` `⚠` per element, naming the slide, the element and the fallback family it fell back to.
+
+This is per element, not per deck or per font role: Greek is available to Roboto Mono and not to Montserrat, so `Δ` in a `<code>` block is fine while the same character in an `<h1>` is not. Bundling a subset for one role does not cover another role.
 
 - Latin, Latin-Extended and Cyrillic text is covered. Common typography is covered: `— – … ‘ ’ “ ” · × − ↑ ↓ € ™`.
 - Mathematical and geometric symbols mostly are not: `≈ ≠ ≤ ≥ ▲ ▼ ◆ ★ ✓ ✗`. Say `~`, `<=`, `+`/`−`, or use words.
 - `→` is covered everywhere, because zerp bundles a face for it and its own `ul` markers use it.
-- Emoji are exempt from the warning and safe to use: every platform draws them from its own colour emoji font, in the browser and in exports alike, so they never depended on the deck's fonts.
+- Generated content (`::before`/`::after`) is judged for glyph coverage too — a deck that overrides a framework marker's glyph can get a finding for text the browser never actually draws — but not for contrast or type-size: the probe records no pseudo-element color or size, and judging generated content against the originating element's would describe a color/size pair the browser never painted together.
+- `<text>` inside inline SVG is excluded from glyph judging along with contrast, type-size and surface (see "Diagrams and inline SVG" for why); the separate `[svg-text]` warning still fires for any non-`aria-hidden` `<svg>` containing `<text>`.
+- Text a slide script generates at runtime is invisible to the check — the probe reads the rendered page as authored, before any script mutation the reader wouldn't already see reflected there at measurement time, the same reason subset selection cannot see it either (below).
+- An element whose stack names a family zerp does not bundle (`font-family: Georgia, serif`, your own `@font-face`) is judged the same way as any other: if the browser reports a non-custom font painting it, that is still a fallback and still gets flagged. Naming a system font on purpose does not opt text out of the warning — the guarantee this section protects is that a build ships every font its own text needs.
+
+### Limits of the glyph check (know these before treating "clean" as "every glyph is bundled")
+
+- **Emoji are exempt**, deliberately: every platform draws them from its own colour font by design, so a system font drawing exactly an element's exempt characters raises nothing there. This errs toward under-reporting, never over-reporting: a ZWJ sequence like `👩‍👩‍👦` counts as three exempt (`Extended_Pictographic`) characters even though it draws one glyph, and generated-content alt text such as `content: "→" / "arrow"` counts its `"arrow"` alternative as exempt text too — both directions can only suppress a real finding, never invent one.
+- **Attribution is per element, not per codepoint.** The browser's font-fact count (`CSS.getPlatformFontsForNode`) is a deduplicated glyph-set count for a subtree, not a sum of characters, so where a parent's own fallback glyphs are a subset of a descendant's in the same fallback family, the finding lands on the descendant, not the parent. The slide is still flagged — only the pointer to "which element" is coarser than exact in that case.
+- **`<svg>` subtrees are excluded from glyph, contrast, type-size and surface judging alike** (see above and "Diagrams and inline SVG"). HTML placed inside `<foreignObject>` is the one case with no compensating warning at all.
+- **Generated content is judged for glyph coverage only**, never contrast or type-size, for the reason given above.
+- **Runtime-generated text is invisible**, to both subset selection and the check, for the reason given above — put a sample of expected runtime characters in static markup if you need either to see them.
+
 ### Choosing other typefaces
 
 A deck may name its own families in an optional `zerp` key in **its own package.json** — the only deck-level configuration zerp has. Everything else stays zero-config.
 
 ```json
 {
-  "dependencies": { "@fontsource/inter": "^5" },
+  "dependencies": {
+    "@fontsource/bebas-neue": "^5",
+    "@fontsource/inter": "^5",
+    "@fontsource/jetbrains-mono": "^5"
+  },
   "zerp": {
     "fonts": {
+      "display": { "family": "Bebas Neue", "weights": ["400"] },
       "body": { "family": "Inter" },
       "mono": { "family": "JetBrains Mono", "weights": ["400", "700"] }
     }
@@ -296,7 +315,10 @@ A deck may name its own families in an optional `zerp` key in **its own package.
 - `family` is the name the font declares, exactly as you would write it in `font-family`; zerp compares it with the package and errors if they disagree.
 - `fontsourcePackage` is optional and defaults to `@fontsource/` + the slugified family. **The deck installs that package itself** (`pnpm add @fontsource/inter`) — zerp resolves it from the deck's `node_modules`, and a package it cannot find is a build error that names the install command.
 - `weights` is optional. It defaults to what zerp's styles use — body `400 600 700 900 400-italic`, mono `400 700` — and a weight the family does not ship is simply not emitted.
-- Both roles keep everything else: the `→` face rides along, and subsets are still chosen by the deck's text, which is what makes a CJK family (`@fontsource/noto-sans-jp`) possible at all — it is carried a few ranges at a time.
+- `display` sets the face for `h1`. Unset, it follows `body` — family, package and weights — so a deck that names only `body` gets that family everywhere.
+- `mono` unset stays Roboto Mono; it never follows `body`, because the nav, code, tables and labels need real monospace metrics.
+- The display face applies to `h1` only. Move others onto it from your own stylesheet — `h2 { font-family: var(--zerp-font-display) }` — or off it with `h1 { font-family: var(--zerp-font-body) }`; zerp's rule carries zero specificity so a plain element selector wins.
+- All three roles keep everything else: the `→` face rides along, and subsets are still chosen by the deck's text, which is what makes a CJK family (`@fontsource/noto-sans-jp`) possible at all — it is carried a few ranges at a time.
 - Anything outside the Google Fonts directory, or a family that must not be bundled, is out of scope: this is a swap, not a font pipeline.
 
 **A built deck carries only the subsets its own text needs**, so a latin deck ships no Cyrillic and a deck that types one `№` ships the Cyrillic subset that covers it. This is what keeps a single-file deck small, and it has one consequence for scripts: string literals inside a slide `<script>` do count towards the choice (a script that prints `Ж` still pulls Cyrillic in), but characters a script derives at runtime — from a fetch, a computation, `String.fromCharCode` — appear nowhere in the source and cannot. This is the same reason the existing rule says to build static markup and have the script toggle classes or set `textContent`: if a script can produce characters that appear nowhere in the source, put a sample of them in static markup (a legend, a caption, a `hidden` element) so both the subset selection and this check can see them.
@@ -313,4 +335,4 @@ A deck may name its own families in an optional `zerp` key in **its own package.
 
 ## Validation commands
 
-In a consumer deck: `zerp check .`, `zerp verify .`, then `zerp serve .` / `zerp build .`.
+In a consumer deck: `zerp check .`, then `zerp serve .` / `zerp build .`.

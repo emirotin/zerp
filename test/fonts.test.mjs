@@ -1,13 +1,36 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { fontCss, parseUnicodeRange, selectedFaces } from "../dist/fonts.js";
+import { fontCss, parseUnicodeRange } from "../dist/fonts.js";
 
 const setOf = (text) => new Set([...text].map((character) => character.codePointAt(0)));
 // A deck with no zerp.fonts config: zerps own families, selection only.
 const deck = "test/fixtures/clean-deck";
-const subsetsFor = async (text) =>
-  (await selectedFaces(deck, setOf(text))).map((face) => `${face.family}/${face.subset}`);
+
+// `selectedFaces` (the pre-inlining face list) was only ever a helper for
+// `zerp check`'s old static font-coverage walk (coverage.ts), removed with
+// the rest of the static cascade — the browser-backed check measures glyph
+// coverage from the rendered page instead. `fontCss` is the one export left
+// that a deck's own build actually calls, so selection is exercised through
+// its emitted `@font-face` comments (`family-subset-weight-style`) instead.
+const FAMILY_SLUGS = { Montserrat: "montserrat", "Roboto Mono": "roboto-mono" };
+const FACE_BLOCK = /\/\* ([a-z0-9-]+) \*\/\s*@font-face \{[^}]*font-family:\s*'([^']+)'[^}]*\}/g;
+
+function subsetOf(commentSlug, family) {
+  if (family === "Zerp Symbols") {
+    return "symbols";
+  }
+  const prefix = `${FAMILY_SLUGS[family]}-`;
+  const stripped = commentSlug.startsWith(prefix) ? commentSlug.slice(prefix.length) : commentSlug;
+  return stripped.replace(/-\d+-(normal|italic)$/, "");
+}
+
+const subsetsFor = async (text) => {
+  const { faces } = await fontCss(deck, setOf(text));
+  return [...faces.matchAll(FACE_BLOCK)].map(
+    ([, slug, family]) => `${family}/${subsetOf(slug, family)}`,
+  );
+};
 
 test("unicode-range parses single codepoints, ranges and wildcards", () => {
   assert.deepEqual(parseUnicodeRange("U+2192"), [{ first: 0x2192, last: 0x2192 }]);

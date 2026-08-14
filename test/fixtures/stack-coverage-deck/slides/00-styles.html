@@ -1,0 +1,10 @@
+<style>
+  /* A deck-authored content: literal, judged with no font-family of its own —
+     it inherits .marker's own stack, which is body's default (Montserrat),
+     and Montserrat carries no greek. This is what exercises the ::after /
+     content: half of uncoveredInSlides: delete that code path locally and
+     this marker's Δ stops being reported even though nothing else changed. */
+  .marker::after {
+    content: "Δ";
+  }
+</style>

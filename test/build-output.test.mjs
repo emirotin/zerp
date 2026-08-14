@@ -58,7 +58,7 @@ test("a built deck inlines the Zerp Symbols arrow face, scoped to U+2192", async
 
 test("the arrow markers name Zerp Symbols first so exporters pick it up", async () => {
   const css = await readFile("dist/assets/default-styles.css", "utf8");
-  // Four stacks, defined once and read by every rule, so a deck can redefine
+  // Five stacks, defined once and read by every rule, so a deck can redefine
   // them without the framework knowing which rules exist.
   assert.match(css, /--zerp-font-body: "Montserrat", "Zerp Symbols", sans-serif;/);
   assert.match(css, /--zerp-font-marker: "Zerp Symbols", "Montserrat", sans-serif;/);
@@ -68,8 +68,18 @@ test("the arrow markers name Zerp Symbols first so exporters pick it up", async 
   assert.match(css, /\.slide ul li::before \{[^}]*font-family: var\(--zerp-font-marker\)/);
   assert.match(css, /\.flow > \* \+ \*::before \{[^}]*font-family: var\(--zerp-font-marker\)/);
   assert.match(css, /\.nav button \{[^}]*font-family: var\(--zerp-font-nav\)/);
+  assert.match(css, /--zerp-font-display: "Montserrat", "Zerp Symbols", sans-serif;/);
+  assert.match(css, /:where\(\.slide h1\) \{\s*font-family: var\(--zerp-font-display\)/);
   // No rule names a family directly any more.
   assert.doesNotMatch(css.split(":root {").slice(2).join(""), /font-family: "/);
+});
+
+test("a deck that configures no fonts is unchanged by the display role", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/kitchen-sink" });
+  assert.ok(!html.includes("font-tokens"), "no token block, so no per-deck override");
+  // The default h1 stack and the default body stack name the same family, so
+  // adding the role cannot change a default deck's rendering.
+  assert.match(html, /--zerp-font-display: "Montserrat", "Zerp Symbols", sans-serif;/);
 });
 
 test("token contrast json is emitted for the checker", async () => {
