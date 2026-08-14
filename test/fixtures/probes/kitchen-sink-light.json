@@ -5562,12 +5562,5 @@
       "pageBackgroundColor": "rgb(240, 243, 255)"
     }
   ],
-  "browserErrors": [
-    "slides/images/missing-pin.png",
-    "slides/images/missing-ok.png",
-    "slides/images/missing-left.png",
-    "slides/images/missing-right.png",
-    "slides/images/missing-a.png",
-    "slides/images/missing-b.png"
-  ]
+  "browserErrors": []
 }
