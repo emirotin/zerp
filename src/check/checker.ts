@@ -88,5 +88,10 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
     }
   }
 
-  return { slideCount, themes, findings };
+  return {
+    slideCount,
+    themes,
+    viewport: { width, height, defaulted: options.sizeDefaulted ?? false },
+    findings,
+  };
 }

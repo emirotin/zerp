@@ -25,19 +25,14 @@ export interface Finding {
   message: string;
   suggestion: string | null;
 }
+export interface CheckViewport {
+  width: number;
+  height: number;
+  defaulted: boolean;
+}
 export interface CheckReport {
   slideCount: number;
   themes: CheckTheme[];
+  viewport: CheckViewport;
   findings: Finding[];
-}
-export interface DomNode {
-  nodeType: number;
-  textContent: string | null;
-}
-export interface DomElement extends DomNode {
-  tagName: string;
-  parentElement: DomElement | null;
-  childNodes: { length: number; [index: number]: DomNode | undefined };
-  getAttribute(name: string): string | null;
-  matches(selector: string): boolean;
 }

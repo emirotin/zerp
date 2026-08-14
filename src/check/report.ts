@@ -18,10 +18,21 @@ export function reportHasFailures(report: CheckReport, strict: boolean): boolean
   );
 }
 
+// Layout findings (frame/overflow/safe-zone) are judged against the checked
+// viewport, so a hint to re-check at the deck's actual target size is only
+// useful when that viewport was a guess, not something the caller asked for.
+const VIEWPORT_SENSITIVE_CATEGORIES: ReadonlySet<Finding["category"]> = new Set([
+  "frame",
+  "overflow",
+  "safe-zone",
+]);
+
 export function formatReport(report: CheckReport, options: { summaryOnly?: boolean } = {}): string {
   const lines: string[] = [];
   const themeSummary = report.themes.map((theme) => countBy(report, theme)).join(" · ");
-  const summary = `zerp check — ${report.slideCount} slides · ${themeSummary}`;
+  const { width, height, defaulted } = report.viewport;
+  const viewportDesc = `${width}x${height}${defaulted ? " (default size)" : ""}`;
+  const summary = `zerp check — ${report.slideCount} slides · ${viewportDesc} · ${themeSummary}`;
   if (options.summaryOnly) {
     lines.push(summary);
     if (report.findings.length > 0) {
@@ -30,6 +41,12 @@ export function formatReport(report: CheckReport, options: { summaryOnly?: boole
     return `${lines.join("\n")}\n`;
   }
   lines.push(summary, "");
+  if (defaulted && report.findings.some((f) => VIEWPORT_SENSITIVE_CATEGORIES.has(f.category))) {
+    lines.push(
+      `checked at the default ${width}x${height} — pass --size WxH to check this deck's actual target screen`,
+      "",
+    );
+  }
   const groups = new Map<string, Finding[]>();
   for (const finding of report.findings) {
     const key = `${finding.slideIndex}|${finding.theme}`;

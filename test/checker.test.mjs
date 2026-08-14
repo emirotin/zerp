@@ -117,6 +117,7 @@ test("report shows the in-file ordinal for multi-slide files", () => {
   const out = formatReport({
     slideCount: 42,
     themes: ["dark", "light"],
+    viewport: { width: 1920, height: 1080, defaulted: true },
     findings: [findingAt({})],
   });
   assert.match(out, /slide 30 \(slides\/28-attention\.html · 2\/2 in file\) \[dark\]/);
@@ -126,6 +127,7 @@ test("report omits the ordinal for single-slide files", () => {
   const out = formatReport({
     slideCount: 1,
     themes: ["dark", "light"],
+    viewport: { width: 1920, height: 1080, defaulted: true },
     findings: [findingAt({ slideSrcSlide: "1/1" })],
   });
   assert.match(out, /slide 30 \(slides\/28-attention\.html\) \[dark\]/);
