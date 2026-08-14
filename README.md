@@ -46,20 +46,19 @@ Commands:
 pnpm exec zerp serve                      # serve the current deck on http://localhost:8000 (live-reloads on save)
 pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default theme
 pnpm exec zerp build --theme light        # write ./index.html (light default)
-pnpm exec zerp check                      # APCA contrast + font-size report (both themes; --theme dark|light|both, --json for tooling)
+pnpm exec zerp check                      # browser-backed contrast, font-size, glyph, frame/layout report (both themes, 1920x1080; --theme dark|light|both, --size WxH, --only category,..., --json for tooling)
 pnpm exec zerp slides                     # deck position → source file mapping (--json for tooling)
-pnpm exec zerp verify                     # headless-browser frame/layout check (both themes, 1920x1080; --json for tooling)
 ```
 
 ## Browsers
 
-`zerp verify` needs a Chromium-class browser. It never bundles one — it resolves an external browser in this order:
+`zerp check` opens each theme in a real headless browser and needs a Chromium-class one. It never bundles one — it resolves an external browser in this order:
 
 1. **`CHROME_BIN`** — if set, it is used verbatim. Point it at any Chrome/Chromium binary; a wrapper script that execs one with extra flags works too.
 2. **The playwright-managed Chromium** — run `zerp install-browser` once to download it; nothing else needs configuring afterward.
 3. **A system Chrome/Chromium** — Google Chrome or Chromium found on the usual macOS app paths or on `PATH` (`google-chrome`, `chromium`, `chromium-browser`).
 
-If none is found, `zerp verify` says so and points here. On a machine with no system Chrome, install one once:
+If none is found, `zerp check` says so and points here (and `zerp build`'s post-build check summary prints a one-line notice and continues rather than failing). On a machine with no system Chrome, install one once:
 
 ```bash
 pnpm exec zerp install-browser   # download the managed Chromium
@@ -71,18 +70,18 @@ The browser stays external and optional: the package itself is browser-free, so 
 
 ### Reusing a running browser
 
-By default each `zerp verify` launches a browser and closes it again. A host that verifies decks repeatedly — CI, a service, a watch loop — can keep one browser warm instead and point verify at it with `--browser-endpoint url` (or `ZERP_BROWSER_ENDPOINT`):
+By default each `zerp check` launches a browser and closes it again. A host that checks decks repeatedly — CI, a service, a watch loop — can keep one browser warm instead and point check at it with `--browser-endpoint url` (or `ZERP_BROWSER_ENDPOINT`):
 
 ```bash
 # CDP: any Chrome started with --remote-debugging-port
-pnpm exec zerp verify --browser-endpoint http://127.0.0.1:9222
+pnpm exec zerp check --browser-endpoint http://127.0.0.1:9222
 # playwright protocol: an endpoint from chromium.launchServer()
-pnpm exec zerp verify --browser-endpoint ws://127.0.0.1:5000/<guid>
+pnpm exec zerp check --browser-endpoint ws://127.0.0.1:5000/<guid>
 ```
 
 Prefer `http(s)://` (CDP) when the host runs its own playwright build: it is the browser's own protocol, so the two sides need no common version. `ws(s)://` speaks the playwright protocol, which is version-locked between client and server.
 
-A supplied browser belongs to whoever started it: verify creates its own context, closes that context, and disconnects — it never closes the browser. No local browser is needed or looked for in this mode. The host must keep its event loop responsive while verify runs; a host that blocks it (a synchronous child-process call, say) can stall the very browser it is lending out.
+A supplied browser belongs to whoever started it: check creates its own context, closes that context, and disconnects — it never closes the browser. No local browser is needed or looked for in this mode. The host must keep its event loop responsive while check runs; a host that blocks it (a synchronous child-process call, say) can stall the very browser it is lending out.
 
 ## Tooling
 
@@ -116,12 +115,12 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 - The framework default CSS and browser runtime are stored as separate source assets and inlined into generated HTML during `serve` and `build`.
 - Colors come from design tokens (`var(--zerp-*)`) generated from the Harmony palette; decks render in dark and light themes. Do not hardcode colors.
 - The page title comes from the first slide's top heading (override via the `title` build option; folder name as fallback).
-- Run `zerp check` after authoring: it reports APCA contrast and font-size violations per slide, for both themes.
+- Run `zerp check` after authoring, and after any layout change: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and reports, per slide, APCA contrast, font-size floors, surface-blend, glyph/font-fallback coverage, SVG text sealed off from judging, and — the layout side, folded in from the former `zerp verify` — that exactly one full-size slide frame is active and visible without page overflow, plus any browser console errors. Overflow is relative to the checked viewport (`--size WxH`, default 1920x1080) — check a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked. `zerp check` requires a browser; without one it names the problem (no browser found, or `CHROME_BIN` pointing somewhere invalid) and points at `zerp install-browser`.
+- Every finding carries a `category` — one of `contrast`, `type-size`, `surface`, `glyph`, `svg-text`, `frame`, `overflow`, `safe-zone`, `console` — printed at the front of its report line. `--only category,category` narrows a run to a comma-separated subset; an unknown category is rejected with the full list.
 - Fonts are inlined per deck: a build carries the Montserrat and Roboto Mono subsets whose `unicode-range` the deck's own text actually touches (Latin always), plus a one-glyph face for `→`. A latin deck therefore ships no Cyrillic, and a deck that types `№` ships the subset that covers it.
-- `zerp check` also warns about characters the font stack an element renders in cannot draw — it reads the real `cmap` of each inlined woff2 and resolves the actual stack per element (so `display`/`body`/`mono` are each checked on their own terms). Anything outside a stack's coverage (`≈`, `▲`, CJK, …) is drawn by whatever the viewing machine falls back to, which differs per OS and again on export. The warning is one `⚠` per element, naming the slide, the element and the failing stack. Emoji are exempt — every platform draws those from its own colour emoji font.
-- Run `zerp verify` after layout or framework changes: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and checks that exactly one full-size slide frame is active and visible without page overflow. Overflow is relative to the checked viewport (`--size WxH`, default 1920x1080) — verify a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked.
-- `zerp verify --safe-margin px` additionally requires every top-level element of each slide to stay at least that many px inside all page edges — a print-safe inset for decks headed to PDF. Mark intentionally full-bleed elements with `data-zerp-bleed` to exempt them. Off by default; choose a margin below the slide padding so ordinary content never trips it.
-- `zerp verify --timeout ms` (or `ZERP_VERIFY_TIMEOUT_MS`) sets the budget for the whole browser session — launch, navigation, font activation and the probe. The default is 20000ms, which suits a developer machine; raise it on a small or loaded host, or for a deck carrying heavy imagery. A session that runs out of budget produces no report at all, so if you automate `zerp verify`, give it a budget that matches the host it runs on and treat the timeout as a failed check rather than a passed one.
+- `zerp check`'s glyph finding names, per element, that its text was rendered by a font the deck does not bundle, along with the fallback family — for example, an element set in a stack zerp did not subset for the characters it contains. The renderer itself is the source of truth: zerp inlines every font it ships as an `@font-face`, so Chrome's own answer to "what font actually painted this glyph" (`isCustomFont: false`) is what gets reported, not a static coverage table. Attribution is per element, not per codepoint or count — where a parent's fallback glyphs are a subset of a descendant's in the same family, the finding lands on the descendant; the slide is still flagged, only the element pointer is coarser. Emoji are exempt — every platform draws those from its own colour emoji font. `llms.txt` documents the full set of edge cases (ZWJ sequences, generated content, `<svg>` text).
+- `zerp check --safe-margin px` additionally requires every top-level element of each slide to stay at least that many px inside all page edges — a print-safe inset for decks headed to PDF. Mark intentionally full-bleed elements with `data-zerp-bleed` to exempt them. Off by default; choose a margin below the slide padding so ordinary content never trips it.
+- `zerp check --timeout ms` (or `ZERP_VERIFY_TIMEOUT_MS`) sets the budget for the whole browser session — launch, navigation, font activation and the probe. The default is 20000ms, which suits a developer machine; raise it on a small or loaded host, or for a deck carrying heavy imagery. A session that runs out of budget produces no report at all, so if you automate `zerp check`, give it a budget that matches the host it runs on and treat the timeout as a failed check rather than a passed one.
 - The package ships a designer-facing style guide as `docs/style-system.pdf` (resolvable as `@emirotin/zerp/docs/style-system.pdf`): the layers, the type pair, the token table in both themes, the utilities, and every component, with all examples rendered by the framework's own stylesheet. It is reprinted from the current stylesheet for every release, so it describes the version you installed.
 - "Slide N" means the 1-based deck position (what the on-screen counter shows) — file prefixes only order files. `zerp slides` prints the position → file mapping; pressing `s` in a running deck shows the active slide's source.
 
@@ -137,7 +136,7 @@ Print with a **page size equal to the presentation viewport** and backgrounds
 enabled. One slide fills exactly one page at any page size, in either theme.
 Content that overflows a slide is clipped at the bottom of the page rather than
 spilling onto a second page, so keep slides within the frame (the same as on
-screen — `zerp check`/`zerp verify` catch overflow).
+screen — `zerp check` catches overflow).
 
 Example: render a deck to PDF at 1920×1080 with Playwright:
 

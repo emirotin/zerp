@@ -283,8 +283,8 @@
               steps, timelines, takeaways.
             </li>
             <li>
-              <strong>Guardrails</strong> — APCA contrast and type-size rules enforced by
-              <code>zerp check</code> and <code>zerp verify</code>, in both themes.
+              <strong>Guardrails</strong> — APCA contrast, type-size, and layout rules enforced by
+              <code>zerp check</code>, in both themes.
             </li>
           </ol>
         </div>
@@ -706,12 +706,12 @@
         </p>
         <p>
           The system is enforced, not aspirational.
-          <code>zerp check</code> statically analyzes every slide against both themes: APCA text
-          contrast, the 1em type floor, and surfaces that blend into their background.
-          <code>zerp verify</code> then loads the deck in a real browser and checks geometry,
-          overflow, and console errors. The published defaults all pass; the checker exists to keep
-          <em>your</em> additions honest. Known traps it will catch: <code>.sm</code> +
-          <code>.muted</code> combined, <code>faint</code>
+          <code>zerp check</code> loads every slide in a real headless browser, against both themes:
+          APCA text contrast, the 1em type floor, surfaces that blend into their background, font
+          fallback, and — in the same pass — frame geometry, overflow, and console errors. The
+          published defaults all pass; the checker exists to keep <em>your</em> additions honest.
+          Known traps it will catch: <code>.sm</code> + <code>.muted</code> combined,
+          <code>faint</code>
           used for text, any text under 1em.
         </p>
         <p>

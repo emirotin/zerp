@@ -86,10 +86,15 @@ const SETUP_EXPRESSION = (): string => `(async function () {
         parent: parent,
         fonts: []
       });
-      // Stop at an <svg>: inside it, text is painted with fill and sized by a
-      // presentation attribute, neither of which a CSS-computed audit can
-      // judge — reading \`color\` and \`font-size\` there invents findings about
-      // values the graphic never uses. The svg is reported as a whole by the
+      // Stop at an <svg>: for <text> inside it, Chrome still resolves a
+      // computed \`color\` (inherited from the surrounding HTML) even though
+      // the glyph is painted with \`fill\`, so a contrast pair built from
+      // \`color\` would describe a colour the browser never painted. Computed
+      // \`font-size\` is likewise in the svg's own user-unit space, unscaled by
+      // \`viewBox\`, so a px verdict against it is meaningless. This excludes
+      // the subtree from glyph and surface judging as well, not just contrast
+      // and type-size — none of those probes have a value inside <svg> that
+      // means what it would in HTML. The svg is reported as a whole by the
       // svg-text rule instead.
       if (el.tagName.toLowerCase() === "svg") { return; }
       for (var j = 0; j < el.children.length; j++) { walk(el.children[j], id); }

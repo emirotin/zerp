@@ -1,3 +1,44 @@
+# Migrating a deck from zerp 0.10 to 0.11
+
+No deck source changes. The operational change is in the CLI: `zerp verify`
+no longer exists — everything it did is now part of `zerp check`, which
+absorbs its flags (`--size`, `--safe-margin`, `--timeout`,
+`--browser-endpoint`, `--json`) alongside the `--theme` and `--strict` it
+already had. Replace `zerp verify . --theme both --size 1920x1080` with
+`zerp check . --theme both --size 1920x1080`; a plain `zerp check .` still
+runs the static-style checks, now inside the same browser-backed pass.
+
+`zerp check` now always requires Chrome or Chromium — the checks it used to
+do without a browser are folded into the same pass as the ones that always
+needed one, so there is no longer a browser-free mode. Without a browser it
+errors and names the remedy (`zerp install-browser`, or the `CHROME_BIN`
+path, if that is what is wrong). `zerp build` is unaffected: its post-build
+check summary already tolerated a missing browser and continues to, printing
+an explicit one-line "check skipped" notice instead of failing.
+
+Findings now carry a `category` (`contrast`, `type-size`, `surface`, `glyph`,
+`svg-text`, `frame`, `overflow`, `safe-zone`, `console`), printed at the
+front of each report line; `--only category,...` narrows a run to a subset
+and rejects an unknown name with the full list. `skippedSelectors` is gone
+from `--json` — the previous static engine rejected selectors containing
+`[`, `]`, `+`, `~` or `:` and silently left them unchecked; the browser-backed
+check has no such gap; everything inside `@media` blocks and every
+`!important` declaration is now audited too, for the first time.
+
+Glyph findings changed shape: instead of a deck-level warning listing
+uncovered codepoints, `zerp check` now reports, per element, that its text
+was rendered by a font the deck does not bundle, naming the element and the
+fallback family. This is the browser's own answer (Chrome DevTools Protocol
+`CSS.getPlatformFontsForNode`), not a static `cmap`/`unicode-range`
+computation, so it also now catches svg text and CSS-generated content it
+previously could not reach. `llms.txt` documents the granularity limits
+(emoji exemption, per-element rather than per-codepoint attribution, `<svg>`
+exclusion, generated-content scope, runtime-generated text).
+
+Run `zerp check . --theme both --size 1920x1080` after upgrading and fix
+anything newly surfaced — most of it is coverage the old checker silently
+missed, not a behavior regression.
+
 # Migrating a deck from zerp 0.6 to 0.7
 
 Nothing in a deck changes. There are no authoring changes, and the `zerp`
@@ -26,7 +67,8 @@ slide whose content exceeds the frame clips at the bottom only, instead of at
 both ends (which previously hid the top of the overflow). Slides that fit the
 frame are unchanged. The remedy for overflow is the same as before — trim
 content or top-align with `.slide.top`, then re-run `zerp check .` and
-`zerp verify . --theme both --size 1920x1080`.
+`zerp check . --theme both --size 1920x1080` (as of 0.11, `zerp verify` is
+folded into `zerp check`; see "Migrating a deck from zerp 0.10 to 0.11").
 
 # Migrating from a pre-frame zerp build
 
@@ -45,10 +87,12 @@ Run both static and browser validation after upgrading:
 
 ```bash
 zerp check .
-zerp verify . --theme both --size 1920x1080
+zerp check . --theme both --size 1920x1080
 ```
 
-The browser check requires Chrome or Chromium. `htmlparser2` is a direct
+(As of 0.11, both of those run under `zerp check`; `zerp verify` no longer
+exists — see "Migrating a deck from zerp 0.10 to 0.11".) The browser pass
+requires Chrome or Chromium. `htmlparser2` is a direct
 composition dependency; `linkedom` remains because the checker, title
 derivation, and `zerp slides` use its DOM APIs.
 
