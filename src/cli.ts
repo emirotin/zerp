@@ -29,7 +29,7 @@ function printUsage(): void {
 }
 
 /**
- * Download the playwright-managed Chromium that `zerp verify` can resolve
+ * Download the playwright-managed Chromium that `zerp check` can resolve
  * without a system browser. playwright-core ships the downloader as its own
  * CLI (`cli.js`, its package `bin`); locate it from the installed package
  * directory so this works from a global or local zerp install, then hand off,

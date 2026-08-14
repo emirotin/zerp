@@ -89,6 +89,6 @@ pnpm format:check
 pnpm test:browser
 node dist/cli.js check test/fixtures/kitchen-sink
 node dist/cli.js check examples/casino
-node dist/cli.js check examples/casino --theme both --size 1280x720
+node dist/cli.js check examples/casino --theme both --size 1920x1080
 node dist/cli.js serve examples/casino
 ```
