@@ -222,7 +222,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promi
 
 // Installed at document start so resource and script errors are collected
 // from the first byte of the deck, before any slide markup runs.
-export const COLLECTOR_SOURCE = `
+const COLLECTOR_SOURCE = `
 window.__zerpVerifyErrors = [];
 window.addEventListener("error", function (event) {
   var target = event.target;

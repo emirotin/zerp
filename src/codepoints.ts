@@ -6,9 +6,9 @@ import { parseHTML } from "linkedom";
  *
  * This decides which font subsets a built deck has to carry. It once also
  * carried a slide-only scope for the glyph-coverage check to warn from, but
- * that check now judges each element through the font stack it actually
- * resolves in (see `check/coverage.ts`) rather than against a deck-wide
- * codepoint set, so only this one scope is still read.
+ * that check now judges each element through the fonts the browser actually
+ * rendered it with (see `check/judge.ts`'s `judgeGlyphs`) rather than against
+ * a deck-wide codepoint set, so only this one scope is still read.
  */
 export interface DeckCodepoints {
   readonly full: ReadonlySet<number>;
