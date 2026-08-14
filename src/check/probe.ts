@@ -36,6 +36,25 @@ const SETUP_EXPRESSION = (): string => `(async function () {
     var t = String(text || "").replace(/\\s+/g, " ").trim();
     return t.length > 40 ? t.slice(0, 37) + "\\u2026" : t;
   }
+  // Generated content is real text on the page, but it lives in no text node,
+  // so the walk below cannot see it. Chrome resolves attr()/quotes into the
+  // computed \`content\` value as quoted strings, which is exactly the text the
+  // glyph rules need; anything unquoted (url(), counter(), image-set()) draws
+  // no glyphs from a bundled font and is ignored.
+  function pseudoText(el) {
+    var out = "";
+    var pseudos = ["::before", "::after"];
+    for (var p = 0; p < pseudos.length; p++) {
+      var content = getComputedStyle(el, pseudos[p]).content;
+      if (!content || content === "none" || content === "normal") { continue; }
+      var parts = content.match(/"(?:[^"\\\\]|\\\\.)*"/g);
+      if (!parts) { continue; }
+      for (var i = 0; i < parts.length; i++) {
+        out += parts[i].slice(1, -1).replace(/\\\\(.)/g, "$1");
+      }
+    }
+    return out;
+  }
   function collect(root) {
     var out = [];
     function walk(el, parent) {
@@ -54,6 +73,7 @@ const SETUP_EXPRESSION = (): string => `(async function () {
         className: el.getAttribute("class"),
         snippet: snippet(ownText || el.textContent),
         hasOwnText: /\\S/.test(ownText),
+        pseudoText: pseudoText(el),
         color: cs.color,
         backgroundColor: cs.backgroundColor,
         backgroundImage: cs.backgroundImage,
@@ -66,6 +86,12 @@ const SETUP_EXPRESSION = (): string => `(async function () {
         parent: parent,
         fonts: []
       });
+      // Stop at an <svg>: inside it, text is painted with fill and sized by a
+      // presentation attribute, neither of which a CSS-computed audit can
+      // judge — reading \`color\` and \`font-size\` there invents findings about
+      // values the graphic never uses. The svg is reported as a whole by the
+      // svg-text rule instead.
+      if (el.tagName.toLowerCase() === "svg") { return; }
       for (var j = 0; j < el.children.length; j++) { walk(el.children[j], id); }
     }
     walk(root, null);
@@ -112,8 +138,13 @@ const SLIDE_EXPRESSION = (index: number, safeMargin: number): string => `(functi
       })
       .filter(function (item) { return item.width > 0 && item.height > 0; });
   }
+  // aria-hidden marks a graphic as decorative, and decorative labels carry no
+  // information for the audit to protect — the element walk skips those
+  // subtrees for the same reason, so the svg rule must agree with it.
   var svgTexts = activeSlide
-    ? Array.from(activeSlide.querySelectorAll("svg text")).map(function (t) { return snippet(t.textContent); })
+    ? Array.from(activeSlide.querySelectorAll("svg text"))
+        .filter(function (t) { return t.closest('[aria-hidden="true"]') === null; })
+        .map(function (t) { return snippet(t.textContent); })
     : [];
   return {
     index: index + 1,

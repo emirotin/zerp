@@ -119,6 +119,10 @@ test("fallback fonts are reported once each, on the element whose own text fell 
     { slideIndex: 1, snippet: "Δέλτα" }, // the Greek h1
     { slideIndex: 1, snippet: "marker" }, // the .marker ::after pseudo-content
     { slideIndex: 2, snippet: "Ωμέγα" }, // the Greek h1 on the next slide
+    // Both .compare rows, whose characters exist only as `content: attr()`
+    // generated text — every one of them, not just the slide's first.
+    { slideIndex: 3, snippet: "≈" },
+    { slideIndex: 3, snippet: "≠" },
     { slideIndex: 4, snippet: "Δέλτα" }, // the serif p, forced off Montserrat
   ]);
   // No ancestor (the .slide root, or any wrapper) duplicates a descendant's

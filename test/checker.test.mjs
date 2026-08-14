@@ -85,26 +85,19 @@ test("an uncovered character on a later slide is attributed to its own slide, no
   assert.equal(second.slideSrc, "slides/02-omega.html");
 });
 
-// Known gap, not this task's to fix (out of scope per task-7's fix-up round —
-// the root cause is probe.ts's collect(), which reads each element's own
-// direct text-node children and never sees CSS-generated content). Written
-// as a test.todo carrying the INTENDED behavior, so it fails visibly today
-// (see its output under the "todo" section) without failing `pnpm test`, and
-// so a future fix flips it to passing instead of it having to be
-// reconstructed from scratch. Deleting or silently downgrading this
-// assertion to match the gap would be exactly the invisible-regression
-// outcome this test exists to prevent.
-test.todo("content: attr() text is judged, not silently dropped (currently: silently dropped)", async () => {
+// Was a test.todo while probe.ts's collect() read only real text nodes; it now
+// records each element's resolved ::before/::after content too.
+test("content: attr() text is judged, not silently dropped", async () => {
   const report = await checkPresentation({ rootDir: "test/fixtures/uncovered-glyph-deck" });
   const coverage = report.findings.filter((f) => f.category === "glyph");
   // "≈" reaches the page only via `.compare[data-vs] { content: attr(data-vs) }`
   // — an attribute value read into a `::after` pseudo-element, not a text
-  // node anywhere in the slide markup. The pre-browser cascade checker read
-  // this by resolving `content:` declarations directly against parsed CSS;
-  // the browser-backed probe only walks real DOM text nodes, so generated
-  // content is currently invisible to it.
+  // node anywhere in the slide markup, so the finding can only come from the
+  // probe reading the pseudo-element's resolved `content`.
   const label = coverage.find((f) => f.snippet.includes("≈"));
   assert.ok(label, "content: attr() text should be judged, not silently dropped");
+  assert.equal(label.slideIndex, 1);
+  assert.equal(label.slideSrc, "slides/00-copy.html");
 });
 
 const findingAt = (overrides) => ({
@@ -142,32 +135,34 @@ test("svg text is flagged once per slide, and duplicate themes are not double-co
   const report = await checkPresentation({ rootDir: "test/fixtures/svg-text-deck" });
   const svgFindings = report.findings.filter((f) => f.category === "svg-text");
   // The fixture has a labelled svg and a second, aria-hidden decorative one on
-  // the same slide (see the test.todo below for whether aria-hidden is
-  // actually honored — this fixture's own text happens to sort first in DOM
-  // order either way, so it cannot tell the two apart on its own). What this
-  // pins is checker.ts's merge step: one finding, not one per requested theme.
+  // the same slide. What this pins is checker.ts's merge step: one finding,
+  // not one per requested theme (the aria-hidden opt-out itself is pinned by
+  // the casino test below, on a deck where it is the only svg text).
   assert.equal(svgFindings.length, 1);
   const [finding] = svgFindings;
   assert.equal(finding.snippet, "Pocket 17");
 });
 
-// Known gap, not this task's to fix (see task-7-report.md and the
-// coordinator's explicit "not in scope" ruling for this fix-up round:
-// probe.ts's SLIDE_EXPRESSION collects svg text via a plain
-// `querySelectorAll("svg text")`, with no aria-hidden check at all — unlike
-// the pre-browser cascade checker's walkElements, which skipped aria-hidden
-// subtrees). examples/casino's roulette wheel is the one svg with text in
-// the whole deck and it is entirely aria-hidden (a decorative "0" pocket
-// marker), so the intended finding count is zero; today it is one. Written
-// as a test.todo carrying the INTENDED behavior — unlike svg-text-deck
-// above, this fixture cannot mask the bug behind "reported once per slide,
-// and the real label happens to sort first" — so it fails visibly today
-// (see its output under the "todo" section) without failing
-// `pnpm test`/`pnpm test:browser`, and a future probe.ts fix flips it to
-// passing. This is also the only thing standing between the next task's job
-// (triaging this exact finding) and quietly triaging it away by weakening
-// coverage instead of fixing probe.ts.
-test.todo("aria-hidden svg text opts out of the svg-text finding (examples/casino)", async () => {
+test("text inside an svg is reported only by the svg rule, not contrast or type-size", async () => {
+  const report = await checkPresentation({ rootDir: "test/fixtures/svg-text-deck" });
+  // The fixture's <text> carries fill="var(--zerp-faint)" and font-size="8" in
+  // svg's own coordinate space. Judging it as HTML read the inherited `color`
+  // (a colour the graphic never paints with) and the raw 8 as CSS pixels, so
+  // it produced a contrast pair and a type-size floor that describe nothing on
+  // screen. That is exactly what the svg-text warning exists to say instead.
+  assert.deepEqual(
+    report.findings.filter((f) => f.category === "contrast" || f.category === "type-size"),
+    [],
+  );
+});
+
+// examples/casino's roulette wheel is the one svg with text in the whole deck
+// and it is entirely aria-hidden (decorative pocket markers), so the deck must
+// report no svg-text finding at all. Was a test.todo while probe.ts collected
+// svg text with a plain `querySelectorAll("svg text")`; unlike svg-text-deck
+// above, this deck cannot mask the bug behind "reported once per slide, and
+// the real label happens to sort first".
+test("aria-hidden svg text opts out of the svg-text finding (examples/casino)", async () => {
   const report = await checkPresentation({ rootDir: "examples/casino" });
   const svgFindings = report.findings.filter((f) => f.category === "svg-text");
   assert.deepEqual(svgFindings, []);

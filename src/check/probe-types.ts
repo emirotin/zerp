@@ -9,6 +9,13 @@ export interface ProbeElement {
   className: string | null;
   snippet: string; // collapsed text, ≤40 chars with ellipsis
   hasOwnText: boolean; // has a non-whitespace direct text child
+  /**
+   * Concatenated ::before/::after generated text, resolved by the browser
+   * (`content: attr(data-vs)` arrives here as its attribute's value). Optional
+   * so hand-authored probes in tests stay valid; absent means "not recorded",
+   * which judge.ts treats as empty.
+   */
+  pseudoText?: string;
   color: string; // computed, always rgb()/rgba()
   backgroundColor: string;
   backgroundImage: string;

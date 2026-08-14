@@ -152,6 +152,14 @@ function ownFontCounts(slide: ProbeSlide, element: ProbeElement): Map<string, Fo
   return counts;
 }
 
+// Everything this element draws itself: its own text plus whatever its
+// ::before/::after content added. Both are its responsibility and both are
+// counted in its CDP font aggregate, so both must be weighed against it.
+function glyphText(element: ProbeElement): string {
+  const pseudo = element.pseudoText ?? "";
+  return element.hasOwnText ? `${element.snippet}${pseudo}` : pseudo;
+}
+
 function fallbackGlyphs(
   slide: ProbeSlide,
   element: ProbeElement,
@@ -166,7 +174,8 @@ function fallbackGlyphs(
     drawn += count;
     families.push(family);
   }
-  const exempt = (element.snippet.match(EXEMPT) ?? []).length;
+  const text = glyphText(element);
+  const exempt = (text.match(EXEMPT) ?? []).length;
   return { count: Math.max(0, drawn - exempt), families };
 }
 
@@ -181,17 +190,13 @@ function judgeGlyphs(
 
   for (const slide of probe.slides) {
     for (const el of slide.elements) {
-      // Gate on hasOwnText, not just a nonzero count: `snippet` collapses to
-      // "" for an element whose own direct children are whitespace-only text
-      // nodes (see probe.ts's walk), which is exactly the case where an
-      // element's only own contribution is generated content (e.g. a
-      // ::after character) rather than real, quotable text. Reporting those
-      // would point the author at nothing locatable. This does mean a
-      // fallback glyph drawn purely by ::after/::before content on an
-      // element with no real text of its own goes unreported — a known gap,
-      // not silently absorbed: such content is rare, and the alternative
-      // (reporting against an empty snippet) is worse for the deck author.
-      if (!el.hasOwnText) {
+      // Gate on text this element itself puts on the page — its own text
+      // nodes or its generated content. Without one of those, `snippet`
+      // collapses to "" (see probe.ts's walk) and a finding would point the
+      // author at nothing locatable, while the glyphs it names belong to a
+      // descendant that is judged on its own.
+      const pseudo = el.pseudoText ?? "";
+      if (!el.hasOwnText && pseudo === "") {
         continue;
       }
       const { count, families } = fallbackGlyphs(slide, el);
@@ -205,7 +210,9 @@ function judgeGlyphs(
         slideIndex: slide.index,
         slideSrc: slide.src,
         slideSrcSlide: slide.srcSlide,
-        snippet: el.snippet,
+        // Generated content is not in the markup, so quoting the element's own
+        // text (empty here) would leave the author nothing to search for.
+        snippet: el.hasOwnText ? el.snippet : pseudo,
         message: `${count} glyph${count === 1 ? "" : "s"} rendered by a system font (${families.join(", ")}), not a bundled one`,
         suggestion:
           "use characters covered by the bundled fonts (Montserrat, Roboto Mono), or bundle a face that covers this text",
