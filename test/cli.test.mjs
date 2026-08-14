@@ -33,6 +33,25 @@ test("zerp check --json emits a machine-readable report with sourced errors", ()
   assert.equal(errors[0].slideSrc, "slides/00-bad.html");
 });
 
+// The only end-to-end guard that the fix-hint table (token-contrast.json,
+// loaded by checker.ts and passed into judge()) is actually wired up. If a
+// future change drops tokenContrast from the judge() call, or the table's
+// background hex stops matching what the browser reports, every suggestion
+// silently goes back to null and the suite would otherwise stay green.
+test("zerp check names a fix token for a real contrast error", () => {
+  const result = runCli(["check", "test/fixtures/broken-deck", "--json"]);
+  assert.equal(result.status, 1);
+  const report = JSON.parse(result.stdout);
+  const contrastErrors = report.findings.filter(
+    (f) => f.category === "contrast" && f.severity === "error",
+  );
+  assert.ok(contrastErrors.length > 0, "broken deck reports contrast errors");
+  assert.ok(
+    contrastErrors.some((f) => f.suggestion && f.suggestion.includes("var(--zerp-")),
+    "at least one contrast error names a fix token",
+  );
+});
+
 test("zerp check --json on a clean deck has no error findings and exits 0", () => {
   const result = runCli(["check", "test/fixtures/clean-deck", "--json"]);
   assert.equal(result.status, 0);
@@ -92,14 +111,29 @@ test("invalid theme is rejected", () => {
   assert.match(result.stderr, /Invalid theme/);
 });
 
-test("invalid verify size is rejected before launching a browser", () => {
-  const result = runCli(["verify", "test/fixtures/clean-deck", "--size", "wide"]);
+test("invalid check size is rejected before launching a browser", () => {
+  const result = runCli(["check", "test/fixtures/clean-deck", "--size", "wide"]);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Invalid verification size/);
 });
 
-test("invalid verify safe margin is rejected before launching a browser", () => {
-  const result = runCli(["verify", "test/fixtures/clean-deck", "--safe-margin", "wide"]);
+test("invalid check safe margin is rejected before launching a browser", () => {
+  const result = runCli(["check", "test/fixtures/clean-deck", "--safe-margin", "wide"]);
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Invalid safe margin/);
+});
+
+test("verify is gone and check absorbs its flags", async () => {
+  const help = await runCli(["--help"]);
+  assert.ok(!help.stdout.includes("zerp verify"), "verify is no longer a command");
+  assert.match(help.stdout, /--only/);
+  assert.match(help.stdout, /--safe-margin/);
+});
+
+test("check reports both audits in one pass", async () => {
+  const result = await runCli(["check", "test/fixtures/stack-coverage-deck", "--json"]);
+  const report = JSON.parse(result.stdout);
+  const categories = new Set(report.findings.map((f) => f.category));
+  assert.ok(categories.has("glyph"), "the Greek h1 falls back and is reported");
+  assert.ok(!("skippedSelectors" in report), "nothing is skipped any more");
 });

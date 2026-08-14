@@ -311,14 +311,6 @@ async function planFamilies(rootDir: string): Promise<FamilyPlan[]> {
   ];
 }
 
-/** The faces a deck's own text selects — see {@link selectFaceBlocks}. */
-export async function selectedFaces(
-  rootDir: string,
-  codepoints: ReadonlySet<number>,
-): Promise<FontFaceInfo[]> {
-  return selectFaceBlocks(rootDir, await planFamilies(rootDir), codepoints);
-}
-
 // Base64-encoding a woff2 is the expensive half of a build and the same file
 // is inlined into several weights' worth of nothing, so encode each once.
 const dataUrlCache = new Map<string, Promise<string>>();

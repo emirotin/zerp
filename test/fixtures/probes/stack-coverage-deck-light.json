@@ -1,0 +1,556 @@
+{
+  "theme": "light",
+  "width": 1920,
+  "height": 1080,
+  "sizeDefaulted": false,
+  "frameCount": 4,
+  "slideCount": 4,
+  "innerSlideCount": 4,
+  "slides": [
+    {
+      "index": 1,
+      "src": "slides/01-greek.html",
+      "srcSlide": "1/1",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 47,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h1",
+          "className": null,
+          "snippet": "Δέλτα",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 51.2,
+          "fontWeight": 900,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "p",
+          "className": null,
+          "snippet": "Prose is latin only.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "p",
+          "className": null,
+          "snippet": "Inline is monospace.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 21,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "code",
+          "className": null,
+          "snippet": "Δέλτα",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 19,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "p",
+          "className": "marker",
+          "snippet": "marker",
+          "hasOwnText": true,
+          "pseudoText": "Δ",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 1,
+              "isCustomFont": false
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 1,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 2,
+      "src": "slides/02-omega.html",
+      "srcSlide": "1/1",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h1",
+          "className": null,
+          "snippet": "Ωμέγα",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 51.2,
+          "fontWeight": 900,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 2,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 3,
+      "src": "slides/03-compare.html",
+      "srcSlide": "1/1",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": []
+        },
+        {
+          "id": 1,
+          "tag": "div",
+          "className": "compare",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "≈",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 1,
+              "isCustomFont": false
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "div",
+          "className": null,
+          "snippet": "A",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 1,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "div",
+          "className": null,
+          "snippet": "B",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 1,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "div",
+          "className": "compare",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "≠",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Helvetica",
+              "glyphCount": 1,
+              "isCustomFont": false
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "div",
+          "className": null,
+          "snippet": "C",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 4,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "div",
+          "className": null,
+          "snippet": "D",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 4,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 3,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 4,
+      "src": "slides/04-generic-stack.html",
+      "srcSlide": "1/1",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Times",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "p",
+          "className": null,
+          "snippet": "Δέλτα",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Times",
+              "glyphCount": 5,
+              "isCustomFont": false
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 4,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    }
+  ],
+  "browserErrors": []
+}

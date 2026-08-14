@@ -1,6 +1,6 @@
 {
   "name": "@emirotin/zerp",
-  "version": "0.11.0-rc.1",
+  "version": "0.11.0-rc.2",
   "description": "Zero-config presentation framework for slide decks authored in HTML and/or Markdown.",
   "keywords": [
     "cli",
@@ -17,7 +17,7 @@
     "url": "git+ssh://git@github.com/emirotin/zerp.git"
   },
   "bin": {
-    "zerp": "./dist/cli.js"
+    "zerp": "dist/cli.js"
   },
   "files": [
     "dist",
@@ -54,11 +54,12 @@
     "build:docs": "node ./scripts/build-docs.mjs",
     "demo": "node ./scripts/demo.mjs",
     "shot": "node ./scripts/shot.mjs",
+    "record-probe": "pnpm build && node scripts/record-probe.mjs",
     "check": "tsc -p tsconfig.json --noEmit",
     "prepare": "husky",
     "prepublishOnly": "pnpm build && pnpm build:docs",
     "test": "pnpm build && node --test test/*.test.mjs",
-    "test:browser": "ZERP_RUN_BROWSER_TEST=1 node --test test/verify.test.mjs test/theme-toggle.test.mjs",
+    "test:browser": "ZERP_RUN_BROWSER_TEST=1 node --test test/verify.test.mjs test/theme-toggle.test.mjs test/probe.test.mjs test/probe-fonts.test.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "lint": "oxlint --deny-warnings --node-plugin --import-plugin src scripts test .zed",

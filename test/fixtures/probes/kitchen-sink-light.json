@@ -1,0 +1,5578 @@
+{
+  "theme": "light",
+  "width": 1920,
+  "height": 1080,
+  "sizeDefaulted": false,
+  "frameCount": 12,
+  "slideCount": 12,
+  "innerSlideCount": 12,
+  "slides": [
+    {
+      "index": 1,
+      "src": "slides/00-elements.md",
+      "srcSlide": "1/4",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 27,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin Black",
+              "glyphCount": 8,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h1",
+          "className": null,
+          "snippet": "Elements",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 51.2,
+          "fontWeight": 900,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin Black",
+              "glyphCount": 8,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "p",
+          "className": null,
+          "snippet": "Plain paragraph with and .",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 27,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "strong",
+          "className": null,
+          "snippet": "bold",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "code",
+          "className": null,
+          "snippet": "inline code",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 19,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "ul",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 37,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "li",
+          "className": null,
+          "snippet": "First arrow bullet",
+          "hasOwnText": true,
+          "pseudoText": "→ ",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 5,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 19,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Zerp Symbols",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "tag": "li",
+          "className": null,
+          "snippet": "Second arrow bullet",
+          "hasOwnText": true,
+          "pseudoText": "→ ",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 5,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Zerp Symbols",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 1,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 2,
+      "src": "slides/00-elements.md",
+      "srcSlide": "2/4",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Ordered list",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "ol",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 47,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "li",
+          "className": null,
+          "snippet": "First numbered takeaway",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 2,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 23,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "li",
+          "className": null,
+          "snippet": "Second numbered takeaway",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 2,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 24,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 2,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 3,
+      "src": "slides/00-elements.md",
+      "srcSlide": "3/4",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Table",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "table",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 3,
+          "tag": "thead",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 2,
+          "fonts": []
+        },
+        {
+          "id": 4,
+          "tag": "tr",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 9,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "th",
+          "className": null,
+          "snippet": "Name",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 4,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "th",
+          "className": null,
+          "snippet": "Value",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 4,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "tag": "tbody",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 2,
+          "fonts": []
+        },
+        {
+          "id": 8,
+          "tag": "tr",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 7,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "tag": "td",
+          "className": null,
+          "snippet": "Alpha",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 8,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "tag": "td",
+          "className": null,
+          "snippet": "42",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 8,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "tag": "tr",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 7,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "tag": "td",
+          "className": null,
+          "snippet": "Beta",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 11,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "tag": "td",
+          "className": null,
+          "snippet": "58",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 11,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "tag": "blockquote",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 19.2,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 48,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "tag": "p",
+          "className": null,
+          "snippet": "A quotation rendered via the blockquo…",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 24,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 14,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 48,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 3,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 4,
+      "src": "slides/00-elements.md",
+      "srcSlide": "4/4",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 58,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Links and code",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "p",
+          "className": null,
+          "snippet": "Plain paragraph with inside.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 29,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "a",
+          "className": null,
+          "snippet": "a link",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "pre",
+          "className": null,
+          "snippet": "function plan() { return \"build, chec…",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 13,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 48,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "code",
+          "className": "language-js",
+          "snippet": "function plan() { return \"build, chec…",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16.8,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 4,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 48,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "hr",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(128, 128, 128)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 7,
+          "tag": "p",
+          "className": null,
+          "snippet": "Text after a horizontal rule.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 29,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 4,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 5,
+      "src": "slides/01-components.html",
+      "srcSlide": "1/2",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 22,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "div",
+          "className": "block-label",
+          "snippet": "Kitchen sink",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Components",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 10,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "div",
+          "className": "cols-2",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 4,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Card content",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "p",
+          "className": null,
+          "snippet": "Card content",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 4,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "div",
+          "className": "card tint-blue",
+          "snippet": "Tinted card",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(203, 232, 253)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "tag": "p",
+          "className": null,
+          "snippet": "Tinted card",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 6,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "tag": "div",
+          "className": "stat-row",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 9,
+          "tag": "div",
+          "className": "stat",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 8,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 3,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "tag": "div",
+          "className": "value",
+          "snippet": "42%",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 48,
+          "fontWeight": 900,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "tag": "div",
+          "className": "label",
+          "snippet": "share",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "tag": "div",
+          "className": "stat",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 8,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 4,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "tag": "div",
+          "className": "value",
+          "snippet": "1907",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 48,
+          "fontWeight": 900,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 12,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "tag": "div",
+          "className": "label",
+          "snippet": "year",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 12,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "tag": "div",
+          "className": "compare",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "→",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Zerp Symbols",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Before",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 15,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "tag": "p",
+          "className": null,
+          "snippet": "Before",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 16,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "tag": "div",
+          "className": "card",
+          "snippet": "After",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 15,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "tag": "p",
+          "className": null,
+          "snippet": "After",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 18,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "tag": "div",
+          "className": "flow",
+          "snippet": "planbuildcheck",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "tag": "span",
+          "className": null,
+          "snippet": "plan",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 20,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "tag": "span",
+          "className": null,
+          "snippet": "build",
+          "hasOwnText": true,
+          "pseudoText": "→",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 20,
+          "fonts": [
+            {
+              "familyName": "Zerp Symbols",
+              "glyphCount": 1,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "tag": "span",
+          "className": null,
+          "snippet": "check",
+          "hasOwnText": true,
+          "pseudoText": "→",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 20,
+          "fonts": [
+            {
+              "familyName": "Zerp Symbols",
+              "glyphCount": 1,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "tag": "div",
+          "className": "flow",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 25,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Spot",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 24,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "tag": "p",
+          "className": null,
+          "snippet": "Spot",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 25,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Signal",
+          "hasOwnText": false,
+          "pseudoText": "→",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 24,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Zerp Symbols",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 28,
+          "tag": "p",
+          "className": null,
+          "snippet": "Signal",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 27,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 29,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Bet",
+          "hasOwnText": false,
+          "pseudoText": "→",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 24,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Zerp Symbols",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 30,
+          "tag": "p",
+          "className": null,
+          "snippet": "Bet",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 29,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 5,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 6,
+      "src": "slides/01-components.html",
+      "srcSlide": "2/2",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 26,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "More components",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 15,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "div",
+          "className": "steps",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 3,
+          "tag": "div",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 2,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 15,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "h3",
+          "className": null,
+          "snippet": "Install",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "p",
+          "className": null,
+          "snippet": "add the package",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 15,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "div",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 2,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "tag": "h3",
+          "className": null,
+          "snippet": "Author",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 6,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "tag": "p",
+          "className": null,
+          "snippet": "write slides",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 6,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "tag": "div",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 2,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "tag": "h3",
+          "className": null,
+          "snippet": "Present",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "tag": "p",
+          "className": null,
+          "snippet": "serve the deck",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "tag": "div",
+          "className": "timeline",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 13,
+          "tag": "div",
+          "className": "item",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 12,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 4,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "tag": "div",
+          "className": "year",
+          "snippet": "1873",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20.8,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 13,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "tag": "div",
+          "className": "label",
+          "snippet": "Monte Carlo",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 13,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "tag": "div",
+          "className": "item",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 12,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 4,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "tag": "div",
+          "className": "year",
+          "snippet": "1962",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20.8,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 16,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "tag": "div",
+          "className": "label",
+          "snippet": "Thorp",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 16,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "tag": "div",
+          "className": "key-thought",
+          "snippet": "The key takeaway.",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 2,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 17,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "tag": "p",
+          "className": null,
+          "snippet": "The key takeaway.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 19,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 17,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "tag": "p",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 16,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "tag": "span",
+          "className": "pill ok",
+          "snippet": "ready",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(43, 83, 33)",
+          "backgroundColor": "rgb(212, 234, 208)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(79, 147, 64)",
+          "parent": 21,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "tag": "span",
+          "className": "pill warn",
+          "snippet": "caution",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(108, 64, 2)",
+          "backgroundColor": "rgb(248, 224, 200)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(187, 115, 5)",
+          "parent": 21,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "tag": "span",
+          "className": "pill tint-teal",
+          "snippet": "info",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(0, 86, 54)",
+          "backgroundColor": "rgb(203, 235, 216)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(0, 150, 98)",
+          "parent": 21,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "tag": "div",
+          "className": "interactive-badge",
+          "snippet": "Interactive",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(43, 83, 33)",
+          "backgroundColor": "rgb(212, 234, 208)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(79, 147, 64)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "tag": "div",
+          "className": "grid-demo",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 27,
+          "tag": "div",
+          "className": "cell",
+          "snippet": "1",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 2,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 26,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 28,
+          "tag": "div",
+          "className": "cell filled",
+          "snippet": "2",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(250, 251, 254)",
+          "backgroundColor": "rgb(205, 98, 101)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 2,
+          "borderColor": "rgb(205, 98, 101)",
+          "parent": 26,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 6,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 7,
+      "src": "slides/02-utilities.html",
+      "srcSlide": "1/1",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide top active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 102,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 9,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Utilities",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 9,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "p",
+          "className": "center",
+          "snippet": "Centered paragraph",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 18,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "p",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 33,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "span",
+          "className": "blue",
+          "snippet": "blue",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "span",
+          "className": "green",
+          "snippet": "green",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(79, 147, 64)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(79, 147, 64)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "span",
+          "className": "orange",
+          "snippet": "orange",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(201, 104, 61)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(201, 104, 61)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "tag": "span",
+          "className": "purple",
+          "snippet": "purple",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(149, 114, 205)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(149, 114, 205)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "tag": "span",
+          "className": "red",
+          "snippet": "red",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(205, 98, 101)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(205, 98, 101)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "tag": "span",
+          "className": "amber",
+          "snippet": "amber",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(187, 115, 5)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(187, 115, 5)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "tag": "span",
+          "className": "teal",
+          "snippet": "teal",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(0, 150, 98)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(0, 150, 98)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "tag": "div",
+          "className": "row",
+          "snippet": "firstsecondthird",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 15,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "tag": "span",
+          "className": null,
+          "snippet": "first",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 11,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "tag": "span",
+          "className": null,
+          "snippet": "second",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 11,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "tag": "span",
+          "className": null,
+          "snippet": "third",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 11,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "tag": "div",
+          "className": "stack",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 69,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 33,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "tag": "p",
+          "className": "lg",
+          "snippet": "Large text",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 15,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 10,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "tag": "p",
+          "className": "xl",
+          "snippet": "Extra large text",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 25.6,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 15,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 16,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "tag": "p",
+          "className": null,
+          "snippet": "Body text with a aside",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 15,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 39,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 19,
+          "tag": "span",
+          "className": "sm",
+          "snippet": "slightly smaller",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 18,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 16,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 20,
+          "tag": "p",
+          "className": "muted",
+          "snippet": "Muted secondary line",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 15,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 21,
+          "tag": "p",
+          "className": "sub",
+          "snippet": "Sub detail line under a statement",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 15,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 33,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 22,
+          "tag": "p",
+          "className": "mono",
+          "snippet": "monospace 1907",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "tag": "p",
+          "className": "narrow center",
+          "snippet": "A width-capped centered block that ke…",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 68,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "tag": "p",
+          "className": null,
+          "snippet": "and and",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 10,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "tag": "span",
+          "className": "danger",
+          "snippet": "danger",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(205, 98, 101)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(205, 98, 101)",
+          "parent": 24,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "tag": "span",
+          "className": "ok",
+          "snippet": "ok",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(79, 147, 64)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(79, 147, 64)",
+          "parent": 24,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "tag": "span",
+          "className": "accent",
+          "snippet": "accent",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 24,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 6,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 7,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 8,
+      "src": "slides/03-more.html",
+      "srcSlide": "1/2",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 69,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 21,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Figures and shortcuts",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 21,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "figure",
+          "className": "corner",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "img",
+          "className": "raised",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "rgba(0, 0, 0, 0.18) 0px 8px 24px 0px",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 2,
+          "fonts": []
+        },
+        {
+          "id": 4,
+          "tag": "figcaption",
+          "className": null,
+          "snippet": "Pinned figure",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 12,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "figure",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "img",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 5,
+          "fonts": []
+        },
+        {
+          "id": 7,
+          "tag": "figcaption",
+          "className": null,
+          "snippet": "A caption line",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 5,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 14,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "tag": "p",
+          "className": null,
+          "snippet": "Press to switch themes.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 24,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "tag": "kbd",
+          "className": null,
+          "snippet": "T",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 19,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 8,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "tag": "p",
+          "className": "xl",
+          "snippet": "Extra large emphasis text",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 25.6,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 25,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "tag": "div",
+          "className": "caption",
+          "snippet": "A standalone caption",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 8,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 9,
+      "src": "slides/03-more.html",
+      "srcSlide": "2/2",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Grids",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "div",
+          "className": "cols-3",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 3,
+          "tag": "div",
+          "className": "card raised",
+          "snippet": "Alpha",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "rgba(0, 0, 0, 0.18) 0px 8px 24px 0px",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "p",
+          "className": null,
+          "snippet": "Alpha",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 3,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Beta",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "p",
+          "className": null,
+          "snippet": "Beta",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 5,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Gamma",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "tag": "p",
+          "className": null,
+          "snippet": "Gamma",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 7,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "tag": "div",
+          "className": "cols-4",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 10,
+          "tag": "div",
+          "className": "card",
+          "snippet": "One",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "tag": "p",
+          "className": null,
+          "snippet": "One",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 10,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Two",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "tag": "p",
+          "className": null,
+          "snippet": "Two",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 12,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Three",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "tag": "p",
+          "className": null,
+          "snippet": "Three",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 14,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 5,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "tag": "div",
+          "className": "card",
+          "snippet": "Four",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "tag": "p",
+          "className": null,
+          "snippet": "Four",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 16,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "tag": "div",
+          "className": "img-row",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 19,
+          "tag": "img",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 18,
+          "fonts": []
+        },
+        {
+          "id": 20,
+          "tag": "img",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 18,
+          "fonts": []
+        },
+        {
+          "id": 21,
+          "tag": "table",
+          "className": "mono compact",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 22,
+          "tag": "tbody",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 21,
+          "fonts": []
+        },
+        {
+          "id": 23,
+          "tag": "tr",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 22,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 24,
+          "tag": "th",
+          "className": null,
+          "snippet": "Sum",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 23,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 25,
+          "tag": "th",
+          "className": null,
+          "snippet": "2",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 23,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 26,
+          "tag": "th",
+          "className": null,
+          "snippet": "7",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 23,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "tag": "th",
+          "className": null,
+          "snippet": "12",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 23,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 2,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 28,
+          "tag": "tr",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 22,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 29,
+          "tag": "td",
+          "className": null,
+          "snippet": "Ways",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 28,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 30,
+          "tag": "td",
+          "className": null,
+          "snippet": "1",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 28,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 31,
+          "tag": "td",
+          "className": null,
+          "snippet": "6",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 28,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 32,
+          "tag": "td",
+          "className": null,
+          "snippet": "1",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 18.4,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 28,
+          "fonts": [
+            {
+              "familyName": "Roboto Mono",
+              "glyphCount": 1,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 9,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 10,
+      "src": "slides/04-additions.html",
+      "srcSlide": "1/3",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide title active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 30,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 15,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin Black",
+              "glyphCount": 10,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h1",
+          "className": null,
+          "snippet": "Deck title",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 64,
+          "fontWeight": 900,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin Black",
+              "glyphCount": 10,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "h3",
+          "className": null,
+          "snippet": "Accent subtitle",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 15,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "p",
+          "className": "meta",
+          "snippet": "Presenter Name2026 · Somewhere",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 30,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "br",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 3,
+          "fonts": []
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 10,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 11,
+      "src": "slides/04-additions.html",
+      "srcSlide": "2/3",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 34,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 17,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Concept and edges",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 17,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "div",
+          "className": "concept",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin Black",
+              "glyphCount": 7,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Apple Color Emoji",
+              "glyphCount": 1,
+              "isCustomFont": false
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "div",
+          "className": "icon",
+          "snippet": "🧠",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 80,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Apple Color Emoji",
+              "glyphCount": 1,
+              "isCustomFont": false
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "div",
+          "className": "label",
+          "snippet": "Concept",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(12, 138, 202)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 38.4,
+          "fontWeight": 900,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(12, 138, 202)",
+          "parent": 2,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin Black",
+              "glyphCount": 7,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "p",
+          "className": "center muted",
+          "snippet": "a tagline under the concept header",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 34,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "div",
+          "className": "cols-3",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 7,
+          "tag": "div",
+          "className": "card edge-green",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(79, 147, 64)",
+          "parent": 6,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "tag": "h3",
+          "className": null,
+          "snippet": "Win",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 7,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 3,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "tag": "p",
+          "className": "sub",
+          "snippet": "green border card",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 7,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 17,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "tag": "div",
+          "className": "card edge-danger",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(205, 98, 101)",
+          "parent": 6,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 22,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 11,
+          "tag": "h3",
+          "className": null,
+          "snippet": "Risk",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 10,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "tag": "p",
+          "className": "sub",
+          "snippet": "danger border card",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 10,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 18,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "tag": "div",
+          "className": "card edge-purple",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(149, 114, 205)",
+          "parent": 6,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 22,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 14,
+          "tag": "h3",
+          "className": null,
+          "snippet": "Note",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 13,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 4,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 15,
+          "tag": "p",
+          "className": "sub",
+          "snippet": "purple border card",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 13,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 18,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 16,
+          "tag": "div",
+          "className": "key-thought edge-warn",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 2,
+          "borderColor": "rgb(187, 115, 5)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 52,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 17,
+          "tag": "p",
+          "className": null,
+          "snippet": "Key thought with a warning edge",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 22.4,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 16,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 31,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 18,
+          "tag": "p",
+          "className": "sub",
+          "snippet": "and a sub detail line",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 16,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 21,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 11,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    },
+    {
+      "index": 12,
+      "src": "slides/04-additions.html",
+      "srcSlide": "3/3",
+      "elements": [
+        {
+          "id": 0,
+          "tag": "div",
+          "className": "slide active",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": null,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 46,
+              "isCustomFont": true
+            },
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 58,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 1,
+          "tag": "div",
+          "className": "interactive-badge",
+          "snippet": "Interactive",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(43, 83, 33)",
+          "backgroundColor": "rgb(212, 234, 208)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(79, 147, 64)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 11,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "tag": "h2",
+          "className": null,
+          "snippet": "Declarative step reveals",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 35.2,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 24,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "tag": "p",
+          "className": null,
+          "snippet": "Always visible intro line.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 26,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "tag": "p",
+          "className": null,
+          "snippet": "Appears at step one.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "tag": "div",
+          "className": "card narrow",
+          "snippet": "Appears at step two.",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "tag": "p",
+          "className": null,
+          "snippet": "Appears at step two.",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 5,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 20,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "tag": "p",
+          "className": "step-hint",
+          "snippet": "↓ reveal the next point",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 700,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 0,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 23,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "tag": "div",
+          "className": "img-row",
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 0,
+          "fonts": []
+        },
+        {
+          "id": 9,
+          "tag": "figure",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 8,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 9,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 10,
+          "tag": "img",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 9,
+          "fonts": []
+        },
+        {
+          "id": 11,
+          "tag": "figcaption",
+          "className": null,
+          "snippet": "Caption A",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 9,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 9,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 12,
+          "tag": "figure",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(44, 46, 55)",
+          "parent": 8,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 9,
+              "isCustomFont": true
+            }
+          ]
+        },
+        {
+          "id": 13,
+          "tag": "img",
+          "className": null,
+          "snippet": "",
+          "hasOwnText": false,
+          "pseudoText": "",
+          "color": "rgb(44, 46, 55)",
+          "backgroundColor": "rgb(250, 251, 254)",
+          "backgroundImage": "none",
+          "fontSizePx": 16,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 1,
+          "borderColor": "rgb(203, 206, 218)",
+          "parent": 12,
+          "fonts": []
+        },
+        {
+          "id": 14,
+          "tag": "figcaption",
+          "className": null,
+          "snippet": "Caption B",
+          "hasOwnText": true,
+          "pseudoText": "",
+          "color": "rgb(103, 105, 115)",
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none",
+          "fontSizePx": 20,
+          "fontWeight": 400,
+          "opacity": 1,
+          "boxShadow": "none",
+          "borderWidthPx": 0,
+          "borderColor": "rgb(103, 105, 115)",
+          "parent": 12,
+          "fonts": [
+            {
+              "familyName": "Montserrat Thin",
+              "glyphCount": 9,
+              "isCustomFont": true
+            }
+          ]
+        }
+      ],
+      "activeCount": 1,
+      "visibleCount": 1,
+      "activeIndex": 12,
+      "bodyHeight": 1080,
+      "viewportWidth": 1920,
+      "viewportHeight": 1080,
+      "activeDisplay": "flex",
+      "activeClass": true,
+      "activeRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 1080
+      },
+      "safeZoneItems": null,
+      "svgTextSnippets": [],
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
+    }
+  ],
+  "browserErrors": []
+}

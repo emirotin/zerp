@@ -28,8 +28,8 @@ This file guides agents modifying the `zerp` framework repository itself: its so
 - `src/assets/base-styles.css` contains the hand-authored presentation styles and uses token references only.
 - `scripts/generate-tokens.mjs` derives theme tokens and the token-contrast table from `@evilmartians/harmony`; the build concatenates tokens and base styles into `dist/assets/default-styles.css`.
 - `src/fonts.ts` inlines Montserrat and Roboto Mono woff2 subsets from `@fontsource/*` as base64 `@font-face` declarations, so built decks are single-file and fully offline.
-- `src/check/` implements `zerp check`, a static APCA contrast and font-size analyzer using `linkedom`, `css-tree`, and `apca-w3`; it runs against both themes.
-- `src/verify.ts` implements `zerp verify`, a headless-browser contract check for frame visibility, viewport geometry, overflow, and browser errors.
+- `src/check/` implements `zerp check`: a probe (`probe.ts`) drives a real headless browser over each theme via `playwright-core` and the Chrome DevTools Protocol, and a pure `judge.ts` turns the recorded facts (computed styles, `CSS.getPlatformFontsForNode` font facts, frame/viewport geometry, console errors) into categorized findings (`contrast`, `type-size`, `surface`, `glyph`, `svg-text`, `frame`, `overflow`, `safe-zone`, `console`). `zerp check` requires Chrome/Chromium; there is no separate `verify` command any more — it was folded into `check`.
+- `src/verify.ts` holds the shared browser-session plumbing `zerp check`'s browser pass uses: `runBrowserSession`, timeout/endpoint resolution (`--timeout`/`ZERP_VERIFY_TIMEOUT_MS`, `--browser-endpoint`/`ZERP_BROWSER_ENDPOINT`), and `resolveBrowserExecutable` (`CHROME_BIN` → managed Chromium → system Chrome/Chromium).
 - `src/assets/default-runtime.js` contains the browser navigation/runtime logic and theme switch.
 - `scripts/build.mjs` builds TypeScript output into `dist/`, copies assets, and formats generated files.
 - `docs/style-system.html` is the authored designer guide; `scripts/build-docs.mjs` prints it to the shipped `docs/style-system.pdf` with headless Chrome (reusing `resolveBrowserExecutable` from `src/verify.ts`) and stamps the version and date into its footer. `prepublishOnly` runs it after the build, so a published PDF matches the released stylesheet.
@@ -73,8 +73,7 @@ Use the smallest relevant check while iterating, then run the complete checks re
 - `pnpm test` builds the package and runs the unit/CLI tests.
 - `pnpm lint` and `pnpm format:check` validate source and generated-file conventions.
 - `pnpm test:browser` runs browser regression tests and requires Chrome or Chromium.
-- `node dist/cli.js check <deck>` checks APCA text contrast, font-size floors, and surface-blend detection for both themes.
-- `node dist/cli.js verify <deck> --theme both --size 1920x1080` uses headless Chrome to check that each slide has exactly one active, visible, full-size frame, and checks viewport geometry, overflow, and browser errors. Chrome or Chromium is required.
+- `node dist/cli.js check <deck> --theme both --size 1920x1080` drives headless Chrome to check APCA text contrast, font-size floors, surface-blend detection, glyph/font-fallback coverage, svg text, and that each slide has exactly one active, visible, full-size frame with no overflow and no browser errors. Chrome or Chromium is required; `--only category,...` narrows to a comma-separated subset of finding categories.
 - `pnpm shot <deck> --slide N --theme dark|light|both` captures headless-Chrome screenshots into `shots/`; read the PNGs. Use `--focus ".selector"` to outline an element in magenta, `--scale 2` for close inspection of small elements, and `--setup "js"` to drive interactive state such as stepping reveals or opening the theme popover.
 
 ## Commands
@@ -90,6 +89,6 @@ pnpm format:check
 pnpm test:browser
 node dist/cli.js check test/fixtures/kitchen-sink
 node dist/cli.js check examples/casino
-node dist/cli.js verify examples/casino --theme both --size 1920x1080
+node dist/cli.js check examples/casino --theme both --size 1920x1080
 node dist/cli.js serve examples/casino
 ```
