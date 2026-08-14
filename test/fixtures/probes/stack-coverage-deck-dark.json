@@ -194,7 +194,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(18, 20, 28)"
+      "pageBackgroundColor": "rgb(18, 20, 28)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 2,
@@ -268,7 +269,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(18, 20, 28)"
+      "pageBackgroundColor": "rgb(18, 20, 28)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 3,
@@ -471,7 +473,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(18, 20, 28)"
+      "pageBackgroundColor": "rgb(18, 20, 28)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 4,
@@ -545,7 +548,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(18, 20, 28)"
+      "pageBackgroundColor": "rgb(18, 20, 28)",
+      "pageBackgroundImage": "none"
     }
   ],
   "browserErrors": []

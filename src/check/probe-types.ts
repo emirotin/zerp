@@ -27,7 +27,7 @@ export interface ProbeElement {
   borderColor: string;
   /** Index into the slide's element list, or null for the slide root. */
   parent: number | null;
-  /** Populated in Task 5; empty until then. */
+  /** Per-family glyph counts from CDP's CSS.getPlatformFontsForNode. */
   fonts: ProbeFont[];
 }
 
@@ -61,6 +61,17 @@ export interface ProbeSlide {
    * of assuming a color it was never told.
    */
   pageBackgroundColor: string;
+  /**
+   * The document's own computed `background-image` (`getComputedStyle(document.body)`).
+   * A deck that paints the page via a gradient or image resets `background-color`
+   * to a transparent value that parses fine, so judge.ts cannot tell "no page
+   * background was declared" from "the color channel alone". This field is
+   * judge.ts's signal that the true backdrop is not a flat color at all, and
+   * anything measured against it must be reported `unverifiable` instead.
+   * Optional so hand-authored probes in tests stay valid; absent means "not
+   * recorded", which judge.ts treats as no image.
+   */
+  pageBackgroundImage?: string;
 }
 
 export interface DeckProbe {

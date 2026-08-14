@@ -24,9 +24,9 @@ export interface JudgeOptions {
   // syscall in judge()'s call path that can fail for reasons unrelated to the
   // DeckProbe argument, and it assumes judge.js keeps a JSON file next to it
   // on disk, which breaks under bundling. So the table is optional input:
-  // the caller (the CLI, in a later task) loads it once and passes it in.
-  // Without it, contrast/type-size findings still fire; only the "use this
-  // token instead" suggestion is omitted.
+  // checker.ts loads it once and passes it in. Without it, contrast/type-size
+  // findings still fire; only the "use this token instead" suggestion is
+  // omitted.
   tokenContrast?: TokenContrast;
 }
 
@@ -93,11 +93,24 @@ function backdropFor(slide: ProbeSlide, el: ProbeElement): BackgroundResult {
   }
   // Nothing opaque inside the slide: the theme background lives on html/body,
   // not on .slide, so the probe records it separately (pageBackgroundColor).
-  // Composite over that real value rather than assuming a color — falling
-  // back to black here would misjudge every plain-background slide against a
-  // backdrop the deck never has. The black default only applies if the field
-  // is missing (hand-authored test probes) or unparseable.
-  const pageBg = parseColor(slide.pageBackgroundColor ?? "") ?? { r: 0, g: 0, b: 0, a: 1 };
+  // A page painted with a background-image/gradient is invisible to this
+  // color-only walk, so it must be unverifiable rather than silently ignored.
+  if (slide.pageBackgroundImage && slide.pageBackgroundImage !== "none") {
+    return { kind: "unverifiable", reason: "page background image/gradient" };
+  }
+  const parsedPageBg = parseColor(slide.pageBackgroundColor ?? "");
+  // A parsed-but-transparent (or partially transparent) body background is
+  // not "no color" — it composites onto whatever renders beneath the
+  // document, which this walk cannot see. Guessing black there would be as
+  // wrong as guessing white; unverifiable is honest. Composite over that real
+  // value rather than assuming a color otherwise — falling back to black
+  // would misjudge every plain-background slide against a backdrop the deck
+  // never has. The black default only applies when the field is missing
+  // (hand-authored test probes) or unparseable.
+  if (parsedPageBg && parsedPageBg.a < 1) {
+    return { kind: "unverifiable", reason: "page background is not fully opaque" };
+  }
+  const pageBg = parsedPageBg ?? { r: 0, g: 0, b: 0, a: 1 };
   return { kind: "color", color: compositeLayers(layers, pageBg) };
 }
 
@@ -243,9 +256,13 @@ function judgeSurfaceBlend(
         continue;
       }
 
-      // We need an actual background color on the element itself.
+      // We need an actual background color on the element itself. A fully
+      // transparent color (what every un-backgrounded element reports under
+      // getComputedStyle, e.g. rgba(0, 0, 0, 0)) is not a surface at all —
+      // parsing it successfully must not be mistaken for "this element paints
+      // an opaque black panel".
       const ownBgParsed = parseColor(el.backgroundColor);
-      if (!ownBgParsed) {
+      if (!ownBgParsed || ownBgParsed.a === 0) {
         continue;
       }
 
@@ -261,8 +278,13 @@ function judgeSurfaceBlend(
         continue;
       }
 
-      const ownBg = ownBgParsed;
       const behindBg = backdropResult.color;
+      // Composite the element's own (possibly semi-transparent) background
+      // over its backdrop before comparing: a reader never sees the raw
+      // uncomposited color (e.g. rgba(255,255,255,0.04) reads as near-black
+      // over a dark backdrop, not as near-white), and the composited hex is
+      // the only one that was actually painted.
+      const ownBg = blend(ownBgParsed, behindBg);
 
       // Check if the surface blends into its backdrop.
       const dist = rgbDistance(ownBg, behindBg);
@@ -474,7 +496,7 @@ function safeZoneFailureMessage(
 }
 
 // Deck-level structural findings (no slide of their own to attribute to) sit
-// on slideIndex 1, mirroring how the CLI's later merge step will surface them.
+// on slideIndex 1, mirroring how checker.ts's merge step surfaces them.
 function deckFinding(probe: DeckProbe, category: FindingCategory, message: string): Finding {
   return {
     severity: "error",

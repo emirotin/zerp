@@ -254,7 +254,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 2,
@@ -413,7 +414,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 3,
@@ -819,7 +821,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 4,
@@ -1047,7 +1050,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 5,
@@ -1858,7 +1862,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 6,
@@ -2639,7 +2644,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 7,
@@ -3388,7 +3394,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 8,
@@ -3710,7 +3717,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 9,
@@ -4517,7 +4525,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 10,
@@ -4670,7 +4679,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 11,
@@ -5173,7 +5183,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     },
     {
       "index": 12,
@@ -5559,7 +5570,8 @@
       },
       "safeZoneItems": null,
       "svgTextSnippets": [],
-      "pageBackgroundColor": "rgb(240, 243, 255)"
+      "pageBackgroundColor": "rgb(240, 243, 255)",
+      "pageBackgroundImage": "none"
     }
   ],
   "browserErrors": []

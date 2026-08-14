@@ -90,6 +90,108 @@ test("contrast is judged against the composited backdrop", () => {
   assert.match(findings[0].message, /contrast Lc/);
 });
 
+test("a page background image/gradient makes contrast unverifiable, not silently ignored", () => {
+  // The probe only ever recorded pageBackgroundColor, never the body's
+  // background-image. A gradient/image page resets background-color to a
+  // transparent value that still parses, so a judge that only looks at the
+  // color channel cannot tell "no page background" from "a page background
+  // this walk cannot see" — and would misjudge contrast against whatever the
+  // color happens to parse to.
+  const probe = {
+    theme: "dark",
+    width: 1920,
+    height: 1080,
+    sizeDefaulted: false,
+    frameCount: 1,
+    slideCount: 1,
+    innerSlideCount: 1,
+    browserErrors: [],
+    slides: [
+      {
+        index: 1,
+        src: null,
+        srcSlide: null,
+        activeCount: 1,
+        visibleCount: 1,
+        activeIndex: 1,
+        bodyHeight: 1080,
+        viewportWidth: 1920,
+        viewportHeight: 1080,
+        activeDisplay: "flex",
+        activeClass: true,
+        activeRect: null,
+        safeZoneItems: null,
+        svgTextSnippets: [],
+        pageBackgroundColor: "rgba(0, 0, 0, 0)",
+        pageBackgroundImage: "linear-gradient(rgb(0, 0, 0), rgb(255, 255, 255))",
+        elements: [
+          {
+            id: 0,
+            tag: "div",
+            className: "slide",
+            snippet: "",
+            hasOwnText: false,
+            color: "rgb(255, 255, 255)",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            backgroundImage: "none",
+            fontSizePx: 16,
+            fontWeight: 400,
+            opacity: 1,
+            boxShadow: "none",
+            borderWidthPx: 0,
+            borderColor: "rgb(0, 0, 0)",
+            parent: null,
+            fonts: [],
+          },
+          {
+            id: 1,
+            tag: "p",
+            className: null,
+            snippet: "on a gradient",
+            hasOwnText: true,
+            color: "rgb(255, 255, 255)",
+            backgroundColor: "rgba(0, 0, 0, 0)",
+            backgroundImage: "none",
+            fontSizePx: 20,
+            fontWeight: 400,
+            opacity: 1,
+            boxShadow: "none",
+            borderWidthPx: 0,
+            borderColor: "rgb(0, 0, 0)",
+            parent: 0,
+            fonts: [],
+          },
+        ],
+      },
+    ],
+  };
+  const findings = judge(probe).filter((f) => f.category === "contrast");
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].severity, "unverifiable");
+});
+
+test("a fully transparent page background does not default to opaque black", () => {
+  // Measured by the reviewer: judging the recorded kitchen-sink-light
+  // fixture with pageBackgroundColor forced to a fully transparent value
+  // went from 0 to 80 findings, all `error`, reading "... on #000000" — a
+  // non-zero exit on a deck with no real defect, because the old fallback
+  // only kicked in when the field was missing or unparseable, and
+  // "rgba(0, 0, 0, 0)" is neither.
+  const probe = loadProbe("kitchen-sink-light");
+  for (const slide of probe.slides) {
+    slide.pageBackgroundColor = "rgba(0, 0, 0, 0)";
+  }
+  const findings = judge(probe).filter((f) => f.category === "contrast");
+  const blackBackdropErrors = findings.filter(
+    (f) => f.severity === "error" && f.message.includes("#000000"),
+  );
+  assert.deepEqual(
+    blackBackdropErrors,
+    [],
+    `expected no findings judged against an assumed #000000 backdrop, got ${blackBackdropErrors.length}`,
+  );
+});
+
 test("text below the hard floor is an error, below the soft floor a warning", () => {
   const base = (fontSizePx) => ({
     theme: "dark",
@@ -172,7 +274,11 @@ test("contrast composites two semi-transparent ancestors, not just the nearest o
   // Using only the nearest layer (B over black) would give rgb(128,128,128).
   // Using only the furthest layer (A alone) would give rgb(77,77,77).
   // Neither matches the true composite, so the reported backdrop hex pins
-  // that both layers, and their order, were actually applied.
+  // that both layers were actually composited together, not just the nearest
+  // or the furthest one alone. Both overlays are the same color (white) here,
+  // and alpha compositing is commutative for equal colors, so this does not
+  // pin compositing order — a swapped-order bug would still produce the same
+  // result and pass this test.
   const probe = {
     theme: "dark",
     width: 1920,

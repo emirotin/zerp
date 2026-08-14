@@ -167,7 +167,8 @@ const SLIDE_EXPRESSION = (index: number, safeMargin: number): string => `(functi
     activeRect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null,
     safeZoneItems: safeZoneItems,
     svgTextSnippets: svgTexts,
-    pageBackgroundColor: getComputedStyle(document.body).backgroundColor
+    pageBackgroundColor: getComputedStyle(document.body).backgroundColor,
+    pageBackgroundImage: getComputedStyle(document.body).backgroundImage
   };
 })()`;
 
