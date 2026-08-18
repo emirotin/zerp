@@ -186,3 +186,55 @@ test(
     }
   },
 );
+
+test(
+  "the letterbox continues a full-bleed slide's background",
+  { skip: !browserTestsEnabled || !chromeAvailable(), timeout: 60_000 },
+  async () => {
+    // A deck whose first slide paints its own background and whose second
+    // does not: the page backdrop must follow the active slide so letterbox
+    // bars continue a full-bleed slide instead of showing the theme
+    // background beside it.
+    const deckDir = await mkdtemp(path.join(tmpdir(), "zerp-backdrop-"));
+    try {
+      await mkdir(path.join(deckDir, "slides"));
+      await writeFile(
+        path.join(deckDir, "slides", "01-fill.html"),
+        '<div class="slide" style="background: var(--zerp-blue-tint)"><h2>Fill</h2></div>\n',
+        "utf8",
+      );
+      await writeFile(
+        path.join(deckDir, "slides", "02-plain.html"),
+        '<div class="slide"><h2>Plain</h2></div>\n',
+        "utf8",
+      );
+      const html = await buildPresentationHtml({ rootDir: deckDir, theme: "light" });
+      const deckHtmlPath = path.join(deckDir, "index.html");
+      await writeFile(deckHtmlPath, html, "utf8");
+      // 1600x1080 letterboxes horizontally, so the bars are actually visible.
+      await withViewport(1600, 1080, async (page) => {
+        await page.goto(`file://${deckHtmlPath}`);
+        const onFill = await page.evaluate(() => {
+          const slide = document.querySelector("[data-zerp-slide-active] .slide");
+          return {
+            slide: getComputedStyle(slide).backgroundColor,
+            body: getComputedStyle(document.body).backgroundColor,
+          };
+        });
+        assert.equal(onFill.body, onFill.slide, "letterbox follows the fill slide's background");
+        assert.notEqual(onFill.slide, "rgba(0, 0, 0, 0)");
+        const onPlain = await page.evaluate(() => {
+          window.next();
+          const root = getComputedStyle(document.documentElement).backgroundColor;
+          return {
+            inline: document.body.style.backgroundColor,
+            root,
+          };
+        });
+        assert.equal(onPlain.inline, "", "a plain slide restores the stylesheet backdrop");
+      });
+    } finally {
+      await rm(deckDir, { recursive: true, force: true });
+    }
+  },
+);
