@@ -3,6 +3,17 @@ import { test } from "node:test";
 
 import { checkPresentation } from "../dist/check/checker.js";
 import { formatReport, reportHasFailures } from "../dist/check/report.js";
+import { resolveBrowserExecutable } from "../dist/verify.js";
+
+const browserTestsEnabled = process.env.ZERP_RUN_BROWSER_TEST === "1";
+
+function chromeAvailable() {
+  try {
+    return Boolean(resolveBrowserExecutable());
+  } catch {
+    return false;
+  }
+}
 
 // The static-cascade-specific assertions that used to live here (exact
 // glyph-coverage wording, skippedSelectors, svg-text/aria-hidden counting)
@@ -169,6 +180,23 @@ test("aria-hidden svg text opts out of the svg-text finding (examples/casino)", 
   const svgFindings = report.findings.filter((f) => f.category === "svg-text");
   assert.deepEqual(svgFindings, []);
 });
+
+test(
+  "a deck's declared size is the default check viewport",
+  { skip: !browserTestsEnabled || !chromeAvailable() },
+  async () => {
+    const report = await checkPresentation({
+      rootDir: "test/fixtures/size-deck",
+      themes: ["light"],
+    });
+    assert.deepEqual(report.viewport, {
+      width: 1280,
+      height: 720,
+      defaulted: true,
+      source: "deck",
+    });
+  },
+);
 
 test("checkPresentation restricts findings to the requested themes", async () => {
   const report = await checkPresentation({

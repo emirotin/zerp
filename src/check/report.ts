@@ -30,8 +30,10 @@ const VIEWPORT_SENSITIVE_CATEGORIES: ReadonlySet<Finding["category"]> = new Set(
 export function formatReport(report: CheckReport, options: { summaryOnly?: boolean } = {}): string {
   const lines: string[] = [];
   const themeSummary = report.themes.map((theme) => countBy(report, theme)).join(" · ");
-  const { width, height, defaulted } = report.viewport;
-  const viewportDesc = `${width}x${height}${defaulted ? " (default size)" : ""}`;
+  const { width, height, source } = report.viewport;
+  const viewportDesc = `${width}x${height}${
+    source === "default" ? " (default size)" : source === "deck" ? " (deck size)" : ""
+  }`;
   const summary = `zerp check — ${report.slideCount} slides · ${viewportDesc} · ${themeSummary}`;
   if (options.summaryOnly) {
     lines.push(summary);
@@ -41,7 +43,10 @@ export function formatReport(report: CheckReport, options: { summaryOnly?: boole
     return `${lines.join("\n")}\n`;
   }
   lines.push(summary, "");
-  if (defaulted && report.findings.some((f) => VIEWPORT_SENSITIVE_CATEGORIES.has(f.category))) {
+  if (
+    source === "default" &&
+    report.findings.some((f) => VIEWPORT_SENSITIVE_CATEGORIES.has(f.category))
+  ) {
     lines.push(
       `checked at the default ${width}x${height} — pass --size WxH to check this deck's actual target screen`,
       "",

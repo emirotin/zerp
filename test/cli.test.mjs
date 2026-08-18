@@ -6,6 +6,11 @@ function runCli(args) {
   return spawnSync(process.execPath, ["dist/cli.js", ...args], { encoding: "utf8" });
 }
 
+test("check help documents the deck-size default", () => {
+  const result = runCli(["--help"]);
+  assert.match(result.stdout, /--size WxH.*default: the deck's zerp\.size or 1920x1080/);
+});
+
 test("zerp check fails on the broken deck with a grouped report", () => {
   const result = runCli(["check", "test/fixtures/broken-deck"]);
   assert.equal(result.status, 1);

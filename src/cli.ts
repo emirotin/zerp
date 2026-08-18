@@ -18,7 +18,7 @@ const THEME_NAMES = new Set(["dark", "light", "system"]);
 const USAGE = `Usage:
   zerp serve [deck-dir] [port] [--theme dark|light|system]
   zerp build [deck-dir] [--theme dark|light|system]
-  zerp check [deck-dir] [--theme dark|light|both] [--size WxH] [--safe-margin px] [--timeout ms] [--browser-endpoint url] [--only category,...] [--strict] [--json]
+  zerp check [deck-dir] [--theme dark|light|both] [--size WxH (default: the deck's zerp.size or 1920x1080)] [--safe-margin px] [--timeout ms] [--browser-endpoint url] [--only category,...] [--strict] [--json]
   zerp slides [deck-dir] [--json]
   zerp install-browser
 
@@ -197,8 +197,7 @@ async function main(): Promise<void> {
   if (command === "check") {
     const rootDir = path.resolve(firstArg ?? ".");
     const themes = parseCheckThemes(values.theme);
-    const size = parseVerifySize(values.size) ?? { width: 1920, height: 1080 };
-    const { width, height } = size;
+    const size = parseVerifySize(values.size);
     const safeMargin = parseSafeMargin(values["safe-margin"]);
     const timeoutMs = parseVerifyTimeout(values.timeout);
     const only = parseOnly(values.only);
@@ -208,9 +207,7 @@ async function main(): Promise<void> {
     const report = await checkPresentation({
       rootDir,
       themes,
-      width,
-      height,
-      sizeDefaulted: values.size === undefined,
+      ...(size === undefined ? {} : size),
       safeMargin,
       timeoutMs,
       ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
