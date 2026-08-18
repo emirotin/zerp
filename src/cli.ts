@@ -9,6 +9,7 @@ import { formatReport, reportHasFailures } from "./check/report.js";
 import { FINDING_CATEGORIES, type CheckTheme, type FindingCategory } from "./check/types.js";
 import { type DeckSize, parseWxH } from "./deck-config.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
+import { printPresentation } from "./print.js";
 import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
 import { resolveBrowserEndpoint, resolveVerificationTimeoutMs } from "./verify.js";
@@ -19,6 +20,7 @@ const USAGE = `Usage:
   zerp serve [deck-dir] [port] [--theme dark|light|system]
   zerp build [deck-dir] [--theme dark|light|system]
   zerp check [deck-dir] [--theme dark|light|both] [--size WxH (default: the deck's zerp.size or 1920x1080)] [--safe-margin px] [--timeout ms] [--browser-endpoint url] [--only category,...] [--strict] [--json]
+  zerp print [deck-dir] [--theme dark|light] [-o|--out out.pdf] [--timeout ms] [--browser-endpoint url]
   zerp slides [deck-dir] [--json]
   zerp install-browser
 
@@ -137,6 +139,7 @@ async function main(): Promise<void> {
       timeout: { type: "string" },
       "browser-endpoint": { type: "string" },
       only: { type: "string" },
+      out: { type: "string", short: "o" },
       help: { type: "boolean", default: false },
     },
   });
@@ -217,6 +220,23 @@ async function main(): Promise<void> {
       values.json ? `${JSON.stringify(report, null, 2)}\n` : formatReport(report),
     );
     process.exitCode = reportHasFailures(report, values.strict ?? false) ? 1 : 0;
+    return;
+  }
+
+  if (command === "print") {
+    const theme = values.theme ?? "light";
+    if (theme !== "dark" && theme !== "light") {
+      throw new Error(`print theme must be dark or light (got ${theme})`);
+    }
+    const browserEndpoint = resolveBrowserEndpoint(values["browser-endpoint"]);
+    const outPath = await printPresentation({
+      rootDir: firstArg ?? ".",
+      theme,
+      ...(values.out === undefined ? {} : { out: values.out }),
+      timeoutMs: parseVerifyTimeout(values.timeout),
+      ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
+    });
+    process.stdout.write(`wrote ${outPath}\n`);
     return;
   }
 
