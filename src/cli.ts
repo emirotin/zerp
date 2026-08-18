@@ -7,6 +7,7 @@ import { parseArgs } from "node:util";
 import { checkPresentation } from "./check/checker.js";
 import { formatReport, reportHasFailures } from "./check/report.js";
 import { FINDING_CATEGORIES, type CheckTheme, type FindingCategory } from "./check/types.js";
+import { type DeckSize, parseWxH } from "./deck-config.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
 import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
@@ -99,22 +100,11 @@ function parseVerifyTimeout(raw: string | undefined): number {
   return resolveVerificationTimeoutMs(raw === undefined ? undefined : Number.parseInt(raw, 10));
 }
 
-function parseVerifySize(raw: string | undefined): {
-  width: number;
-  height: number;
-  defaulted: boolean;
-} {
-  const value = raw ?? "1920x1080";
-  const match = value.match(/^(\d+)x(\d+)$/);
-  if (!match) {
-    throw new Error(`Invalid verification size: ${value} (expected WxH)`);
-  }
-  const width = Number.parseInt(match[1] ?? "", 10);
-  const height = Number.parseInt(match[2] ?? "", 10);
-  if (width < 1 || height < 1) {
-    throw new Error(`Invalid verification size: ${value} (expected positive WxH)`);
-  }
-  return { width, height, defaulted: raw === undefined };
+function parseVerifySize(raw: string | undefined): DeckSize | undefined {
+  if (raw === undefined) return undefined;
+  const size = parseWxH(raw);
+  if (!size) throw new Error(`Invalid verification size: ${raw} (expected positive WxH)`);
+  return size;
 }
 
 const FINDING_CATEGORY_SET = new Set<string>(FINDING_CATEGORIES);
@@ -207,7 +197,8 @@ async function main(): Promise<void> {
   if (command === "check") {
     const rootDir = path.resolve(firstArg ?? ".");
     const themes = parseCheckThemes(values.theme);
-    const { width, height, defaulted } = parseVerifySize(values.size);
+    const size = parseVerifySize(values.size) ?? { width: 1920, height: 1080 };
+    const { width, height } = size;
     const safeMargin = parseSafeMargin(values["safe-margin"]);
     const timeoutMs = parseVerifyTimeout(values.timeout);
     const only = parseOnly(values.only);
@@ -219,7 +210,7 @@ async function main(): Promise<void> {
       themes,
       width,
       height,
-      sizeDefaulted: defaulted,
+      sizeDefaulted: values.size === undefined,
       safeMargin,
       timeoutMs,
       ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
