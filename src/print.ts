@@ -9,6 +9,8 @@ import {
   runBrowserSession,
 } from "./verify.js";
 
+let printSequence = 0;
+
 export interface PrintOptions {
   rootDir: string;
   theme?: "dark" | "light";
@@ -31,7 +33,7 @@ export async function printPresentation(options: PrintOptions): Promise<string> 
   const size = resolveDeckSize(await readDeckConfig(rootDir));
   const theme = options.theme ?? "light";
   const html = await buildPresentationHtml({ rootDir, theme });
-  const tempPath = path.join(rootDir, `.zerp-print-${process.pid}.html`);
+  const tempPath = path.join(rootDir, `.zerp-print-${process.pid}-${printSequence++}.html`);
   const out = path.resolve(options.out ?? path.join(rootDir, "index.pdf"));
   await writeFile(tempPath, html);
   const executablePath = options.browserEndpoint ? undefined : resolveBrowserExecutable();
