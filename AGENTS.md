@@ -29,7 +29,9 @@ This file guides agents modifying the `zerp` framework repository itself: its so
 - `scripts/generate-tokens.mjs` derives theme tokens and the token-contrast table from `@evilmartians/harmony`; the build concatenates tokens and base styles into `dist/assets/default-styles.css`.
 - `src/fonts.ts` inlines Montserrat and Roboto Mono woff2 subsets from `@fontsource/*` as base64 `@font-face` declarations, so built decks are single-file and fully offline.
 - `src/check/` implements `zerp check`: a probe (`probe.ts`) drives a real headless browser over each theme via `playwright-core` and the Chrome DevTools Protocol, and a pure `judge.ts` turns the recorded facts (computed styles, `CSS.getPlatformFontsForNode` font facts, frame/viewport geometry, console errors) into categorized findings (`contrast`, `type-size`, `surface`, `glyph`, `svg-text`, `frame`, `overflow`, `safe-zone`, `console`). `zerp check` requires Chrome/Chromium; there is no separate `verify` command any more — it was folded into `check`.
-- `src/verify.ts` holds the shared browser-session plumbing `zerp check`'s browser pass uses: `runBrowserSession`, timeout/endpoint resolution (`--timeout`/`ZERP_VERIFY_TIMEOUT_MS`, `--browser-endpoint`/`ZERP_BROWSER_ENDPOINT`), and `resolveBrowserExecutable` (`CHROME_BIN` → managed Chromium → system Chrome/Chromium).
+- `src/verify.ts` holds the shared browser-session plumbing `zerp check`'s browser pass uses: `runBrowserSession`, timeout/endpoint resolution (`--timeout`/`ZERP_VERIFY_TIMEOUT_MS`, `--browser-endpoint`/`ZERP_BROWSER_ENDPOINT`), and `resolveBrowserExecutable` (`CHROME_BIN` → managed Chromium → system Chrome/Chromium). Every session it opens sets `window.__ZERP_NO_SCALE__` before the runtime initializes, so `zerp check` and `zerp print` measure/render the deck at its unscaled design size.
+- `src/deck-config.ts` reads the optional `zerp` key from a deck's own `package.json` (`readDeckConfig`, `resolveDeckSize`, `DEFAULT_DECK_SIZE`, `parseWxH`): font role overrides and the deck's declared design size (`zerp.size`, `"WxH"`, default `1920x1080`).
+- `src/print.ts` renders a deck directly to PDF at its design size via `printPresentation`, backing the `zerp print` command — reusing `src/verify.ts`'s browser-session plumbing the same way `zerp check`'s browser pass does.
 - `src/assets/default-runtime.js` contains the browser navigation/runtime logic and theme switch.
 - `scripts/build.mjs` builds TypeScript output into `dist/`, copies assets, and formats generated files.
 - `docs/style-system.html` is the authored designer guide; `scripts/build-docs.mjs` prints it to the shipped `docs/style-system.pdf` with headless Chrome (reusing `resolveBrowserExecutable` from `src/verify.ts`) and stamps the version and date into its footer. `prepublishOnly` runs it after the build, so a published PDF matches the released stylesheet.
@@ -91,4 +93,5 @@ node dist/cli.js check test/fixtures/kitchen-sink
 node dist/cli.js check examples/casino
 node dist/cli.js check examples/casino --theme both --size 1920x1080
 node dist/cli.js serve examples/casino
+node dist/cli.js print examples/casino -o /tmp/casino.pdf
 ```

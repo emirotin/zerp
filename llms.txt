@@ -16,7 +16,7 @@ This is the complete authoring guide for a downstream presentation project using
 
 1. Discover the deck before referring to a slide by number: run `zerp slides . --json` and confirm the source file, in-file ordinal, and heading.
 2. Edit only the relevant `slides/**/*.html`, `slides/**/*.md`, or assets under `slides/`. Prefer built-in classes, Markdown for text-first slides, and HTML for layout-heavy or interactive slides.
-3. Run `zerp check .` after every authoring change and fix every error and warning. Run `zerp check . --theme both --size 1920x1080` (an explicit target size) after layout or interaction changes — the same command also gates frame/layout geometry, so there is nothing further to run.
+3. Run `zerp check .` after every authoring change and fix every error and warning. Run `zerp check . --theme both` after layout or interaction changes — it checks at the deck's declared design size (or 1920×1080 if it declares none), and the same command also gates frame/layout geometry, so there is nothing further to run. Pass `--size WxH` only to check at a size other than the deck's own.
 4. Use `zerp serve .` for live inspection; use the consuming project's browser or screenshot tooling, when available, for close visual inspection. Check both dark and light themes.
 5. Run `zerp build . --theme system` for the handoff artifact. Never hand-edit the generated `index.html`.
 
@@ -39,9 +39,10 @@ The main commands from the deck directory are:
 ```bash
 zerp slides . --json
 zerp check .
-zerp check . --theme both --size 1920x1080
+zerp check . --theme both
 zerp serve .
 zerp build . --theme system
+zerp print . -o deck.pdf
 ```
 
 ## Deck contract
@@ -50,6 +51,7 @@ zerp build . --theme system
 - Assets live under `slides/` too; use relative paths (`./images/foo.jpg`) — they are rewritten at build time.
 - Each `.html` file contains one or more `<div class="slide">` blocks. Each `.md` file is auto-wrapped; separate multiple slides with `---` on its own line.
 - The page `<title>` is derived from the first slide's highest-level heading (h1 before h2, regardless of order); style/script-only files contribute no slides and are skipped. Override with the `title` build option; falls back to the deck folder name.
+- A deck renders at a design size — 1920×1080 by default, or whatever it declares (see "Deck configuration" below) — and scales to fit the real window at runtime. Author against that fixed canvas; never against the actual viewport.
 - Never hand-edit the generated `index.html`.
 
 ## Slide numbering
@@ -126,11 +128,15 @@ Prefer Markdown for text-first slides; HTML for layout-heavy or interactive slid
 
 ## Printing and PDF export
 
-Built decks are print-ready. The same `index.html` paginates for print with no extra flags or per-deck setup.
+```bash
+zerp print . -o deck.pdf
+```
+
+`zerp print` renders the deck directly to a PDF at its design size — no browser print dialog, no manual page-size setup.
 
 - Printing emits **one page per slide, in deck order**. Presentation chrome (nav, counter, progress bar, theme toggle, source badge) is never printed.
 - Steps print in their **final state**: `data-step` content is present, `data-until-step` content is absent. A printed deck shows every reveal.
-- Print with a **page size equal to the presentation viewport** (e.g. 1920×1080 CSS px) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
+- Print with a **page size equal to the deck's design size** (its `zerp.size`, or 1920×1080 if it declares none) and backgrounds enabled. Pagination is size- and theme-agnostic: one slide fills exactly one page at any page size, in dark or light.
 - **Page capacity is physical**: content that overflows a slide is clipped at the bottom of the page, not reflowed onto a second page. Fix overflow the same way as on screen (trim content, or top-align with `.slide.top`); `zerp check` still gates it.
 - If a deck will additionally be exported to PPTX by a downstream pipeline, `llms-pptx.txt` (shipped alongside this file) has the export-specific authoring restrictions; the caller includes it alongside this guide when that target applies.
 
@@ -140,16 +146,17 @@ After authoring or editing slides, ALWAYS run:
 
 ```bash
 zerp check .
-zerp check . --theme both --size 1920x1080  # your deck's actual target screen
+zerp check . --theme both  # checks at the deck's design size by default
 # add --json for a machine-readable report (per-slide entries include the
-# source file); --theme dark|light|both and --only category,... narrow it
+# source file); --theme dark|light|both and --only category,... narrow it;
+# pass --size WxH only to check at a size other than the deck's own
 ```
 
 `zerp check` opens each theme in a real headless browser and needs a Chromium-class one: run `zerp install-browser` once to download a managed Chromium, or set `CHROME_BIN` to an existing Chrome/Chromium. Without one, `zerp check` errors and names the remedy — `zerp install-browser`, or the `CHROME_BIN` path if that is the problem. The whole session (launch, navigation, font activation, probe) is bounded by `--timeout ms` / `ZERP_VERIFY_TIMEOUT_MS`, 20000ms by default — raise it on a slow or loaded host. A timed-out session yields no report, which is a check that did not run, not a check that passed. To skip the per-run browser launch entirely, point `--browser-endpoint url` / `ZERP_BROWSER_ENDPOINT` at an already-running browser (`http(s)://` CDP, `ws(s)://` playwright); check borrows it and never closes it.
 
 Fix every `✗` error and `⚠` warning (font too small, text contrast too low, a surface whose background blends into what is behind it, a label sealed inside an `<svg>` where neither can be measured, text rendered by a font the deck does not bundle, one active/visible frame per slide missing or wrong size, page overflow, a print-safe-margin violation, or a browser console error — the report names the slide file, the element, and suggests fixes where there is a fix to suggest). Each line is prefixed with its category (`[contrast]`, `[type-size]`, `[surface]`, `[glyph]`, `[svg-text]`, `[frame]`, `[overflow]`, `[safe-zone]`, `[console]`); `--only` takes a comma-separated subset of those names. Re-run until clean. Items marked `?` (backgrounds with images/gradients) need a manual look. `zerp build` prints the same summary after writing, and — if no browser is available — a one-line notice that the check was skipped and `zerp check` runs it; the build itself still succeeds.
 
-**Layout findings are viewport-specific.** Overflow, frame geometry and safe-margin are judged against the exact `--size WxH` viewport (default 1920x1080) — the summary and the `viewport` field of `--json` state what was checked. A deck designed for a different screen is not wrong when it overflows the default; check it with its actual target size. Contrast, type-size and glyph findings are viewport-independent.
+**Layout findings are viewport-specific.** Overflow, frame geometry and safe-margin are judged against the checked viewport — a deck's own declared `zerp.size`, or 1920x1080 if it declares none, unless an explicit `--size WxH` overrides it. The summary and the `viewport` field of `--json` state what was checked, including its `source` (`"deck"`, `"default"`, or `"flag"`). A deck designed for a different screen than its declared (or default) size is not wrong when it overflows; declare the right `zerp.size`, or pass `--size WxH` to check against a size other than the deck's own. Contrast, type-size and glyph findings are viewport-independent.
 
 `zerp serve` live-reloads the browser on any change under `slides/` — the page returns to the same slide (URL hash) and replays the steps of every slide you had stepped through. Built decks contain no reload client.
 
@@ -221,7 +228,7 @@ Rules: scope queries to `document.currentScript.closest(".slide")`; keep state i
 2. If a layout truly needs custom CSS, put a `<style>` inside the slide file, use ONLY `var(--zerp-*)` tokens, keep text at 1em+.
 3. A `<style>` block is document-global. For deck-wide styles the convention is a style-only file sorted first (e.g. `slides/00-styles.html` containing just a `<style>` — it contributes no slide).
 4. Re-run `zerp check` — it judges the browser's own computed styles, so custom CSS is checked exactly like built-in styles regardless of selector shape, specificity, `@media` blocks, or `!important`; nothing is skipped.
-5. If the layout changes, run `zerp check . --theme both --size 1920x1080` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
+5. If the layout changes, run `zerp check . --theme both` with Chrome or Chromium available. This catches display overrides and wrapper/viewport regressions that static checking cannot see.
 
 ## Diagrams and inline SVG
 
@@ -291,9 +298,11 @@ This is per element, not per deck or per font role: Greek is available to Roboto
 - **Generated content is judged for glyph coverage only**, never contrast or type-size, for the reason given above.
 - **Runtime-generated text is invisible**, to both subset selection and the check, for the reason given above — put a sample of expected runtime characters in static markup if you need either to see them.
 
-### Choosing other typefaces
+## Deck configuration
 
-A deck may name its own families in an optional `zerp` key in **its own package.json** — the only deck-level configuration zerp has. Everything else stays zero-config.
+A deck needs no configuration. An optional `zerp` key in **its own package.json** covers the two things it cannot express any other way: which typefaces it is set in, and what design size it is authored for. Everything else stays zero-config.
+
+### Choosing other typefaces
 
 ```json
 {
@@ -322,6 +331,23 @@ A deck may name its own families in an optional `zerp` key in **its own package.
 - Anything outside the Google Fonts directory, or a family that must not be bundled, is out of scope: this is a swap, not a font pipeline.
 
 **A built deck carries only the subsets its own text needs**, so a latin deck ships no Cyrillic and a deck that types one `№` ships the Cyrillic subset that covers it. This is what keeps a single-file deck small, and it has one consequence for scripts: string literals inside a slide `<script>` do count towards the choice (a script that prints `Ж` still pulls Cyrillic in), but characters a script derives at runtime — from a fetch, a computation, `String.fromCharCode` — appear nowhere in the source and cannot. This is the same reason the existing rule says to build static markup and have the script toggle classes or set `textContent`: if a script can produce characters that appear nowhere in the source, put a sample of them in static markup (a legend, a caption, a `hidden` element) so both the subset selection and this check can see them.
+
+### Design size
+
+A deck renders at a fixed design canvas, declared with `"zerp": { "size": "WxH" }` in the deck's own `package.json`:
+
+```json
+{
+  "zerp": {
+    "size": "1920x1080"
+  }
+}
+```
+
+- Unset, the design size is `1920x1080`. This is what a deck with no `zerp` key gets.
+- The design size controls three things: the stage every slide frame is fixed at, the default viewport `zerp check` uses when `--size` is not passed, and the PDF page size `zerp print` produces.
+- The runtime scales the whole stage to fit the real browser window (letterboxed, centered) so the deck always fills the screen without reflowing; layout inside a slide never changes with window size.
+- Author proportional CSS with `cqw`/`cqh` (percent of the stage's design width/height), not `vw`/`vh`. Viewport units read the real window, which is wrong once the stage is scaled — `60cqh` always means 60% of the design height, at any window size; `60vh` does not. `cqw`/`cqh` work because the stage sets `container-type: size`.
 
 ## What to avoid
 
