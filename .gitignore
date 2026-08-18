@@ -9,6 +9,7 @@ shots/
 .zerp-shot*.html
 .zerp-verify-*.html
 .zerp-probe-*.html
+.zerp-print-*.html
 *.tgz
 
 # Agent scratch space (SDD ledgers, task briefs, review packages)

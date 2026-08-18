@@ -46,7 +46,8 @@ Commands:
 pnpm exec zerp serve                      # serve the current deck on http://localhost:8000 (live-reloads on save)
 pnpm exec zerp serve . 3000 --theme dark  # explicit deck dir, port, default theme
 pnpm exec zerp build --theme light        # write ./index.html (light default)
-pnpm exec zerp check                      # browser-backed contrast, font-size, glyph, frame/layout report (both themes, 1920x1080; --theme dark|light|both, --size WxH, --only category,..., --json for tooling)
+pnpm exec zerp check                      # browser-backed contrast, font-size, glyph, frame/layout report (both themes, the deck's design size; --theme dark|light|both, --size WxH, --only category,..., --json for tooling)
+pnpm exec zerp print -o deck.pdf          # render straight to PDF at the deck's design size
 pnpm exec zerp slides                     # deck position → source file mapping (--json for tooling)
 ```
 
@@ -115,7 +116,7 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 - The framework default CSS and browser runtime are stored as separate source assets and inlined into generated HTML during `serve` and `build`.
 - Colors come from design tokens (`var(--zerp-*)`) generated from the Harmony palette; decks render in dark and light themes. Do not hardcode colors.
 - The page title comes from the first slide's top heading (override via the `title` build option; folder name as fallback).
-- Run `zerp check` after authoring, and after any layout change: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and reports, per slide, APCA contrast, font-size floors, surface-blend, glyph/font-fallback coverage, SVG text sealed off from judging, and — the layout side, folded in from the former `zerp verify` — that exactly one full-size slide frame is active and visible without page overflow, plus any browser console errors. Overflow is relative to the checked viewport (`--size WxH`, default 1920x1080) — check a deck at its actual target screen size; the summary and `--json`'s `viewport` field record exactly what was checked. `zerp check` requires a browser; without one it names the problem (no browser found, or `CHROME_BIN` pointing somewhere invalid) and points at `zerp install-browser`.
+- Run `zerp check` after authoring, and after any layout change: it opens each theme in headless Chrome/Chromium (resolved as described under [Browsers](#browsers) — run `zerp install-browser` once if you have no system Chrome) and reports, per slide, APCA contrast, font-size floors, surface-blend, glyph/font-fallback coverage, SVG text sealed off from judging, and — the layout side, folded in from the former `zerp verify` — that exactly one full-size slide frame is active and visible without page overflow, plus any browser console errors. Overflow is relative to the checked viewport — the deck's declared `zerp.size`, or 1920x1080 if it declares none, unless `--size WxH` overrides it; the summary and `--json`'s `viewport` field (including its `source`: `"deck"`, `"default"`, or `"flag"`) record exactly what was checked. `zerp check` requires a browser; without one it names the problem (no browser found, or `CHROME_BIN` pointing somewhere invalid) and points at `zerp install-browser`.
 - Every finding carries a `category` — one of `contrast`, `type-size`, `surface`, `glyph`, `svg-text`, `frame`, `overflow`, `safe-zone`, `console` — printed at the front of its report line. `--only category,category` narrows a run to a comma-separated subset; an unknown category is rejected with the full list.
 - Fonts are inlined per deck: a build carries the Montserrat and Roboto Mono subsets whose `unicode-range` the deck's own text actually touches (Latin always), plus a one-glyph face for `→`. A latin deck therefore ships no Cyrillic, and a deck that types `№` ships the subset that covers it.
 - `zerp check`'s glyph finding names, per element, that its text was rendered by a font the deck does not bundle, along with the fallback family — for example, an element set in a stack zerp did not subset for the characters it contains. The renderer itself is the source of truth: zerp inlines every font it ships as an `@font-face`, so Chrome's own answer to "what font actually painted this glyph" (`isCustomFont: false`) is what gets reported, not a static coverage table. Attribution is per element, not per codepoint or count — where a parent's fallback glyphs are a subset of a descendant's in the same family, the finding lands on the descendant; the slide is still flagged, only the element pointer is coarser. Emoji are exempt — every platform draws those from its own colour emoji font. `llms.txt` documents the full set of edge cases (ZWJ sequences, generated content, `<svg>` text).
@@ -126,19 +127,27 @@ pnpm test:browser # opt-in headless-browser regression test (requires Chrome/Chr
 
 ## Printing and PDF export
 
-A built deck is print-ready as-is. Printing (browser print dialog, or a headless
-print backend) produces **one page per slide** in deck order: presentation chrome
-(nav, counter, progress bar, theme toggle, source badge) is hidden, and steps are
-rendered in their final state — every `data-step` reveal shown, every
-`data-until-step` element gone.
+```bash
+pnpm exec zerp print                      # write ./index.pdf at the deck's design size
+pnpm exec zerp print . --theme dark -o out.pdf
+```
 
-Print with a **page size equal to the presentation viewport** and backgrounds
-enabled. One slide fills exactly one page at any page size, in either theme.
-Content that overflows a slide is clipped at the bottom of the page rather than
-spilling onto a second page, so keep slides within the frame (the same as on
-screen — `zerp check` catches overflow).
+`zerp print` is the canonical path: it renders the deck directly to a PDF at
+its design size (`zerp.size`, or 1920×1080 if the deck declares none) with a
+headless browser, no manual viewport or page-size setup. It produces **one
+page per slide** in deck order: presentation chrome (nav, counter, progress
+bar, theme toggle, source badge) is hidden, and steps are rendered in their
+final state — every `data-step` reveal shown, every `data-until-step` element
+gone. Content that overflows a slide is clipped at the bottom of the page
+rather than spilling onto a second page, so keep slides within the frame (the
+same as on screen — `zerp check` catches overflow).
 
-Example: render a deck to PDF at 1920×1080 with Playwright:
+Any built `index.html` is also print-ready as-is (browser print dialog, or a
+headless print backend), for custom pipelines that need more control than
+`zerp print` offers. Print with a **page size equal to the presentation
+viewport** and backgrounds enabled — one slide fills exactly one page at any
+page size, in either theme. Example: render a deck to PDF at 1920×1080 with
+Playwright directly:
 
 ```python
 from playwright.sync_api import sync_playwright
@@ -157,9 +166,10 @@ set and you get a portrait page.
 
 ## Deck configuration (optional)
 
-A deck needs no configuration: a directory with `slides/` is a deck. The one
-thing it cannot express otherwise is which typefaces it is set in, so an
-optional `zerp` key in the deck's own `package.json` can name them:
+A deck needs no configuration: a directory with `slides/` is a deck. The two
+things it cannot express otherwise are which typefaces it is set in and what
+design size it is authored for, so an optional `zerp` key in the deck's own
+`package.json` can name them:
 
 ```json
 {
@@ -169,6 +179,7 @@ optional `zerp` key in the deck's own `package.json` can name them:
     "@fontsource/jetbrains-mono": "^5"
   },
   "zerp": {
+    "size": "1920x1080",
     "fonts": {
       "display": { "family": "Bebas Neue", "weights": ["400"] },
       "body": { "family": "Inter" },
@@ -178,6 +189,12 @@ optional `zerp` key in the deck's own `package.json` can name them:
 }
 ```
 
+- `size` is `"WxH"` in CSS pixels. Unset, it defaults to `1920x1080`. It fixes
+  the deck's design canvas — every slide frame is sized to it and the runtime
+  scales that canvas to fit the real browser window — and it doubles as the
+  default viewport `zerp check` measures against and the page size `zerp print`
+  produces, so all three stay in lockstep without repeating the number on the
+  command line.
 - `family` is the name the font declares — the same one you would write in
   `font-family`. zerp checks it against the package and says so if they differ.
 - `fontsourcePackage` is optional; it defaults to `@fontsource/<family>`

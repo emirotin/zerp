@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { chmod, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 
 import { generateTokenContrast, generateTokensCss } from "./generate-tokens.mjs";
@@ -20,3 +20,7 @@ await writeFile(
 );
 
 execFileSync("pnpm", ["exec", "oxfmt", "--write", "dist"], { stdio: "inherit" });
+
+// tsc emits without the exec bit; the bin entry needs it when the package
+// is consumed via npm/pnpm link rather than a tarball install.
+await chmod("dist/cli.js", 0o755);

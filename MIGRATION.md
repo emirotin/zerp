@@ -1,6 +1,23 @@
 # Migrating a deck from zerp 0.10 to 0.11
 
-No deck source changes. The operational change is in the CLI: `zerp verify`
+Still no deck source changes for a deck authored at the default 1920×1080 —
+frames now sit inside a fixed-px stage that the runtime scales to fit the
+real window, but a default-size deck renders identically. A deck authored for
+a different screen should declare it: add `"zerp": { "size": "WxH" }` to the
+deck's own `package.json` and drop any explicit `--size` flag passed to
+`zerp check` or a custom print pipeline — the declared size becomes the
+default for both, and for the new `zerp print` command too. Anything that
+scripted against the built page's body structure (rather than through
+documented selectors like `.slide` or `[data-zerp-slide]`) must account for
+the new `<div data-zerp-stage>` wrapper: slide frames are no longer direct
+children of `<body>`; presentation chrome (`.nav`, `.counter`, etc.) still is.
+
+`zerp print [deck-dir] [--theme dark|light] [-o|--out out.pdf]` is new: it
+renders a deck straight to a PDF at its design size, replacing a hand-rolled
+Playwright print pipeline for the common case (the raw-Playwright recipe in
+the README still works, for pipelines that need more control).
+
+The other operational change is in the CLI: `zerp verify`
 no longer exists — everything it did is now part of `zerp check`, which
 absorbs its flags (`--size`, `--safe-margin`, `--timeout`,
 `--browser-endpoint`, `--json`) alongside the `--theme` and `--strict` it
@@ -35,9 +52,15 @@ previously could not reach. `llms.txt` documents the granularity limits
 (emoji exemption, per-element rather than per-codepoint attribution, `<svg>`
 exclusion, generated-content scope, runtime-generated text).
 
-Run `zerp check . --theme both --size 1920x1080` after upgrading and fix
-anything newly surfaced — most of it is coverage the old checker silently
-missed, not a behavior regression.
+Run `zerp check . --theme both` after upgrading and fix anything newly
+surfaced — most of it is coverage the old checker silently missed, not a
+behavior regression.
+
+The library's `CheckOptions.sizeDefaulted` is removed. `checkPresentation`
+now works out the checked size (and the `viewport.source` it reports) itself
+from the deck's own `zerp.size` and whichever of `width`/`height` the caller
+passed, so a caller that used to set `sizeDefaulted` to describe its own
+default should simply stop passing it — there is nothing left to assert.
 
 # Migrating a deck from zerp 0.6 to 0.7
 

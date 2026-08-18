@@ -87,3 +87,34 @@ test("token contrast json is emitted for the checker", async () => {
   assert.ok(json.dark.lc["--zerp-bg"]["--zerp-muted"] < -60);
   assert.equal(json.light.bg["--zerp-surface"], "#fafbfe");
 });
+
+test("frame and stage geometry read the stage tokens", async () => {
+  const css = await readFile("dist/assets/default-styles.css", "utf8");
+  assert.match(css, /--zerp-stage-w: 1920px/);
+  assert.match(css, /--zerp-stage-h: 1080px/);
+  assert.match(css, /\[data-zerp-stage\] \{[^}]*container-type: size/);
+  assert.match(css, /\[data-zerp-slide\] \{[^}]*width: var\(--zerp-stage-w\)/);
+  const screenPart = css.slice(0, css.indexOf("@media print"));
+  assert.ok(!/[0-9]+v[hw]/.test(screenPart), "no viewport units outside @media print");
+});
+
+test("print block restores viewport-relative pagination and kills the transform", async () => {
+  const css = await readFile("dist/assets/default-styles.css", "utf8");
+  const printBlock = css.slice(css.indexOf("@media print"));
+  assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*transform: none/);
+  assert.match(printBlock, /\[data-zerp-slide\] \{[^}]*height: 100vh/);
+});
+
+test("print block keeps the stage's container size viewport-driven so cqh survives", async () => {
+  // The stage stays `container-type: size` in print (inherited from the
+  // screen rule); if its box resolves to `auto` here it computes to 0 and
+  // any author CSS using cqh/cqw collapses. width/height: 100vw/100vh keep
+  // the container tracking the page box instead.
+  const css = await readFile("dist/assets/default-styles.css", "utf8");
+  const printBlock = css.slice(css.indexOf("@media print"));
+  assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*transform: none/);
+  assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*width: 100vw/);
+  assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*height: 100vh/);
+  const stageRule = printBlock.match(/\[data-zerp-stage\] \{[^}]*\}/)?.[0] ?? "";
+  assert.doesNotMatch(stageRule, /width: auto/);
+});

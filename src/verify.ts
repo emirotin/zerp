@@ -296,6 +296,11 @@ export async function runBrowserSession<T>(
     });
     const context = await opened;
     const page = await context.newPage();
+    // Every zerp-driven headless session (check probe, print) measures the
+    // stage unscaled; at a viewport that differs from the design size the
+    // geometry rules then report the mismatch honestly instead of measuring
+    // a letterboxed rendering.
+    await page.addInitScript("window.__ZERP_NO_SCALE__ = true;");
     await page.addInitScript(COLLECTOR_SOURCE);
     await page.goto(`file://${htmlPath}#1`, { waitUntil: "load" });
     return run(page, context);

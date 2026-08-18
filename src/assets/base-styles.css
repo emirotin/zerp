@@ -28,6 +28,12 @@
   --zerp-font-marker: "Zerp Symbols", "Montserrat", sans-serif;
   --zerp-font-mono: "Roboto Mono", "Zerp Symbols", monospace;
   --zerp-font-nav: "Roboto Mono", monospace;
+
+  /* The deck's design canvas. A deck that declares zerp.size gets these two
+     overridden by a size-tokens style block; everything geometric below
+     reads them, so the canvas lives in exactly one place. */
+  --zerp-stage-w: 1920px;
+  --zerp-stage-h: 1080px;
 }
 
 html,
@@ -58,7 +64,7 @@ video {
 img {
   border-radius: 10px;
   object-fit: contain;
-  max-height: 60vh;
+  max-height: calc(var(--zerp-stage-h) * 0.6);
 }
 
 a {
@@ -77,13 +83,28 @@ hr {
   margin: 20px 0;
 }
 
+/* The stage is the deck's fixed design canvas. The runtime scale-to-fits it
+   into the real viewport with a transform; layout inside never changes, so
+   every measurement (checks, exports, print) sees the same geometry at any
+   window size. container-type: size makes cqw/cqh resolve against the
+   canvas — the sanctioned author-facing stage-relative units. Chrome stays
+   OUTSIDE the stage: a transformed ancestor would become the containing
+   block of its position: fixed elements. */
+[data-zerp-stage] {
+  position: relative;
+  width: var(--zerp-stage-w);
+  height: var(--zerp-stage-h);
+  transform-origin: 0 0;
+  container-type: size;
+}
+
 /* The frame owns slide visibility. The inner .slide remains an authored
    layout surface, so a deck can safely choose display: grid/flex/block on a
    slide root without changing whether inactive slides occupy the page. */
 [data-zerp-slide] {
   display: none;
-  width: 100vw;
-  height: 100vh;
+  width: var(--zerp-stage-w);
+  height: var(--zerp-stage-h);
 }
 
 [data-zerp-slide][data-zerp-slide-active] {
@@ -340,7 +361,7 @@ figure {
 }
 
 figure img {
-  max-height: 55vh;
+  max-height: calc(var(--zerp-stage-h) * 0.55);
 }
 
 figcaption,
@@ -1124,12 +1145,15 @@ figcaption,
     overflow: visible;
   }
 
-  /* Every frame becomes one page box. In Chromium's print context vh
-     resolves against the page area, so 100vh (inherited from the base
-     frame rule) = one page at any print size. overflow:hidden clips
-     slide overflow instead of letting it perturb pagination. */
+  /* The screen rules above are stage-fixed (--zerp-stage-w/h), so print
+     re-asserts viewport units here. In Chromium's print context vh
+     resolves against the page area, so 100vh = one page at any print
+     size. overflow:hidden clips slide overflow instead of letting it
+     perturb pagination. */
   [data-zerp-slide] {
     display: flex;
+    width: 100vw;
+    height: 100vh;
     break-after: page;
     break-inside: avoid;
     overflow: hidden;
@@ -1138,6 +1162,17 @@ figcaption,
   /* No trailing blank page after the last slide. */
   [data-zerp-slide]:not(:has(~ [data-zerp-slide])) {
     break-after: auto;
+  }
+
+  /* The screen transform must not shrink the printed page. container-type:
+     size stays active here (inherited from the screen rule), so an `auto`
+     box would resolve to a 0 container and collapse any author cqh/cqw
+     units. 100vw/100vh keep the container tracking the page box instead,
+     consistent with each frame being one page in print. */
+  [data-zerp-stage] {
+    transform: none !important;
+    width: 100vw;
+    height: 100vh;
   }
 
   /* Presentation chrome has no meaning on paper. */

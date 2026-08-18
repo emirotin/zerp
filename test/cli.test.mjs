@@ -6,6 +6,25 @@ function runCli(args) {
   return spawnSync(process.execPath, ["dist/cli.js", ...args], { encoding: "utf8" });
 }
 
+test("check help documents the deck-size default", () => {
+  const result = runCli(["--help"]);
+  assert.match(result.stdout, /--size WxH.*default: the deck's zerp\.size or 1920x1080/);
+});
+
+test("print appears in usage", () => {
+  const result = runCli(["--help"]);
+  assert.match(
+    result.stdout,
+    /zerp print \[deck-dir\] \[--theme dark\|light\] \[-o\|--out out\.pdf\]/,
+  );
+});
+
+test("print rejects a system theme", () => {
+  const result = runCli(["print", "test/fixtures/clean-deck", "--theme", "system"]);
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /print theme must be dark or light/);
+});
+
 test("zerp check fails on the broken deck with a grouped report", () => {
   const result = runCli(["check", "test/fixtures/broken-deck"]);
   assert.equal(result.status, 1);

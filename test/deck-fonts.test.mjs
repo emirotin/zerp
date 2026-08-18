@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 
-import { readDeckConfig } from "../dist/deck-config.js";
+import { readDeckConfig, resolveDeckSize } from "../dist/deck-config.js";
 import { fontCss } from "../dist/fonts.js";
 import { buildPresentationHtml } from "../dist/presentation.js";
 
@@ -78,11 +78,26 @@ test("config mistakes are named, not ignored", async () => {
     [{ fonts: { display: { family: "Inter", weight: ["400"] } } }, /unknown key "weight"/],
     [{ fonts: { heading: { family: "Inter" } } }, /unknown key "heading"/],
     [{ font: {} }, /unknown key "font"/],
+    [{ size: 1920 }, /size must be a string/],
+    [{ size: "huge" }, /size must be "WxH"/],
+    [{ size: "0x1080" }, /size must be "WxH"/],
+    [{ fonts: {}, size: { width: 1920 } }, /size must be a string/],
   ];
   for (const [zerp, expected] of cases) {
     const dir = await writeTempDeck(zerp);
     await assert.rejects(readDeckConfig(dir), expected);
   }
+});
+
+test("a size-only zerp config is parsed, not dropped", async () => {
+  const dir = await writeTempDeck({ size: "1280x720" });
+  const config = await readDeckConfig(dir);
+  assert.deepEqual(config, { size: { width: 1280, height: 720 } });
+});
+
+test("resolveDeckSize defaults to 1920x1080", async () => {
+  const dir = await writeTempDeck({});
+  assert.deepEqual(resolveDeckSize(await readDeckConfig(dir)), { width: 1920, height: 1080 });
 });
 
 test("display is a role of its own", async () => {

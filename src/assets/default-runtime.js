@@ -39,6 +39,24 @@
     updateSourceBadge();
   }
 
+  // ---- backdrop: continue the slide's background into the letterbox ----
+  // The scale-to-fit stage letterboxes when the window's aspect ratio differs
+  // from the deck's. The bars are painted by the page background, which
+  // matches ordinary slides but shows as bars of the wrong color around a
+  // slide that fills its frame with its own background. Copying the active
+  // slide's resolved background color onto the page makes the bars continue
+  // the slide. The resolved color goes stale when the theme flips, so every
+  // theme path re-syncs.
+  function syncBackdrop() {
+    const active = slides[current];
+    if (!active) {
+      return;
+    }
+    const bg = getComputedStyle(active).backgroundColor;
+    const transparent = !bg || bg === "transparent" || bg === "rgba(0, 0, 0, 0)";
+    document.body.style.backgroundColor = transparent ? "" : bg;
+  }
+
   function show(index) {
     current = clamp(index);
     for (const [frameIndex, frame] of frames.entries()) {
@@ -68,6 +86,7 @@
     if (navNext) {
       navNext.disabled = current === total - 1;
     }
+    syncBackdrop();
     history.replaceState(null, "", "#" + String(current + 1));
   }
 
@@ -274,6 +293,7 @@
   function applyTheme(value) {
     document.documentElement.dataset.zerpTheme = value;
     syncThemeToggle();
+    syncBackdrop();
   }
 
   function toggleTheme() {
@@ -297,10 +317,36 @@
   }
 
   // An OS scheme flip repaints through CSS on its own; all that is left to do
-  // is restate where the button now leads.
+  // is restate where the button now leads and refresh the resolved backdrop.
   if (darkQuery && darkQuery.addEventListener) {
-    darkQuery.addEventListener("change", syncThemeToggle);
+    darkQuery.addEventListener("change", () => {
+      syncThemeToggle();
+      syncBackdrop();
+    });
   }
+
+  // ---- scale-to-fit: shrink/grow the fixed-px stage to the window ----
+  var stage = document.querySelector("[data-zerp-stage]");
+
+  function fitStage() {
+    if (!stage || window.__ZERP_NO_SCALE__) return;
+    var w = stage.offsetWidth; // layout px = design px; transforms don't affect offset*
+    var h = stage.offsetHeight;
+    if (!w || !h) return;
+    var scale = Math.min(window.innerWidth / w, window.innerHeight / h);
+    if (Math.abs(scale - 1) < 0.0005) {
+      // Exports and checks render at the design size; leaving the style
+      // untouched there keeps their measurements literally transform-free.
+      stage.style.transform = "";
+      return;
+    }
+    var tx = (window.innerWidth - w * scale) / 2;
+    var ty = (window.innerHeight - h * scale) / 2;
+    stage.style.transform = "translate(" + tx + "px, " + ty + "px) scale(" + scale + ")";
+  }
+
+  window.addEventListener("resize", fitStage);
+  fitStage();
 
   initTheme();
 

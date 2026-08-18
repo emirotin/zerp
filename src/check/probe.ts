@@ -354,7 +354,6 @@ export async function probeDeck(options: ProbeOptions): Promise<DeckProbe> {
       theme: options.theme,
       width: options.width,
       height: options.height,
-      sizeDefaulted: options.sizeDefaulted ?? false,
       frameCount: result.frameCount,
       slideCount: result.slideCount,
       innerSlideCount: result.innerSlideCount,

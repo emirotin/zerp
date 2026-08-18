@@ -7,7 +7,9 @@ import { parseArgs } from "node:util";
 import { checkPresentation } from "./check/checker.js";
 import { formatReport, reportHasFailures } from "./check/report.js";
 import { FINDING_CATEGORIES, type CheckTheme, type FindingCategory } from "./check/types.js";
+import { type DeckSize, parseWxH } from "./deck-config.js";
 import { type ThemeName, writePresentation } from "./presentation.js";
+import { printPresentation } from "./print.js";
 import { servePresentation } from "./server.js";
 import { formatSlideList, listDeckSlides } from "./slides.js";
 import { resolveBrowserEndpoint, resolveVerificationTimeoutMs } from "./verify.js";
@@ -17,7 +19,8 @@ const THEME_NAMES = new Set(["dark", "light", "system"]);
 const USAGE = `Usage:
   zerp serve [deck-dir] [port] [--theme dark|light|system]
   zerp build [deck-dir] [--theme dark|light|system]
-  zerp check [deck-dir] [--theme dark|light|both] [--size WxH] [--safe-margin px] [--timeout ms] [--browser-endpoint url] [--only category,...] [--strict] [--json]
+  zerp check [deck-dir] [--theme dark|light|both] [--size WxH (default: the deck's zerp.size or 1920x1080)] [--safe-margin px] [--timeout ms] [--browser-endpoint url] [--only category,...] [--strict] [--json]
+  zerp print [deck-dir] [--theme dark|light] [-o|--out out.pdf] [--timeout ms] [--browser-endpoint url]
   zerp slides [deck-dir] [--json]
   zerp install-browser
 
@@ -99,22 +102,11 @@ function parseVerifyTimeout(raw: string | undefined): number {
   return resolveVerificationTimeoutMs(raw === undefined ? undefined : Number.parseInt(raw, 10));
 }
 
-function parseVerifySize(raw: string | undefined): {
-  width: number;
-  height: number;
-  defaulted: boolean;
-} {
-  const value = raw ?? "1920x1080";
-  const match = value.match(/^(\d+)x(\d+)$/);
-  if (!match) {
-    throw new Error(`Invalid verification size: ${value} (expected WxH)`);
-  }
-  const width = Number.parseInt(match[1] ?? "", 10);
-  const height = Number.parseInt(match[2] ?? "", 10);
-  if (width < 1 || height < 1) {
-    throw new Error(`Invalid verification size: ${value} (expected positive WxH)`);
-  }
-  return { width, height, defaulted: raw === undefined };
+function parseVerifySize(raw: string | undefined): DeckSize | undefined {
+  if (raw === undefined) return undefined;
+  const size = parseWxH(raw);
+  if (!size) throw new Error(`Invalid verification size: ${raw} (expected positive WxH)`);
+  return size;
 }
 
 const FINDING_CATEGORY_SET = new Set<string>(FINDING_CATEGORIES);
@@ -147,6 +139,7 @@ async function main(): Promise<void> {
       timeout: { type: "string" },
       "browser-endpoint": { type: "string" },
       only: { type: "string" },
+      out: { type: "string", short: "o" },
       help: { type: "boolean", default: false },
     },
   });
@@ -207,7 +200,7 @@ async function main(): Promise<void> {
   if (command === "check") {
     const rootDir = path.resolve(firstArg ?? ".");
     const themes = parseCheckThemes(values.theme);
-    const { width, height, defaulted } = parseVerifySize(values.size);
+    const size = parseVerifySize(values.size);
     const safeMargin = parseSafeMargin(values["safe-margin"]);
     const timeoutMs = parseVerifyTimeout(values.timeout);
     const only = parseOnly(values.only);
@@ -217,9 +210,7 @@ async function main(): Promise<void> {
     const report = await checkPresentation({
       rootDir,
       themes,
-      width,
-      height,
-      sizeDefaulted: defaulted,
+      ...(size === undefined ? {} : size),
       safeMargin,
       timeoutMs,
       ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
@@ -229,6 +220,23 @@ async function main(): Promise<void> {
       values.json ? `${JSON.stringify(report, null, 2)}\n` : formatReport(report),
     );
     process.exitCode = reportHasFailures(report, values.strict ?? false) ? 1 : 0;
+    return;
+  }
+
+  if (command === "print") {
+    const theme = values.theme ?? "light";
+    if (theme !== "dark" && theme !== "light") {
+      throw new Error(`print theme must be dark or light (got ${theme})`);
+    }
+    const browserEndpoint = resolveBrowserEndpoint(values["browser-endpoint"]);
+    const outPath = await printPresentation({
+      rootDir: firstArg ?? ".",
+      theme,
+      ...(values.out === undefined ? {} : { out: values.out }),
+      timeoutMs: parseVerifyTimeout(values.timeout),
+      ...(browserEndpoint === undefined ? {} : { browserEndpoint }),
+    });
+    process.stdout.write(`wrote ${outPath}\n`);
     return;
   }
 

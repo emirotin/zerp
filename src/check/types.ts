@@ -29,6 +29,7 @@ export interface CheckViewport {
   width: number;
   height: number;
   defaulted: boolean;
+  source: "flag" | "deck" | "default";
 }
 export interface CheckReport {
   slideCount: number;

@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 
+import { readDeckConfig, resolveDeckSize } from "../deck-config.js";
 import { resolveVerificationTimeoutMs } from "../verify.js";
 import { judge, type TokenContrast } from "./judge.js";
 import { probeDeck } from "./probe.js";
@@ -10,7 +11,6 @@ export interface CheckOptions {
   themes?: CheckTheme[];
   width?: number;
   height?: number;
-  sizeDefaulted?: boolean;
   safeMargin?: number;
   timeoutMs?: number;
   browserEndpoint?: string;
@@ -18,11 +18,6 @@ export interface CheckOptions {
 }
 
 const THEMES: CheckTheme[] = ["dark", "light"];
-// Matches zerp verify's historical default: a 1080p viewport suits most decks
-// and callers that omit width/height (e.g. `zerp build`'s post-write summary)
-// still get a real probe rather than an error.
-const DEFAULT_WIDTH = 1920;
-const DEFAULT_HEIGHT = 1080;
 
 // svg-text and glyph findings describe the deck's markup and font coverage —
 // facts that do not change with the color theme. judge() has no notion of
@@ -51,8 +46,12 @@ async function loadTokenContrast(): Promise<TokenContrast> {
  */
 export async function checkPresentation(options: CheckOptions): Promise<CheckReport> {
   const themes = options.themes ?? THEMES;
-  const width = options.width ?? DEFAULT_WIDTH;
-  const height = options.height ?? DEFAULT_HEIGHT;
+  const config = await readDeckConfig(options.rootDir);
+  const deckSize = resolveDeckSize(config);
+  const explicit = options.width !== undefined && options.height !== undefined;
+  const width = options.width ?? deckSize.width;
+  const height = options.height ?? deckSize.height;
+  const source = explicit ? "flag" : config.size ? "deck" : "default";
   const safeMargin = options.safeMargin ?? 0;
   const timeoutMs = options.timeoutMs ?? resolveVerificationTimeoutMs();
   const tokenContrast = await loadTokenContrast();
@@ -68,7 +67,6 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
       height,
       safeMargin,
       timeoutMs,
-      sizeDefaulted: options.sizeDefaulted ?? false,
       ...(options.browserEndpoint === undefined
         ? {}
         : { browserEndpoint: options.browserEndpoint }),
@@ -91,7 +89,7 @@ export async function checkPresentation(options: CheckOptions): Promise<CheckRep
   return {
     slideCount,
     themes,
-    viewport: { width, height, defaulted: options.sizeDefaulted ?? false },
+    viewport: { width, height, defaulted: !explicit, source },
     findings,
   };
 }

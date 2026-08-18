@@ -78,7 +78,6 @@ export interface DeckProbe {
   theme: "dark" | "light";
   width: number;
   height: number;
-  sizeDefaulted: boolean;
   frameCount: number;
   slideCount: number;
   innerSlideCount: number;
@@ -93,6 +92,5 @@ export interface ProbeOptions {
   height: number;
   safeMargin: number;
   timeoutMs: number;
-  sizeDefaulted?: boolean;
   browserEndpoint?: string;
 }

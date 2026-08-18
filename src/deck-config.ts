@@ -20,12 +20,33 @@ export interface DeckFontConfig {
   weights?: string[];
 }
 
+export interface DeckSize {
+  width: number;
+  height: number;
+}
+
+export const DEFAULT_DECK_SIZE: DeckSize = { width: 1920, height: 1080 };
+
+export function parseWxH(value: string): DeckSize | null {
+  const match = value.match(/^(\d+)x(\d+)$/);
+  if (!match) return null;
+  const width = Number.parseInt(match[1] ?? "", 10);
+  const height = Number.parseInt(match[2] ?? "", 10);
+  if (width < 1 || height < 1) return null;
+  return { width, height };
+}
+
 export interface DeckConfig {
   fonts?: {
     body?: DeckFontConfig;
     display?: DeckFontConfig;
     mono?: DeckFontConfig;
   };
+  size?: DeckSize;
+}
+
+export function resolveDeckSize(config: DeckConfig): DeckSize {
+  return config.size ?? DEFAULT_DECK_SIZE;
 }
 
 const FONT_ROLES = ["body", "display", "mono"];
@@ -82,16 +103,26 @@ function parseConfig(value: unknown): DeckConfig {
   if (!isRecord(value)) {
     fail("it must be an object");
   }
-  checkKeys(value, ["fonts"], "zerp");
+  checkKeys(value, ["fonts", "size"], "zerp");
+
+  let size: DeckSize | undefined;
+  if (value.size !== undefined) {
+    if (typeof value.size !== "string") fail('size must be a string like "1920x1080"');
+    const parsed = parseWxH(value.size);
+    if (!parsed)
+      fail(`size must be "WxH" with positive integers, e.g. "1920x1080" (got "${value.size}")`);
+    size = parsed;
+  }
+
   const fonts = value.fonts;
   if (fonts === undefined) {
-    return {};
+    return size ? { size } : {};
   }
   if (!isRecord(fonts)) {
     fail("fonts must be an object");
   }
   checkKeys(fonts, FONT_ROLES, "fonts");
-  const parsed: DeckConfig = { fonts: {} };
+  const parsed: DeckConfig = { fonts: {}, ...(size ? { size } : {}) };
   for (const role of FONT_ROLES) {
     if (fonts[role] !== undefined) {
       Object.assign(parsed.fonts ?? {}, { [role]: parseFont(fonts[role], role) });

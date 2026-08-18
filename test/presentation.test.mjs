@@ -100,3 +100,21 @@ test("deck title falls back to the folder name when the first slide has no headi
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("frames are wrapped in a single stage, chrome outside it", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/clean-deck" });
+  const stageOpen = html.indexOf("<div data-zerp-stage>");
+  const stageClose = html.lastIndexOf("</div>", html.indexOf('class="progress"'));
+  assert.ok(stageOpen !== -1);
+  assert.ok(html.indexOf("<div data-zerp-slide>") > stageOpen);
+  assert.ok(html.lastIndexOf("<div data-zerp-slide>") < stageClose);
+  assert.ok(html.indexOf('class="progress"') > stageClose, "chrome is a sibling after the stage");
+  assert.ok(!html.includes('data-zerp="size"'), "a size-free deck gets no size block");
+});
+
+test("a declared size is emitted as stage tokens", async () => {
+  const html = await buildPresentationHtml({ rootDir: "test/fixtures/size-deck" });
+  assert.match(html, /<style data-zerp="size">/);
+  assert.match(html, /--zerp-stage-w: 1280px/);
+  assert.match(html, /--zerp-stage-h: 720px/);
+});
