@@ -302,6 +302,29 @@
     darkQuery.addEventListener("change", syncThemeToggle);
   }
 
+  // ---- scale-to-fit: shrink/grow the fixed-px stage to the window ----
+  var stage = document.querySelector("[data-zerp-stage]");
+
+  function fitStage() {
+    if (!stage || window.__ZERP_NO_SCALE__) return;
+    var w = stage.offsetWidth; // layout px = design px; transforms don't affect offset*
+    var h = stage.offsetHeight;
+    if (!w || !h) return;
+    var scale = Math.min(window.innerWidth / w, window.innerHeight / h);
+    if (Math.abs(scale - 1) < 0.0005) {
+      // Exports and checks render at the design size; leaving the style
+      // untouched there keeps their measurements literally transform-free.
+      stage.style.transform = "";
+      return;
+    }
+    var tx = (window.innerWidth - w * scale) / 2;
+    var ty = (window.innerHeight - h * scale) / 2;
+    stage.style.transform = "translate(" + tx + "px, " + ty + "px) scale(" + scale + ")";
+  }
+
+  window.addEventListener("resize", fitStage);
+  fitStage();
+
   initTheme();
 
   show((Number.parseInt(location.hash.slice(1), 10) || 1) - 1);
