@@ -5,6 +5,7 @@ import { parseDocument } from "htmlparser2";
 import { parseHTML } from "linkedom";
 
 import { type DeckCodepoints, scanDeckCodepoints } from "./codepoints.js";
+import { readDeckConfig, resolveDeckSize } from "./deck-config.js";
 import { fontCss } from "./fonts.js";
 import { renderMarkdownSlides } from "./markdown.js";
 
@@ -306,11 +307,13 @@ export async function deckCodepoints(rootDir: string): Promise<DeckCodepoints> {
 export async function buildPresentationHtml(options: BuildOptions): Promise<string> {
   const lang = options.lang ?? "en";
   const theme = options.theme ?? "system";
-  const [slidesHtml, defaultStyles, defaultRuntime] = await Promise.all([
+  const [slidesHtml, defaultStyles, defaultRuntime, config] = await Promise.all([
     composeSlidesHtml(options.rootDir),
     readAsset("./assets/default-styles.css"),
     readAsset("./assets/default-runtime.js"),
+    readDeckConfig(options.rootDir),
   ]);
+  const size = resolveDeckSize(config);
   // Which subsets to carry is a fact about this deck's text, so the font CSS
   // is built after the slides are assembled, from the full document's
   // codepoints — chrome included, since chrome is rendered too.
@@ -322,6 +325,17 @@ export async function buildPresentationHtml(options: BuildOptions): Promise<stri
     ? `
     <style data-zerp="font-tokens">
 ${fonts.tokens}
+    </style>`
+    : "";
+  // The size block, like the font tokens, only exists when the deck
+  // declared something — a default deck's document stays unchanged.
+  const sizeTokens = config.size
+    ? `
+    <style data-zerp="size">
+:root {
+  --zerp-stage-w: ${size.width}px;
+  --zerp-stage-h: ${size.height}px;
+}
     </style>`
     : "";
   const title =
@@ -338,10 +352,12 @@ ${fonts.faces}
     </style>
     <style data-zerp="base">
 ${defaultStyles}
-    </style>${fontTokens}
+    </style>${fontTokens}${sizeTokens}
   </head>
   <body>
+    <div data-zerp-stage>
 ${slidesHtml}
+    </div>
 ${CHROME_HTML}
     <script>
 ${defaultRuntime}
