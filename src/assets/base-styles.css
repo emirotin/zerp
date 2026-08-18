@@ -1164,11 +1164,15 @@ figcaption,
     break-after: auto;
   }
 
-  /* The screen transform must not shrink the printed page. */
+  /* The screen transform must not shrink the printed page. container-type:
+     size stays active here (inherited from the screen rule), so an `auto`
+     box would resolve to a 0 container and collapse any author cqh/cqw
+     units. 100vw/100vh keep the container tracking the page box instead,
+     consistent with each frame being one page in print. */
   [data-zerp-stage] {
     transform: none !important;
-    width: auto;
-    height: auto;
+    width: 100vw;
+    height: 100vh;
   }
 
   /* Presentation chrome has no meaning on paper. */

@@ -104,3 +104,17 @@ test("print block restores viewport-relative pagination and kills the transform"
   assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*transform: none/);
   assert.match(printBlock, /\[data-zerp-slide\] \{[^}]*height: 100vh/);
 });
+
+test("print block keeps the stage's container size viewport-driven so cqh survives", async () => {
+  // The stage stays `container-type: size` in print (inherited from the
+  // screen rule); if its box resolves to `auto` here it computes to 0 and
+  // any author CSS using cqh/cqw collapses. width/height: 100vw/100vh keep
+  // the container tracking the page box instead.
+  const css = await readFile("dist/assets/default-styles.css", "utf8");
+  const printBlock = css.slice(css.indexOf("@media print"));
+  assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*transform: none/);
+  assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*width: 100vw/);
+  assert.match(printBlock, /\[data-zerp-stage\] \{[^}]*height: 100vh/);
+  const stageRule = printBlock.match(/\[data-zerp-stage\] \{[^}]*\}/)?.[0] ?? "";
+  assert.doesNotMatch(stageRule, /width: auto/);
+});

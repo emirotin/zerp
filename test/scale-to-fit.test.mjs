@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
@@ -141,5 +141,48 @@ test(
       );
       assert.equal(transform, "");
     });
+  },
+);
+
+test(
+  "cqh units survive print media instead of collapsing when the stage box goes auto",
+  { skip: !browserTestsEnabled || !chromeAvailable(), timeout: 60_000 },
+  async () => {
+    // container-type: size stays active on [data-zerp-stage] in print, so an
+    // `auto` box there resolves the container height to 0 and collapses any
+    // author cqh unit. width/height: 100vw/100vh keep the container tracking
+    // the page box; prove it by measuring a cqh-sized element under print.
+    const tmpDir = await mkdtemp(path.join(tmpdir(), "zerp-print-cq-"));
+    try {
+      await mkdir(path.join(tmpDir, "slides"));
+      await writeFile(
+        path.join(tmpDir, "slides", "00-cq.html"),
+        '<div class="slide"><div id="cq-el" style="width: 100px; height: 60cqh;"></div></div>\n',
+        "utf8",
+      );
+      const html = await buildPresentationHtml({ rootDir: tmpDir });
+      const htmlPath2 = path.join(tmpDir, "index.html");
+      await writeFile(htmlPath2, html, "utf8");
+      await withViewport(1920, 1080, async (page) => {
+        await page.emulateMedia({ media: "print" });
+        await page.goto(`file://${htmlPath2}`);
+        const stageHeight = await page.evaluate(
+          `document.querySelector("[data-zerp-stage]").getBoundingClientRect().height`,
+        );
+        const elHeight = await page.evaluate(
+          `document.getElementById("cq-el").getBoundingClientRect().height`,
+        );
+        assert.ok(
+          Math.abs(stageHeight - 1080) < 2,
+          `expected stage height near 1080, got ${stageHeight}`,
+        );
+        assert.ok(
+          Math.abs(elHeight - 648) < 2,
+          `expected cqh element height near 648, got ${elHeight}`,
+        );
+      });
+    } finally {
+      await rm(tmpDir, { recursive: true, force: true });
+    }
   },
 );
