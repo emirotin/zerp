@@ -1,5 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { readFile, stat } from "node:fs/promises";
+import { readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -30,9 +32,39 @@ for (const [dependency, command] of PREREQUISITES) {
 // (CHROME_BIN, the managed chromium, a system Chrome) is available to import.
 const { resolveBrowserExecutable } = await import("../dist/verify.js");
 
+// Everything the printed PDF is a function of, besides the version: the guide
+// itself and the sources the built stylesheet is generated from. The footer
+// stamp derives from these instead of the wall clock so that reprinting an
+// unchanged tree reproduces the committed PDF byte-for-byte.
+const STAMP_INPUTS = [
+  SOURCE,
+  "src/assets/base-styles.css",
+  "scripts/generate-tokens.mjs",
+  "src/fonts.ts",
+];
+
+async function stampDate() {
+  const dirty = execFileSync("git", ["status", "--porcelain", "--", ...STAMP_INPUTS], {
+    encoding: "utf8",
+  })
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => line.slice(3).trim());
+  if (dirty.length > 0) {
+    // Uncommitted input edits: date the PDF by the newest edit, which is
+    // stable across reruns (unlike "today").
+    const mtimes = await Promise.all(dirty.map(async (file) => (await stat(file)).mtime));
+    return new Date(Math.max(...mtimes)).toLocaleDateString("en-CA");
+  }
+  // "%cs" is the committer date as local-time YYYY-MM-DD.
+  return execFileSync("git", ["log", "-1", "--format=%cs", "--", ...STAMP_INPUTS], {
+    encoding: "utf8",
+  }).trim();
+}
+
 const { version } = JSON.parse(await readFile("package.json", "utf8"));
-// "en-CA" formats a local-time date as YYYY-MM-DD.
-const stamp = `Generated ${new Date().toLocaleDateString("en-CA")} against zerp ${version}.`;
+const date = await stampDate();
+const stamp = `Generated ${date} against zerp ${version}.`;
 
 const browser = await chromium.launch({ executablePath: resolveBrowserExecutable() });
 
@@ -72,10 +104,37 @@ try {
 
   // The guide sets its own page size and margins in @page; honor them rather
   // than printing at the backend's default paper.
-  await page.pdf({ path: OUTPUT, printBackground: true, preferCSSPageSize: true });
+  const pdf = normalizePdf(await page.pdf({ printBackground: true, preferCSSPageSize: true }));
+
+  const previous = existsSync(OUTPUT) ? await readFile(OUTPUT) : null;
+  if (previous && previous.equals(pdf)) {
+    console.log(`${OUTPUT} unchanged — ${stamp}`);
+  } else {
+    await writeFile(OUTPUT, pdf);
+    console.log(`${OUTPUT} (${Math.round(pdf.length / 1024)} KB) — ${stamp}`);
+  }
 } finally {
   await browser.close();
 }
 
-const { size } = await stat(OUTPUT);
-console.log(`${OUTPUT} (${Math.round(size / 1024)} KB) — ${stamp}`);
+// Chromium stamps the print time into /CreationDate and /ModDate and a random
+// /ID into the trailer, so identical pages still print to different bytes.
+// Overwrite them in place (same length, so xref offsets stay valid) with
+// values derived from the footer stamp, making the output reproducible.
+function normalizePdf(buffer) {
+  let text = buffer.toString("latin1");
+
+  const fixedDate = `D:${date.replaceAll("-", "")}000000+00'00'`;
+  text = text.replace(/\/(CreationDate|ModDate)\s*\(([^)]*)\)/g, (match, key, value) => {
+    const replacement = fixedDate.padEnd(value.length, "0").slice(0, value.length);
+    return `/${key} (${replacement})`;
+  });
+
+  text = text.replace(/\/ID\s*\[\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*\]/g, (match, a, b) => {
+    const digest = createHash("sha256").update(stamp).digest("hex").toUpperCase();
+    const id = (hex) => digest.padEnd(hex.length, "0").slice(0, hex.length);
+    return `/ID [<${id(a)}> <${id(b)}>]`;
+  });
+
+  return Buffer.from(text, "latin1");
+}
