@@ -55,9 +55,9 @@ pnpm exec zerp slides                     # deck position → source file mappin
 
 `zerp check` opens each theme in a real headless browser and needs a Chromium-class one. It never bundles one — it resolves an external browser in this order:
 
-1. **`CHROME_BIN`** — if set, it is used verbatim. Point it at any Chrome/Chromium binary; a wrapper script that execs one with extra flags works too.
+1. **`CHROME_BIN`** — if set, it wins. Point it at any Chrome/Chromium binary — an absolute path or a command name on `PATH`; a wrapper script that execs one with extra flags works too, as long as it answers `--version` with the browser's version banner. That banner is the health check: a non-browser at the path is a clear error here rather than a confusing launch failure later.
 2. **The playwright-managed Chromium** — run `zerp install-browser` once to download it; nothing else needs configuring afterward.
-3. **A system Chrome/Chromium** — Google Chrome or Chromium found on the usual macOS app paths or on `PATH` (`google-chrome`, `chromium`, `chromium-browser`).
+3. **A system Chrome/Chromium** — Google Chrome or Chromium found on the usual macOS app paths or on `PATH` (`google-chrome`, `chromium`, `chromium-browser`). Names found on `PATH` are resolved to the actual binary before launching, and every candidate must answer `--version` with a version banner — so a non-browser squatting on one of those names (Ubuntu's snap-transition `chromium` stub, say) is skipped rather than crashing the launch.
 
 If none is found, `zerp check` says so and points here (and `zerp build`'s post-build check summary prints a one-line notice and continues rather than failing). On a machine with no system Chrome, install one once:
 

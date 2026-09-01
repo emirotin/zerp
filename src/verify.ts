@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { accessSync, constants as fsConstants, existsSync, statSync } from "node:fs";
+import { delimiter, join } from "node:path";
 
 import { type Browser, type BrowserContext, chromium, type Page } from "playwright-core";
 
@@ -60,7 +61,8 @@ export function formatVerifyFailure(failure: VerifyFailure): string {
 }
 
 // System-Chrome fallbacks, tried after CHROME_BIN and playwright's own managed
-// chromium. Each is validated by a `--version` spawn before use.
+// chromium. Bare names are resolved through PATH to the absolute path a launch
+// needs, and every candidate must answer `--version` with a version banner.
 const SYSTEM_CHROME_CANDIDATES = [
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "/Applications/Chromium.app/Contents/MacOS/Chromium",
@@ -159,22 +161,32 @@ function connectBrowser(endpoint: string, timeoutMs: number): Promise<Browser> {
  *
  *   1. `CHROME_BIN` — an explicit override (wrapper scripts that exec a
  *      browser with extra flags are supported), validated the same way the
- *      system candidates in step 3 are: a path-like value must exist, and
- *      the binary must actually run `--version`. An unvalidated override
- *      would otherwise surface as a raw Playwright launch failure three
- *      layers away from the typo that caused it, instead of a clear,
- *      actionable error naming the bad path right here.
+ *      system candidates in step 3 are: a path-like value must exist, a bare
+ *      name must be on PATH, and the binary must answer `--version` with a
+ *      version banner. An unvalidated override would otherwise surface as a
+ *      raw Playwright launch failure three layers away from the typo that
+ *      caused it, instead of a clear, actionable error naming the bad path
+ *      right here.
  *   2. playwright-core's own managed chromium, if `zerp install-browser` (or a
  *      prior playwright install) has downloaded it. `executablePath()` computes
  *      a path whether or not it exists — and throws in some builds when nothing
  *      is installed — so guard it with `existsSync`.
- *   3. A system-installed Chrome/Chromium, validated by `--version`.
+ *   3. A system-installed Chrome/Chromium: bare names resolved through PATH,
+ *      each candidate validated by its `--version` banner. What is returned is
+ *      always the absolute path the probe exercised, never the probed name —
+ *      playwright's `launch({ executablePath })` does no PATH lookup, so a
+ *      bare name that probes fine would still fail to launch.
  *   4. None found — point at `zerp install-browser` or `CHROME_BIN`.
+ *
+ * `systemCandidates` exists so tests (and hosts with their own browser policy)
+ * can exercise step 3 hermetically; callers normally pass nothing.
  *
  * Exported so every headless entry point resolves a browser identically — the
  * docs PDF build (`scripts/build-docs.mjs`) and the check probe both use it.
  */
-export function resolveBrowserExecutable(): string {
+export function resolveBrowserExecutable(
+  systemCandidates: readonly string[] = SYSTEM_CHROME_CANDIDATES,
+): string {
   const override = process.env.CHROME_BIN;
   if (override) {
     if (override.includes("/") && !existsSync(override)) {
@@ -182,13 +194,24 @@ export function resolveBrowserExecutable(): string {
         `CHROME_BIN is set to "${override}", but no file exists there. Fix the path, or unset CHROME_BIN and run \`zerp install-browser\` to let zerp resolve a browser itself.`,
       );
     }
-    const probe = spawnSync(override, ["--version"], { stdio: "ignore" });
-    if (probe.status !== 0) {
+    const resolved = override.includes("/") ? override : findOnPath(override);
+    if (!resolved) {
       throw new Error(
-        `CHROME_BIN is set to "${override}", but it did not run ("${override} --version" failed). Fix the path, or unset CHROME_BIN and run \`zerp install-browser\` to let zerp resolve a browser itself.`,
+        `CHROME_BIN is set to "${override}", but no such command is on PATH. Fix the name, or unset CHROME_BIN and run \`zerp install-browser\` to let zerp resolve a browser itself.`,
       );
     }
-    return override;
+    const probe = spawnSync(resolved, ["--version"], { encoding: "utf8" });
+    if (probe.status !== 0) {
+      throw new Error(
+        `CHROME_BIN is set to "${override}", but it did not run ("${resolved} --version" failed). Fix the path, or unset CHROME_BIN and run \`zerp install-browser\` to let zerp resolve a browser itself.`,
+      );
+    }
+    if (!BROWSER_VERSION_BANNER.test(`${probe.stdout ?? ""}${probe.stderr ?? ""}`)) {
+      throw new Error(
+        `CHROME_BIN is set to "${override}", but "${resolved} --version" printed no version banner, so it does not look like a Chrome/Chromium binary (Ubuntu's apt \`chromium\` snap stub fails exactly this way). Fix the path, or unset CHROME_BIN and run \`zerp install-browser\` to let zerp resolve a browser itself.`,
+      );
+    }
+    return resolved;
   }
   try {
     const managed = chromium.executablePath();
@@ -198,18 +221,59 @@ export function resolveBrowserExecutable(): string {
   } catch {
     // playwright-core has no managed browser installed; fall through.
   }
-  for (const candidate of SYSTEM_CHROME_CANDIDATES) {
-    if (candidate.includes("/") && !existsSync(candidate)) {
-      continue;
-    }
-    const probe = spawnSync(candidate, ["--version"], { stdio: "ignore" });
-    if (probe.status === 0) {
-      return candidate;
+  for (const candidate of systemCandidates) {
+    const resolved = candidate.includes("/")
+      ? existsSync(candidate)
+        ? candidate
+        : undefined
+      : findOnPath(candidate);
+    if (resolved && reportsBrowserVersion(resolved)) {
+      return resolved;
     }
   }
   throw new Error(
     "No Chrome/Chromium found. Run `zerp install-browser` or set CHROME_BIN to a browser binary.",
   );
+}
+
+/**
+ * A Chromium-class binary answers `--version` with a versioned banner
+ * ("Chromium 151.0.7922.34", "Google Chrome 130.0.6723.69"). Requiring the
+ * dotted build number — rather than exit status alone — is what rejects a
+ * non-browser squatting on a browser's name: Ubuntu's apt `chromium` is a
+ * shell stub that defers to snapd, sits on PATH under the right name, and can
+ * exit 0 from a probe while being unable to launch anything.
+ */
+const BROWSER_VERSION_BANNER = /\d+\.\d+\.\d+/;
+
+function reportsBrowserVersion(executable: string): boolean {
+  const probe = spawnSync(executable, ["--version"], { encoding: "utf8" });
+  return (
+    probe.status === 0 && BROWSER_VERSION_BANNER.test(`${probe.stdout ?? ""}${probe.stderr ?? ""}`)
+  );
+}
+
+/**
+ * The absolute path a PATH lookup would execute for a bare command name, or
+ * undefined when none qualifies. Mirrors execvp: first PATH entry holding an
+ * executable regular file wins.
+ */
+function findOnPath(name: string): string | undefined {
+  for (const dir of (process.env.PATH ?? "").split(delimiter)) {
+    if (!dir) {
+      continue;
+    }
+    const candidate = join(dir, name);
+    try {
+      accessSync(candidate, fsConstants.X_OK);
+      if (statSync(candidate).isFile()) {
+        return candidate;
+      }
+    } catch {
+      // Absent or not executable in this PATH entry; keep looking.
+    }
+  }
+  return undefined;
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
