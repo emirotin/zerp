@@ -14,9 +14,6 @@ importers:
       '@fontsource/roboto-mono':
         specifier: ^5.2.9
         version: 5.2.9
-      apca-w3:
-        specifier: ^0.1.9
-        version: 0.1.9
       css-tree:
         specifier: ^3.2.1
         version: 3.2.1
@@ -325,9 +322,6 @@ packages:
     resolution: {integrity: sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg==}
     engines: {node: '>=12'}
 
-  apca-w3@0.1.9:
-    resolution: {integrity: sha512-Zrf6AeBeQjNe/fxK7U1jCo5zfdjDl6T4/kdw5Xlky3G7u+EJTZkyItjMYQGtwf9pkftsINxcYyOpuLkzKf1ITQ==}
-
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
@@ -341,9 +335,6 @@ packages:
 
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
-
-  colorparsley@0.1.8:
-    resolution: {integrity: sha512-rObESTTTE6G5qO5WFwFxWPggpw4KfpxnLC6Ssl8bITBnNVRhDsyCeTRAUxWQNVTx2pRknKlO2nddYTxjkdNFaw==}
 
   commander@14.0.3:
     resolution: {integrity: sha512-H+y0Jo/T1RZ9qPP4Eh1pkcQcLRglraJaSLoyOtHxu6AapkjWVCy2Sit1QQ4x3Dng8qDlSsZEet7g5Pq06MvTgw==}
@@ -679,10 +670,6 @@ snapshots:
 
   ansi-styles@6.2.3: {}
 
-  apca-w3@0.1.9:
-    dependencies:
-      colorparsley: 0.1.8
-
   boolbase@1.0.0: {}
 
   cli-cursor@5.0.0:
@@ -695,8 +682,6 @@ snapshots:
       string-width: 8.2.0
 
   colorette@2.0.20: {}
-
-  colorparsley@0.1.8: {}
 
   commander@14.0.3: {}
 

@@ -110,6 +110,26 @@ test("a visible border rescues an otherwise blending surface", () => {
   assert.deepEqual(findings, []);
 });
 
+test("a strong luminance step rescues a surface below the RGB-distance threshold", () => {
+  // Green contributes most strongly to WCAG relative luminance. These colors
+  // are only 29 RGB-distance units apart, but their 1.49:1 luminance ratio is
+  // enough to make the surface distinct.
+  const findings = judge(
+    slideWith([
+      { ...root, backgroundColor: "rgb(0, 75, 0)" },
+      {
+        ...root,
+        id: 1,
+        tag: "div",
+        className: "card",
+        parent: 0,
+        backgroundColor: "rgb(0, 104, 0)",
+      },
+    ]),
+  ).filter((f) => f.category === "surface");
+  assert.deepEqual(findings, []);
+});
+
 test("a transparent element is not judged as an opaque black surface", () => {
   // Every un-backgrounded element reports getComputedStyle's transparent
   // rgba(0, 0, 0, 0) as its backgroundColor; parseColor happily parses that

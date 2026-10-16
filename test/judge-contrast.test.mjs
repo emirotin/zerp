@@ -87,7 +87,7 @@ test("contrast is judged against the composited backdrop", () => {
   assert.equal(findings[0].severity, "error");
   assert.equal(findings[0].slideIndex, 1);
   assert.equal(findings[0].snippet, "invisible");
-  assert.match(findings[0].message, /contrast Lc/);
+  assert.match(findings[0].message, /contrast ratio/);
 });
 
 test("a page background image/gradient makes contrast unverifiable, not silently ignored", () => {

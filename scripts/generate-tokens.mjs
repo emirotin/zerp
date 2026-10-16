@@ -1,8 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 
-import { APCAcontrast, sRGBtoY } from "apca-w3";
-
 const require = createRequire(import.meta.url);
 
 const HUES = ["blue", "green", "orange", "purple", "red", "amber", "teal"];
@@ -14,8 +12,8 @@ const NEUTRAL_STEPS = {
   light: { bg: "100", surface: "50", border: "300", text: "900", muted: "700", faint: "400" },
 };
 const HUE_STEPS = {
-  dark: { text: "400", solid: "600", tint: "900", onTint: "200" },
-  light: { text: "600", solid: "600", tint: "200", onTint: "800" },
+  dark: { text: "400", solid: "700", tint: "900", onTint: "200" },
+  light: { text: "700", solid: "700", tint: "200", onTint: "800" },
 };
 
 async function loadHueHex(hue) {
@@ -86,14 +84,24 @@ export async function generateTokensCss() {
   ].join("\n\n");
 }
 
-function lcBetween(fgHex, bgHex) {
+function contrastRatio(fgHex, bgHex) {
   const rgb = (hex) => [
     Number.parseInt(hex.slice(1, 3), 16),
     Number.parseInt(hex.slice(3, 5), 16),
     Number.parseInt(hex.slice(5, 7), 16),
   ];
-  const lc = APCAcontrast(sRGBtoY(rgb(fgHex)), sRGBtoY(rgb(bgHex)));
-  return Math.round((typeof lc === "string" ? Number.parseFloat(lc) : lc) * 10) / 10;
+  const luminance = (hex) => {
+    const channels = rgb(hex).map((channel) => {
+      const srgb = channel / 255;
+      return srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+    });
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+  };
+  const fgLuminance = luminance(fgHex);
+  const bgLuminance = luminance(bgHex);
+  const ratio =
+    (Math.max(fgLuminance, bgLuminance) + 0.05) / (Math.min(fgLuminance, bgLuminance) + 0.05);
+  return ratio;
 }
 
 export async function generateTokenContrast() {
@@ -108,14 +116,14 @@ export async function generateTokenContrast() {
       fg[`--zerp-${hue}`] = tokens[`--zerp-${hue}`];
       fg[`--zerp-${hue}-on-tint`] = tokens[`--zerp-${hue}-on-tint`];
     }
-    const lc = {};
+    const ratio = {};
     for (const [bgToken, bgHex] of Object.entries(bg)) {
-      lc[bgToken] = {};
+      ratio[bgToken] = {};
       for (const [fgToken, fgHex] of Object.entries(fg)) {
-        lc[bgToken][fgToken] = lcBetween(fgHex, bgHex);
+        ratio[bgToken][fgToken] = contrastRatio(fgHex, bgHex);
       }
     }
-    result[theme] = { bg, fg, lc };
+    result[theme] = { bg, fg, ratio };
   }
   return result;
 }

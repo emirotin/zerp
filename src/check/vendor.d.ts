@@ -18,12 +18,6 @@ declare module "css-tree" {
   ): void;
 }
 
-declare module "apca-w3" {
-  export function APCAcontrast(textY: number, bgY: number, places?: number): number | string;
-  export function sRGBtoY(rgb: number[]): number;
-  export function fontLookupAPCA(lc: number | string, places?: number): Array<number | string>;
-}
-
 declare module "linkedom" {
   export function parseHTML(html: string): { document: unknown };
 }
