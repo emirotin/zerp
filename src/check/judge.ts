@@ -1,4 +1,4 @@
-import { contrastLc, MIN_ERROR_PX, MIN_WARN_PX, neededLc, requiredPx } from "./apca.js";
+import { contrastRatio, MIN_ERROR_PX, MIN_WARN_PX, neededRatio, requiredPx } from "./contrast.js";
 import { blend, parseColor, rgbDistance, toHex, type Rgba } from "./color.js";
 import type { DeckProbe, ProbeElement, ProbeSlide, SafeZoneItem } from "./probe-types.js";
 import type { Finding, FindingCategory } from "./types.js";
@@ -6,7 +6,7 @@ import type { Finding, FindingCategory } from "./types.js";
 export interface ThemeContrastData {
   bg: Record<string, string>;
   fg: Record<string, string>;
-  lc: Record<string, Record<string, number>>;
+  ratio: Record<string, Record<string, number>>;
 }
 
 export interface TokenContrast {
@@ -42,13 +42,13 @@ function suggestionFor(
   if (!bgEntry) {
     return null;
   }
-  const table = data.lc[bgEntry[0]];
+  const table = data.ratio[bgEntry[0]];
   if (!table) {
     return null;
   }
   const passing = Object.entries(table)
-    .filter(([, lc]) => {
-      const req = requiredPx(lc, weight);
+    .filter(([, ratio]) => {
+      const req = requiredPx(ratio, weight);
       return req !== null && req <= sizePx;
     })
     .map(([token]) => token);
@@ -234,11 +234,10 @@ function judgeGlyphs(
   }
 }
 
-// Surfaces need either a luminance step (APCA clips small deltas to 0 near
-// the poles, so RGB channel distance carries near-white/near-black cases) or
-// a visible border/shadow to read as a distinct panel.
+// Surfaces need either a visible channel-distance step or a meaningful
+// luminance-ratio step, plus a visible border/shadow as an alternative.
 const SURFACE_MIN_RGB_DIST = 30;
-const SURFACE_MIN_LC = 15;
+const SURFACE_MIN_RATIO = 1.4;
 
 function judgeSurfaceBlend(
   probe: DeckProbe,
@@ -288,10 +287,10 @@ function judgeSurfaceBlend(
 
       // Check if the surface blends into its backdrop.
       const dist = rgbDistance(ownBg, behindBg);
-      const lcSurface = Math.abs(contrastLc(ownBg, behindBg));
+      const surfaceRatio = contrastRatio(ownBg, behindBg);
 
       // If the surface is distinct enough, no warning needed.
-      if (dist >= SURFACE_MIN_RGB_DIST || lcSurface >= SURFACE_MIN_LC) {
+      if (dist >= SURFACE_MIN_RGB_DIST || surfaceRatio >= SURFACE_MIN_RATIO) {
         continue;
       }
 
@@ -423,23 +422,24 @@ function judgeContrastAndTypeSize(
         continue;
       }
       const fgEffective = blend({ ...fgParsed, a: fgParsed.a * el.opacity }, bg.color);
-      const lc = contrastLc(fgEffective, bg.color);
-      const lcAbs = Math.round(Math.abs(lc));
+      const ratio = contrastRatio(fgEffective, bg.color);
+      // Never round a failing value up to a displayed passing threshold.
+      const displayedRatio = Math.floor(ratio * 100) / 100;
       const pair = `${toHex(fgEffective)} on ${toHex(bg.color)}`;
-      const req = requiredPx(lc, weight);
+      const req = requiredPx(ratio, weight);
       if (req === null) {
         push(
           "error",
           "contrast",
-          `contrast Lc ${lcAbs} (${pair}) is unusable for text at any size`,
+          `contrast ratio ${displayedRatio}:1 (${pair}) is below the 3:1 minimum for large text`,
           suggest(toHex(bg.color), sizePx, weight),
         );
       } else if (sizePx < req) {
-        const target = neededLc(sizePx, weight);
+        const target = neededRatio(sizePx, weight);
         push(
           "error",
           "contrast",
-          `${sizePx}px/${weight} text has contrast Lc ${lcAbs} (${pair}); needs ≥${req}px at this contrast${target === null ? "" : ` or Lc ≥ ${target} at this size`}`,
+          `${sizePx}px/${weight} text has contrast ratio ${displayedRatio}:1 (${pair}); needs ≥${Math.round(req * 100) / 100}px at this contrast or ≥${target}:1 at this size`,
           suggest(toHex(bg.color), sizePx, weight),
         );
       }

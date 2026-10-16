@@ -35,11 +35,11 @@ test("every theme exposes all 40 tokens", async () => {
   }
 });
 
-test("token contrast table has signed Lc values per background", async () => {
+test("token contrast table has WCAG ratios per background", async () => {
   const contrast = await generateTokenContrast();
-  const darkTextOnBg = contrast.dark.lc["--zerp-bg"]["--zerp-text"];
-  assert.ok(darkTextOnBg < -90, `expected strong negative Lc, got ${darkTextOnBg}`);
-  const lightTextOnBg = contrast.light.lc["--zerp-bg"]["--zerp-text"];
-  assert.ok(lightTextOnBg > 90, `expected strong positive Lc, got ${lightTextOnBg}`);
-  assert.ok(Math.abs(contrast.dark.lc["--zerp-surface"]["--zerp-muted"]) > 60);
+  const darkTextOnBg = contrast.dark.ratio["--zerp-bg"]["--zerp-text"];
+  assert.ok(darkTextOnBg > 12, `expected strong contrast, got ${darkTextOnBg}:1`);
+  const lightTextOnBg = contrast.light.ratio["--zerp-bg"]["--zerp-text"];
+  assert.ok(lightTextOnBg > 12, `expected strong contrast, got ${lightTextOnBg}:1`);
+  assert.ok(contrast.dark.ratio["--zerp-surface"]["--zerp-muted"] > 4.5);
 });

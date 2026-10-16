@@ -43,7 +43,7 @@ test("a deck-scoped colour variable gets a real contrast verdict", async () => {
   const judged = report.findings.filter(
     (f) => f.severity === "error" && f.message.includes("#808080"),
   );
-  assert.equal(judged.length, 2, "grey-on-grey is judged for real, in both themes");
+  assert.equal(judged.length, 1, "grey-on-grey gets the WCAG verdict appropriate to each theme");
 });
 
 test("a clean deck reports no coverage findings", async () => {

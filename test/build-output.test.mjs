@@ -84,7 +84,7 @@ test("a deck that configures no fonts is unchanged by the display role", async (
 
 test("token contrast json is emitted for the checker", async () => {
   const json = JSON.parse(await readFile("dist/check/token-contrast.json", "utf8"));
-  assert.ok(json.dark.lc["--zerp-bg"]["--zerp-muted"] < -60);
+  assert.ok(json.dark.ratio["--zerp-bg"]["--zerp-muted"] > 4.5);
   assert.equal(json.light.bg["--zerp-surface"], "#fafbfe");
 });
 

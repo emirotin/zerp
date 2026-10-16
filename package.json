@@ -1,6 +1,6 @@
 {
   "name": "@emirotin/zerp",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "description": "Zero-config presentation framework for slide decks authored in HTML and/or Markdown.",
   "keywords": [
     "cli",
@@ -68,7 +68,6 @@
   "dependencies": {
     "@fontsource/montserrat": "^5.2.8",
     "@fontsource/roboto-mono": "^5.2.9",
-    "apca-w3": "^0.1.9",
     "css-tree": "^3.2.1",
     "htmlparser2": "^10.1.0",
     "linkedom": "^0.18.12",

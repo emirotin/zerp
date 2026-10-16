@@ -2,7 +2,6 @@
   "theme": "dark",
   "width": 1920,
   "height": 1080,
-  "sizeDefaulted": false,
   "frameCount": 12,
   "slideCount": 12,
   "innerSlideCount": 12,
@@ -2473,7 +2472,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 21,
           "fonts": [
             {
@@ -2498,7 +2497,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(187, 115, 5)",
+          "borderColor": "rgb(151, 91, 3)",
           "parent": 21,
           "fonts": [
             {
@@ -2523,7 +2522,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(0, 150, 98)",
+          "borderColor": "rgb(0, 121, 78)",
           "parent": 21,
           "fonts": [
             {
@@ -2548,7 +2547,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 0,
           "fonts": [
             {
@@ -2610,14 +2609,14 @@
           "hasOwnText": true,
           "pseudoText": "",
           "color": "rgb(250, 251, 254)",
-          "backgroundColor": "rgb(205, 98, 101)",
+          "backgroundColor": "rgb(166, 78, 81)",
           "backgroundImage": "none",
           "fontSizePx": 16,
           "fontWeight": 700,
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 2,
-          "borderColor": "rgb(205, 98, 101)",
+          "borderColor": "rgb(166, 78, 81)",
           "parent": 26,
           "fonts": [
             {
@@ -5236,7 +5235,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 0,
           "fonts": [
             {

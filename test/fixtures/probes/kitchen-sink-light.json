@@ -2,7 +2,6 @@
   "theme": "light",
   "width": 1920,
   "height": 1080,
-  "sizeDefaulted": false,
   "frameCount": 12,
   "slideCount": 12,
   "innerSlideCount": 12,
@@ -921,7 +920,7 @@
           "snippet": "a link",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -929,7 +928,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 2,
           "fonts": [
             {
@@ -1308,7 +1307,7 @@
           "snippet": "42%",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 48,
@@ -1316,7 +1315,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 9,
           "fonts": [
             {
@@ -1388,7 +1387,7 @@
           "snippet": "1907",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 48,
@@ -1396,7 +1395,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 12,
           "fonts": [
             {
@@ -2255,7 +2254,7 @@
           "snippet": "1873",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20.8,
@@ -2263,7 +2262,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 13,
           "fonts": [
             {
@@ -2335,7 +2334,7 @@
           "snippet": "1962",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20.8,
@@ -2343,7 +2342,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 16,
           "fonts": [
             {
@@ -2393,7 +2392,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 2,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 0,
           "fonts": [
             {
@@ -2473,7 +2472,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 21,
           "fonts": [
             {
@@ -2498,7 +2497,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(187, 115, 5)",
+          "borderColor": "rgb(151, 91, 3)",
           "parent": 21,
           "fonts": [
             {
@@ -2523,7 +2522,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(0, 150, 98)",
+          "borderColor": "rgb(0, 121, 78)",
           "parent": 21,
           "fonts": [
             {
@@ -2548,7 +2547,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 0,
           "fonts": [
             {
@@ -2610,14 +2609,14 @@
           "hasOwnText": true,
           "pseudoText": "",
           "color": "rgb(250, 251, 254)",
-          "backgroundColor": "rgb(205, 98, 101)",
+          "backgroundColor": "rgb(166, 78, 81)",
           "backgroundImage": "none",
           "fontSizePx": 16,
           "fontWeight": 700,
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 2,
-          "borderColor": "rgb(205, 98, 101)",
+          "borderColor": "rgb(166, 78, 81)",
           "parent": 26,
           "fonts": [
             {
@@ -2774,7 +2773,7 @@
           "snippet": "blue",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -2782,7 +2781,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 3,
           "fonts": [
             {
@@ -2799,7 +2798,7 @@
           "snippet": "green",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(79, 147, 64)",
+          "color": "rgb(63, 118, 51)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -2807,7 +2806,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 3,
           "fonts": [
             {
@@ -2824,7 +2823,7 @@
           "snippet": "orange",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(201, 104, 61)",
+          "color": "rgb(162, 83, 48)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -2832,7 +2831,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(201, 104, 61)",
+          "borderColor": "rgb(162, 83, 48)",
           "parent": 3,
           "fonts": [
             {
@@ -2849,7 +2848,7 @@
           "snippet": "purple",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(149, 114, 205)",
+          "color": "rgb(119, 91, 165)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -2857,7 +2856,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(149, 114, 205)",
+          "borderColor": "rgb(119, 91, 165)",
           "parent": 3,
           "fonts": [
             {
@@ -2874,7 +2873,7 @@
           "snippet": "red",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(205, 98, 101)",
+          "color": "rgb(166, 78, 81)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -2882,7 +2881,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(205, 98, 101)",
+          "borderColor": "rgb(166, 78, 81)",
           "parent": 3,
           "fonts": [
             {
@@ -2899,7 +2898,7 @@
           "snippet": "amber",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(187, 115, 5)",
+          "color": "rgb(151, 91, 3)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -2907,7 +2906,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(187, 115, 5)",
+          "borderColor": "rgb(151, 91, 3)",
           "parent": 3,
           "fonts": [
             {
@@ -2924,7 +2923,7 @@
           "snippet": "teal",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(0, 150, 98)",
+          "color": "rgb(0, 121, 78)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -2932,7 +2931,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(0, 150, 98)",
+          "borderColor": "rgb(0, 121, 78)",
           "parent": 3,
           "fonts": [
             {
@@ -3309,7 +3308,7 @@
           "snippet": "danger",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(205, 98, 101)",
+          "color": "rgb(166, 78, 81)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -3317,7 +3316,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(205, 98, 101)",
+          "borderColor": "rgb(166, 78, 81)",
           "parent": 24,
           "fonts": [
             {
@@ -3334,7 +3333,7 @@
           "snippet": "ok",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(79, 147, 64)",
+          "color": "rgb(63, 118, 51)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -3342,7 +3341,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 24,
           "fonts": [
             {
@@ -3359,7 +3358,7 @@
           "snippet": "accent",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 20,
@@ -3367,7 +3366,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 24,
           "fonts": [
             {
@@ -4600,7 +4599,7 @@
           "snippet": "Accent subtitle",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 22.4,
@@ -4608,7 +4607,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 0,
           "fonts": [
             {
@@ -4804,7 +4803,7 @@
           "snippet": "Concept",
           "hasOwnText": true,
           "pseudoText": "",
-          "color": "rgb(12, 138, 202)",
+          "color": "rgb(10, 111, 163)",
           "backgroundColor": "rgba(0, 0, 0, 0)",
           "backgroundImage": "none",
           "fontSizePx": 38.4,
@@ -4812,7 +4811,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 0,
-          "borderColor": "rgb(12, 138, 202)",
+          "borderColor": "rgb(10, 111, 163)",
           "parent": 2,
           "fonts": [
             {
@@ -4881,7 +4880,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 6,
           "fonts": [
             {
@@ -4956,7 +4955,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(205, 98, 101)",
+          "borderColor": "rgb(166, 78, 81)",
           "parent": 6,
           "fonts": [
             {
@@ -5031,7 +5030,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(149, 114, 205)",
+          "borderColor": "rgb(119, 91, 165)",
           "parent": 6,
           "fonts": [
             {
@@ -5106,7 +5105,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 2,
-          "borderColor": "rgb(187, 115, 5)",
+          "borderColor": "rgb(151, 91, 3)",
           "parent": 0,
           "fonts": [
             {
@@ -5236,7 +5235,7 @@
           "opacity": 1,
           "boxShadow": "none",
           "borderWidthPx": 1,
-          "borderColor": "rgb(79, 147, 64)",
+          "borderColor": "rgb(63, 118, 51)",
           "parent": 0,
           "fonts": [
             {

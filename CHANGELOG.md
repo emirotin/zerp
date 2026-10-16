@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.0
+
+- **`zerp check` now uses the WCAG 2.x contrast ratio and has no APCA dependency.** Normal text requires 4.5:1; text at least 24px regular or 18.67px bold requires 3:1. Contrast findings and the generated token suggestion table report ratios instead of Lc values. Harmony accent text and solid-fill roles move from step 600 to 700 where needed so the shipped themes and fixtures remain clean under the new thresholds. This removes `apca-w3` and its restrictive license from the package dependency graph.
+
 ## 0.11.1
 
 - **System browsers found on `PATH` now actually launch, and impostors are rejected.** The fallback resolver probed bare command names (`google-chrome`, `chromium`, `chromium-browser`) with a PATH-aware `--version` spawn but returned the bare name — and playwright's `launch({ executablePath })` does no PATH lookup, so the probe would succeed against a real browser and the launch would then fail three layers away ("executable doesn't exist at chromium") about the very browser the probe had just run. Bare candidates (and a bare-name `CHROME_BIN`) now resolve to the absolute path the probe exercised. The probe also reads the `--version` output instead of trusting exit status alone: an executable that exits 0 without printing a version banner — Ubuntu's apt `chromium` snap-transition stub, say — is skipped at the fallback, or rejected with an error naming what happened when `CHROME_BIN` points at it. `resolveBrowserExecutable` gains an optional `systemCandidates` parameter so the fallback is testable without a real browser; passing nothing is unchanged behavior.
