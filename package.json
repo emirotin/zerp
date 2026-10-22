@@ -1,6 +1,6 @@
 {
   "name": "@emirotin/zerp",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "Zero-config presentation framework for slide decks authored in HTML and/or Markdown.",
   "keywords": [
     "cli",
@@ -66,21 +66,21 @@
     "lint:fix": "oxlint --fix --deny-warnings --node-plugin --import-plugin src scripts test .zed"
   },
   "dependencies": {
-    "@fontsource/montserrat": "^5.2.8",
-    "@fontsource/roboto-mono": "^5.2.9",
+    "@fontsource/montserrat": "^5.3.0",
+    "@fontsource/roboto-mono": "^5.3.0",
     "css-tree": "^3.2.1",
     "htmlparser2": "^10.1.0",
-    "linkedom": "^0.18.12",
-    "marked": "^18.0.5",
-    "playwright-core": "^1.62.1"
+    "linkedom": "^0.18.14",
+    "marked": "^18.1.1",
+    "playwright-core": "^1.64.1"
   },
   "devDependencies": {
     "@evilmartians/harmony": "^1.4.0",
-    "@types/node": "^24.6.0",
+    "@types/node": "^24.19.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "oxfmt": "^0.44.0",
-    "oxlint": "^1.59.0",
+    "oxlint": "^1.89.0",
     "typescript": "^5.9.3"
   },
   "lint-staged": {

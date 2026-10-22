@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.12.1
+
+- **Dependency refresh, no behavior change.** `playwright-core` to `^1.64.1` (a `zerp install-browser` host now downloads Chromium 156.0.8078.4), `marked` to `^18.1.1`, `linkedom` to `^0.18.14`, `@fontsource/montserrat` and `@fontsource/roboto-mono` to `^5.3.0`; dev tooling `oxlint` to `^1.89.0` and `@types/node` to `^24.19.2`. Built decks are byte-identical to 0.12.0 output, and the kitchen-sink and casino fixtures stay clean under `zerp check` in both themes.
+
 ## 0.12.0
 
 - **`zerp check` now uses the WCAG 2.x contrast ratio and has no APCA dependency.** Normal text requires 4.5:1; text at least 24px regular or 18.67px bold requires 3:1. Contrast findings and the generated token suggestion table report ratios instead of Lc values. Harmony accent text and solid-fill roles move from step 600 to 700 where needed so the shipped themes and fixtures remain clean under the new thresholds. This removes `apca-w3` and its restrictive license from the package dependency graph.
